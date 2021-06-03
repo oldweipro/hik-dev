@@ -1,21 +1,28 @@
-# Getting Started
+# 海康威视 设备网络SDK_Win64 Java二次开发
 
-### Reference Documentation
-For further reference, please consider the following sections:
+### 硬件产品
 
-* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
-* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/docs/2.1.7.RELEASE/maven-plugin/)
-* [Spring Web Starter](https://docs.spring.io/spring-boot/docs/{bootVersion}/reference/htmlsingle/#boot-features-developing-web-applications)
-* [MyBatis Framework](http://www.mybatis.org/spring-boot-starter/mybatis-spring-boot-autoconfigure/)
-* [Spring Data Redis (Access+Driver)](https://docs.spring.io/spring-boot/docs/{bootVersion}/reference/htmlsingle/#boot-features-redis)
+硬件产品包括网络硬盘录像机、网络摄像机、网络球机、出入口产品、门禁、可视对讲、热成像、移动车载、报警主机、显示控制产品、网络存储等产品。
 
-### Guides
-The following guides illustrate how to use some features concretely:
+下载地址:
 
-* [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
-* [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
-* [Building REST services with Spring](https://spring.io/guides/tutorials/bookmarks/)
-* [MyBatis Quick Start](https://github.com/mybatis/spring-boot-starter/wiki/Quick-Start)
-* [Accessing data with MySQL](https://spring.io/guides/gs/accessing-data-mysql/)
-* [Messaging with Redis](https://spring.io/guides/gs/messaging-redis/)
+选择硬件产品 -> 设备网络SDK
 
+[https://open.hikvision.com/download](https://open.hikvision.com/download)
+
+### 指南
+
+设备网络SDK是基于设备私有网络通信协议开发的，为海康威视各类硬件产品服务的配套模块，用于远程访问和控制设备的软件二次开发，内含SDK动态库、开发文档 及Demo示例（C++、C#、Java）。
+
+### 开发计划
+
+|计划功能|完成情况|
+|---|---|
+|设备注册(登录)|完成✅|
+|获取门禁人员列表|完成✅|
+|获取门禁存储的人脸信息|完成✅|
+|下发门禁卡|完成✅|
+|下发门禁人脸|完成✅|
+|门禁事件布防|完成✅|
+|门禁事件上传(含照片)|完成✅|
+|摄像机推流|进行中❎|
