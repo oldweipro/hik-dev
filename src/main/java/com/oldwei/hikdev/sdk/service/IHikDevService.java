@@ -48,5 +48,5 @@ public interface IHikDevService extends StdCallLibrary {
 
     int NET_DVR_Login_V30(String sDVRIP, short wDVRPort, String sUserName, String sPassword, NET_DVR_DEVICEINFO_V30 lpDeviceInfo);
 
-    boolean  NET_DVR_SaveRealData(int lRealHandle,String sFileName);
+    boolean NET_DVR_SaveRealData(int lRealHandle, String sFileName);
 }
