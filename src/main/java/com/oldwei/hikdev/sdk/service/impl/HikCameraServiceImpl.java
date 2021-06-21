@@ -72,4 +72,9 @@ public class HikCameraServiceImpl implements IHikCameraService {
         String randomString = RandomUtil.randomString(32);
         this.hikDevService.NET_DVR_SaveRealData(previewSucValue, randomString + ".mp4");
     }
+
+    @Override
+    public void pushRtspToRtmp(String rtspUrl, String pushUrl) throws IOException {
+        new ConvertVideoPacket().fromRtsp(rtspUrl).setGrabber().to(pushUrl).go();
+    }
 }

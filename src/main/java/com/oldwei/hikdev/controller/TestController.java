@@ -1,5 +1,6 @@
 package com.oldwei.hikdev.controller;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.oldwei.hikdev.mqtt.MqttConnectClient;
 import com.oldwei.hikdev.sdk.constant.RedisPrefixConstant;
@@ -9,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 /**
@@ -73,5 +75,16 @@ public class TestController {
         }
         this.hikCameraService.saveCameraData(previewSucValue);
         return "启动成功！";
+    }
+
+    @PostMapping("pushRtspToRtmp")
+    public String pushRtspToRtmp(@RequestBody JSONObject jsonObject) throws IOException {
+        String rtspUrl = jsonObject.getString("rtspUrl");
+        String pushUrl = jsonObject.getString("pushUrl");
+        if (StrUtil.isBlank(rtspUrl) || StrUtil.isBlank(pushUrl)) {
+            return "缺少参数 rtspUrl 或 pushUrl";
+        }
+        this.hikCameraService.pushRtspToRtmp(rtspUrl, pushUrl);
+        return "推流成功";
     }
 }
