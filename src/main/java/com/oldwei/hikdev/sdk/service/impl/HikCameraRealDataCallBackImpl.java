@@ -9,7 +9,6 @@ import com.sun.jna.ptr.ByteByReference;
 import com.sun.jna.ptr.NativeLongByReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 
 import java.io.IOException;
 import java.io.PipedOutputStream;
@@ -34,7 +33,6 @@ public class HikCameraRealDataCallBackImpl implements FRealDataCallBack_V30 {
     private NativeLongByReference m_lPort = new NativeLongByReference(new NativeLong(0));
 
     @Override
-    @Async("asyncServiceExecutor")
     public void invoke(int lRealHandle, int dwDataType, ByteByReference pBuffer, int dwBufSize, Pointer pUser) {
         switch (dwDataType) {
             //系统头

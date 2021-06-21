@@ -26,19 +26,30 @@ public class ConvertVideoPacket {
     FFmpegFrameRecorder record = null;
     int width = -1, height = -1;
 
-    // 视频参数
-    protected int audiocodecid;
-    protected int codecid;
-    // 帧率
-    protected double framerate;
-    // 比特率
-    protected int bitrate;
+    /**
+     * 视频编码ID
+     */
+    protected int codecId;
+    /**
+     * 帧率
+     */
+    protected double frameRate;
+    /**
+     * 比特率
+     */
+    protected int bitRate;
 
-    // 音频参数
-    // 想要录制音频，这三个参数必须有：audioChannels > 0 && audioBitrate > 0 && sampleRate > 0
+    /**
+     * 音频参数
+     * 想要录制音频，这三个参数必须有：audioChannels > 0 && audioBitrate > 0 && sampleRate > 0
+     */
     private int audioChannels;
-    private int audioBitrate;
+    private int audioBitRate;
     private int sampleRate;
+    /**
+     * 音频编码ID
+     */
+    private int audioCodecId;
 
     /**
      * 选择视频源
@@ -47,9 +58,21 @@ public class ConvertVideoPacket {
      * @throws IOException
      * @author eguid
      */
-    public ConvertVideoPacket from(PipedInputStream pis) throws IOException {
+    public ConvertVideoPacket fromPis(PipedInputStream pis) {
         grabber = new FFmpegFrameGrabber(pis, 0);
-        grabber.setOption("rtsp_transport", "tcp");
+        return this;
+    }
+
+    public ConvertVideoPacket fromRtsp(String rtspUrl) {
+        grabber = new FFmpegFrameGrabber(rtspUrl);
+        if (rtspUrl.contains("rtsp")) {
+            grabber.setOption("rtsp_transport", "tcp");
+        }
+        return this;
+    }
+
+    public ConvertVideoPacket setGrabber() throws FrameGrabber.Exception {
+
         // 开始之后ffmpeg会采集视频信息，之后就可以获取音视频信息
         grabber.start();
         //一个opencv视频帧转换器
@@ -72,22 +95,23 @@ public class ConvertVideoPacket {
             height = grabber.getImageHeight();
         }
         // 视频参数
-        audiocodecid = grabber.getAudioCodec();
-        log.info("音频编码：" + audiocodecid);
-        codecid = grabber.getVideoCodec();
+        audioCodecId = grabber.getAudioCodec();
+        log.info("音频编码：" + audioCodecId);
+        codecId = grabber.getVideoCodec();
         // 帧率
-        framerate = grabber.getVideoFrameRate();
+        frameRate = grabber.getVideoFrameRate();
         // 比特率
         int videoCodec = grabber.getVideoCodec();
         log.info("视频编码：" + videoCodec);
-        bitrate = grabber.getVideoBitrate();
+        bitRate = grabber.getVideoBitrate();
         // 音频参数
         // 想要录制音频，这三个参数必须有：audioChannels > 0 && audioBitrate > 0 && sampleRate > 0
         audioChannels = grabber.getAudioChannels();
-        audioBitrate = grabber.getAudioBitrate();
-        if (audioBitrate < 1) {
+        audioBitRate = grabber.getAudioBitrate();
+
+        if (audioBitRate < 1) {
             // 默认音频比特率
-            audioBitrate = 128 * 1000;
+            audioBitRate = 128 * 1000;
         }
         return this;
     }
@@ -104,11 +128,11 @@ public class ConvertVideoPacket {
         record = new FFmpegFrameRecorder(out, width, height);
         record.setVideoOption("crf", "18");
         record.setGopSize(2);
-        record.setFrameRate(framerate);
-        record.setVideoBitrate(bitrate);
+        record.setFrameRate(frameRate);
+        record.setVideoBitrate(bitRate);
 
         record.setAudioChannels(audioChannels);
-        record.setAudioBitrate(audioBitrate);
+        record.setAudioBitrate(audioBitRate);
         record.setSampleRate(sampleRate);
         record.setVideoCodec(avcodec.AV_CODEC_ID_MPEG4);
         AVFormatContext fc = null;
@@ -116,7 +140,7 @@ public class ConvertVideoPacket {
             // 封装格式flv
             record.setFormat("flv");
             record.setAudioCodecName("aac");
-            record.setVideoCodec(codecid);
+            record.setVideoCodec(codecId);
             fc = grabber.getFormatContext();
         }
         record.start(fc);
@@ -148,8 +172,6 @@ public class ConvertVideoPacket {
                 //不需要编码直接把音视频帧推出去
                 errIndex += (record.recordPacket(pkt) ? 0 : 1);
                 //如果失败err_index自增1
-//                av_free_packet(pkt);
-                // av_free_packet(pkt);打了过期标签，使用av_packet_unref(pkt);替换
                 av_packet_unref(pkt);
             } catch (IOException e) {
                 //推流失败

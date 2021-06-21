@@ -59,7 +59,7 @@ public class HikCameraServiceImpl implements IHikCameraService {
         //======================开启设备预览========================
         //======================Javacv推流 pis管道流========================
         try {
-            new ConvertVideoPacket().from(pis).to(pushUrl).go();
+            new ConvertVideoPacket().fromPis(pis).setGrabber().to(pushUrl).go();
         } catch (IOException e) {
             e.printStackTrace();
         }
