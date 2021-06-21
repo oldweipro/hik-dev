@@ -30,6 +30,7 @@ public class HikCameraServiceImpl implements IHikCameraService {
     private final IHikDevService hikDevService;
     private final RedisTemplate<String, Serializable> redisTemplate;
     private final IHikPlayCtrlService hikPlayCtrlService;
+
     @Override
     @Async("asyncServiceExecutor")
     public void pushStream(Integer userId, String ip, String pushUrl) {

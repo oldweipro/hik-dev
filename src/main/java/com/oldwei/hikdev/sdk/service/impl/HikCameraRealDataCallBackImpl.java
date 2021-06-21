@@ -9,6 +9,7 @@ import com.sun.jna.ptr.ByteByReference;
 import com.sun.jna.ptr.NativeLongByReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 
 import java.io.IOException;
 import java.io.PipedOutputStream;
@@ -33,6 +34,7 @@ public class HikCameraRealDataCallBackImpl implements FRealDataCallBack_V30 {
     private NativeLongByReference m_lPort = new NativeLongByReference(new NativeLong(0));
 
     @Override
+    @Async("asyncServiceExecutor")
     public void invoke(int lRealHandle, int dwDataType, ByteByReference pBuffer, int dwBufSize, Pointer pUser) {
         switch (dwDataType) {
             //系统头
@@ -61,9 +63,11 @@ public class HikCameraRealDataCallBackImpl implements FRealDataCallBack_V30 {
                     System.out.println("没有数据");
                 }
                 if ((dwBufSize > 0) && (m_lPort.getValue().intValue() != -1)) {
-                    byte[] data = pBuffer.getPointer().getByteArray(0, dwBufSize);
-                    if (data.length > 0) {
-                        writeMediaStream(data, 0, dwBufSize, false);
+                    //视频流数据
+                    byte[] videoStreamData = pBuffer.getPointer().getByteArray(0, dwBufSize);
+                    if (videoStreamData.length > 0) {
+                        log.info("流数据：{}", videoStreamData);
+                        writeMediaStream(videoStreamData, 0, dwBufSize, false);
                     } else {
                         System.out.println("怎么回事小老弟！怎么没有数据了！");
                     }
@@ -89,6 +93,7 @@ public class HikCameraRealDataCallBackImpl implements FRealDataCallBack_V30 {
             if (!isAudio) {
                 if (5120 < length) {
                     log.info("字节数组的大小：{}", length);
+                    log.info("流数据：{}", data);
                 }
                 pos.write(data, offset, length);
             }

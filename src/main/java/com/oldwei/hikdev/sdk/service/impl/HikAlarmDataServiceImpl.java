@@ -95,7 +95,6 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
     @Override
     public JSONObject closeAlarmChan(JSONObject jsonObject) {
         JSONObject result = new JSONObject();
-        result.put("event", jsonObject.getString("event"));
         String ip = jsonObject.getString("ip");
         //报警撤防
         Integer longAlarmHandle = (Integer) this.redisTemplate.opsForValue().get(RedisPrefixConstant.HIK_ALARM_HANDLE_IP + ip);
@@ -106,11 +105,55 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                 log.info("撤防成功");
                 result.put("code", 0);
                 result.put("msg", "撤防成功");
-            }else{
+            } else {
                 log.info("撤防成功");
                 result.put("code", -1);
                 result.put("msg", "撤防失败");
             }
+        }
+        return result;
+    }
+
+    @Override
+    public JSONObject startAlarmListen(JSONObject jsonObject) {
+        JSONObject result = new JSONObject();
+        String ip = jsonObject.getString("ip");
+        Short port = jsonObject.getShort("port");
+        //报警撤防
+        // TODO something... fMSFCallBack = new FMSGCallBack(); let me try FMSGCallBack_V31
+        Pointer pUser = null;
+        int startListenV30 = this.hikDevService.NET_DVR_StartListen_V30(ip, port, null, pUser);
+        this.redisTemplate.opsForValue().set(RedisPrefixConstant.HIK_ALARM_LISTEN_IP + ip, startListenV30);
+        if (startListenV30 < 0) {
+            log.info("启动监听失败，错误号:{}", this.hikDevService.NET_DVR_GetLastError());
+            result.put("code", -1);
+            result.put("msg", "启动监听失败");
+        } else {
+            result.put("code", 0);
+            result.put("msg", "启动监听成功");
+            log.info("启动监听成功");
+        }
+        return result;
+    }
+
+    @Override
+    public JSONObject stopAlarmListen(JSONObject jsonObject) {
+        JSONObject result = new JSONObject();
+        String ip = jsonObject.getString("ip");
+        Integer startListenV30 = (Integer) this.redisTemplate.opsForValue().get(RedisPrefixConstant.HIK_ALARM_LISTEN_IP + ip);
+        if (null == startListenV30 || startListenV30 < 0) {
+            result.put("code", 0);
+            result.put("msg", "停止监听成功");
+            return result;
+        }
+        if (!this.hikDevService.NET_DVR_StopListen_V30(startListenV30)) {
+            log.info("停止监听失败");
+            result.put("code", -1);
+            result.put("msg", "停止监听失败");
+        } else {
+            log.info("停止监听成功");
+            result.put("code", 0);
+            result.put("msg", "停止监听成功");
         }
         return result;
     }
@@ -192,6 +235,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     //报警设备IP地址
                     sIP = new String(pAlarmer.sDeviceIP).split("\0", 2);
                     newRow[2] = sIP[0];
+                    log.info("报警信息主动上传V40：{}", sAlarmType);
                     break;
                 case HikConstant.COMM_ALARM_V30:
                     NET_DVR_ALARMINFO_V30 strAlarmInfoV30 = new NET_DVR_ALARMINFO_V30();
@@ -239,6 +283,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     //报警设备IP地址
                     sIP = new String(pAlarmer.sDeviceIP).split("\0", 2);
                     newRow[2] = sIP[0];
+                    log.info("报警信息主动上传V30：{}", sAlarmType);
                     break;
                 case HikConstant.COMM_ALARM_RULE:
                     NET_VCA_RULE_ALARM strVcaAlarm = new NET_VCA_RULE_ALARM();
@@ -597,6 +642,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     } catch (FileNotFoundException ex) {
                         ex.printStackTrace();
                     }
+                    log.info("人脸识别结果上传：{}", sAlarmType);
                     break;
                 case HikConstant.COMM_SNAP_MATCH_ALARM:
                     //人脸名单比对报警

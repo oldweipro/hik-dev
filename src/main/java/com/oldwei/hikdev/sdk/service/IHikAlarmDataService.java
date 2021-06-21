@@ -35,4 +35,20 @@ public interface IHikAlarmDataService {
      * @return
      */
     JSONObject closeAlarmChan(JSONObject jsonObject);
+
+    /**
+     * 启动监听
+     *
+     * @param jsonObject
+     * @return
+     */
+    JSONObject startAlarmListen(JSONObject jsonObject);
+
+    /**
+     * 停止监听
+     *
+     * @param jsonObject
+     * @return
+     */
+    JSONObject stopAlarmListen(JSONObject jsonObject);
 }

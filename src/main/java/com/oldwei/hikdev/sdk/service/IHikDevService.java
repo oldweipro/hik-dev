@@ -40,6 +40,10 @@ public interface IHikDevService extends StdCallLibrary {
 
     boolean NET_DVR_CloseAlarmChan_V30(int lAlarmHandle);
 
+    int NET_DVR_StartListen_V30(String sLocalIP, short wLocalPort, FMSGCallBack dataCallback, Pointer pUserData);
+
+    boolean NET_DVR_StopListen_V30(int lListenHandle);
+
     boolean NET_DVR_STDXMLConfig(int lUserID, NET_DVR_XML_CONFIG_INPUT lpInputParam, NET_DVR_XML_CONFIG_OUTPUT lpOutputParam);
 
     int NET_DVR_RealPlay_V30(int lUserID, NET_DVR_CLIENTINFO lpClientInfo, FRealDataCallBack_V30 fRealDataCallBack_V30, Pointer pUser, boolean bBlocked);
