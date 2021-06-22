@@ -1,6 +1,5 @@
 package com.oldwei.hikdev.sdk.structure;
 
-import com.oldwei.hikdev.sdk.service.HCNetSDK;
 import com.sun.jna.Structure;
 
 /**
@@ -28,8 +27,8 @@ public class NET_DVR_PDC_ALRAM_INFO extends Structure {
     /**
      * 前端设备信息
      */
-    public HCNetSDK.NET_VCA_DEV_INFO struDevInfo = new HCNetSDK.NET_VCA_DEV_INFO();
-    public HCNetSDK.UNION_PDC_STATPARAM uStatModeParam = new HCNetSDK.UNION_PDC_STATPARAM();
+    public NET_VCA_DEV_INFO struDevInfo = new NET_VCA_DEV_INFO();
+    public UNION_PDC_STATPARAM uStatModeParam = new UNION_PDC_STATPARAM();
     /**
      * 离开人数
      */
@@ -58,10 +57,10 @@ public class NET_DVR_PDC_ALRAM_INFO extends Structure {
         super.read();
         switch (byMode) {
             case 0:
-                uStatModeParam.setType(HCNetSDK.NET_DVR_STATFRAME.class);
+                uStatModeParam.setType(NET_DVR_STATFRAME.class);
                 break;
             case 1:
-                uStatModeParam.setType(HCNetSDK.NET_DVR_STATTIME.class);
+                uStatModeParam.setType(NET_DVR_STATTIME.class);
                 break;
             default:
                 break;

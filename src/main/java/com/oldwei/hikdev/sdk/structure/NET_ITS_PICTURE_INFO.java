@@ -1,6 +1,5 @@
 package com.oldwei.hikdev.sdk.structure;
 
-import com.oldwei.hikdev.sdk.service.HCNetSDK;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 
@@ -16,8 +15,8 @@ public class NET_ITS_PICTURE_INFO extends Structure {
     public byte byPicRecogMode;
     public int dwRedLightTime;
     public byte[] byAbsTime = new byte[32];
-    public HCNetSDK.NET_VCA_RECT struPlateRect = new HCNetSDK.NET_VCA_RECT();
-    public HCNetSDK.NET_VCA_RECT struPlateRecgRect = new HCNetSDK.NET_VCA_RECT();
+    public NET_VCA_RECT struPlateRect = new NET_VCA_RECT();
+    public NET_VCA_RECT struPlateRecgRect = new NET_VCA_RECT();
     public Pointer pBuffer;
     /**
      * UTC时间

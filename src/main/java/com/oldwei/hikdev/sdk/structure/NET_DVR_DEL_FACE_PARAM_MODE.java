@@ -1,6 +1,5 @@
 package com.oldwei.hikdev.sdk.structure;
 
-import com.oldwei.hikdev.sdk.service.HCNetSDK;
 import com.sun.jna.Union;
 
 /**

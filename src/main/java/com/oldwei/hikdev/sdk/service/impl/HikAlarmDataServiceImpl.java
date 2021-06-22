@@ -345,14 +345,12 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             buffers.get(bytes);
                             fout.write(bytes);
                             fout.close();
-                        } catch (FileNotFoundException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
                         } catch (IOException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
                         }
                     }
+                    log.info("行为分析信息上传：{}", sAlarmType);
                     break;
                 case HikConstant.COMM_UPLOAD_PLATE_RESULT:
                     NET_DVR_PLATE_RESULT strPlateResult = new NET_DVR_PLATE_RESULT();
@@ -390,14 +388,12 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             buffers.get(bytes);
                             fout.write(bytes);
                             fout.close();
-                        } catch (FileNotFoundException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
                         } catch (IOException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
                         }
                     }
+                    log.info("交通抓拍结果上传：{}", sAlarmType);
                     break;
                 case HikConstant.COMM_ITS_PLATE_RESULT:
                     NET_ITS_PLATE_RESULT strItsPlateResult = new NET_ITS_PLATE_RESULT();
@@ -438,15 +434,13 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                                 buffers.get(bytes);
                                 fout.write(bytes);
                                 fout.close();
-                            } catch (FileNotFoundException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
                             } catch (IOException e) {
                                 // TODO Auto-generated catch block
                                 e.printStackTrace();
                             }
                         }
                     }
+                    log.info("交通抓拍的终端图片上传：{}", sAlarmType);
                     break;
                 case HikConstant.COMM_ALARM_PDC:
                     NET_DVR_PDC_ALRAM_INFO strPDCResult = new NET_DVR_PDC_ALRAM_INFO();
@@ -486,6 +480,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     sIP = new String(strPDCResult.struDevInfo.struDevIP.sIpV4).split("\0", 2);
                     newRow[2] = sIP[0];
                     //alarmTableModel.insertRow(0, newRow);
+                    log.info("客流量统计报警上传：{}", sAlarmType);
                     break;
 
                 case HikConstant.COMM_ITS_PARK_VEHICLE:
@@ -535,6 +530,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             }
                         }
                     }
+                    log.info("停车场数据上传：{}", sAlarmType);
                     break;
                 case HikConstant.COMM_ALARM_TFS:
                     NET_DVR_TFS_ALARM strTFSAlarmInfo = new NET_DVR_TFS_ALARM();
@@ -559,6 +555,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     sIP = new String(strTFSAlarmInfo.struDevInfo.struDevIP.sIpV4).split("\0", 2);
                     newRow[2] = sIP[0];
                     //alarmTableModel.insertRow(0, newRow);
+                    log.info("交通取证报警信息：{}", sAlarmType);
                     break;
                 case HikConstant.COMM_ALARM_AID_V41:
                     NET_DVR_AID_ALARM_V41 struAIDAlarmInfo = new NET_DVR_AID_ALARM_V41();
@@ -576,6 +573,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     sIP = new String(struAIDAlarmInfo.struDevInfo.struDevIP.sIpV4).split("\0", 2);
                     newRow[2] = sIP[0];
                     //alarmTableModel.insertRow(0, newRow);
+                    log.info("交通事件报警信息扩展：{}", sAlarmType);
                     break;
                 case HikConstant.COMM_ALARM_TPS_V41:
                     NET_DVR_TPS_ALARM_V41 struTPSAlarmInfo = new NET_DVR_TPS_ALARM_V41();
@@ -599,6 +597,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     sIP = new String(struTPSAlarmInfo.struDevInfo.struDevIP.sIpV4).split("\0", 2);
                     newRow[2] = sIP[0];
                     //alarmTableModel.insertRow(0, newRow);
+                    log.info("交通事件报警信息扩展：{}", sAlarmType);
                     break;
                 case HikConstant.COMM_UPLOAD_FACESNAP_RESULT:
                     //实时人脸抓拍上传
@@ -667,9 +666,6 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             buffers.get(bytes);
                             fout.write(bytes);
                             fout.close();
-                        } catch (FileNotFoundException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
                         } catch (IOException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
@@ -690,9 +686,6 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             buffers.get(bytes);
                             fout.write(bytes);
                             fout.close();
-                        } catch (FileNotFoundException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
                         } catch (IOException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
@@ -713,9 +706,6 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             buffers.get(bytes);
                             fout.write(bytes);
                             fout.close();
-                        } catch (FileNotFoundException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
                         } catch (IOException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
@@ -749,6 +739,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     sIP = new String(pAlarmer.sDeviceIP).split("\0", 2);
                     newRow[2] = sIP[0];
                     //alarmTableModel.insertRow(0, newRow);
+                    log.info("人脸比对结果上传：{}", sAlarmType);
                     break;
                 case HikConstant.COMM_ALARM_ACS: //门禁主机报警信息
                     NET_DVR_ACS_ALARM_INFO strACSInfo = new NET_DVR_ACS_ALARM_INFO();
@@ -801,6 +792,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                         CloudUploadUtil.sendDataToCloudApi(data);
                         log.info("门禁主机报警信息=====>{}", data);
                     }
+                    log.info("门禁主机报警信息：{}", sAlarmType);
                     break;
                 case HikConstant.COMM_ID_INFO_ALARM: //身份证信息
                     NET_DVR_ID_CARD_INFO_ALARM strIDCardInfo = new NET_DVR_ID_CARD_INFO_ALARM();
@@ -838,9 +830,6 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             buffers.get(bytes);
                             fout.write(bytes);
                             fout.close();
-                        } catch (FileNotFoundException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
                         } catch (IOException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
@@ -865,14 +854,12 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             buffers.get(bytes);
                             fout.write(bytes);
                             fout.close();
-                        } catch (FileNotFoundException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
                         } catch (IOException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
                         }
                     }
+                    log.info("门禁身份证刷卡信息：{}", sAlarmType);
                     break;
                 case HikConstant.COMM_UPLOAD_AIOP_VIDEO: //设备支持AI开放平台接入，上传视频检测数据
                     NET_AIOP_VIDEO_HEAD struAIOPVideo = new NET_AIOP_VIDEO_HEAD();
@@ -916,9 +903,6 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             buffers.get(bytes);
                             fout.write(bytes);
                             fout.close();
-                        } catch (FileNotFoundException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
                         } catch (IOException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
@@ -940,14 +924,12 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             buffers.get(bytes);
                             fout.write(bytes);
                             fout.close();
-                        } catch (FileNotFoundException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
                         } catch (IOException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
                         }
                     }
+                    log.info("设备支持AI开放平台接入，上传视频检测数据：{}", sAlarmType);
                     break;
                 case HikConstant.COMM_UPLOAD_AIOP_PICTURE: //设备支持AI开放平台接入，上传视频检测数据
                     NET_AIOP_PICTURE_HEAD struAIOPPic = new NET_AIOP_PICTURE_HEAD();
@@ -991,14 +973,12 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             buffers.get(bytes);
                             fout.write(bytes);
                             fout.close();
-                        } catch (FileNotFoundException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
                         } catch (IOException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
                         }
                     }
+                    log.info("设备支持AI开放平台接入，上传图片检测数据：{}", sAlarmType);
                     break;
                 case HikConstant.COMM_ISAPI_ALARM: //ISAPI协议报警信息
                     NET_DVR_ALARM_ISAPI_INFO struEventISAPI = new NET_DVR_ALARM_ISAPI_INFO();
@@ -1031,9 +1011,6 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                         jsonbuffers.get(jsonbytes);
                         foutdata.write(jsonbytes);
                         foutdata.close();
-                    } catch (FileNotFoundException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
                     } catch (IOException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
@@ -1059,14 +1036,12 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             buffers.get(bytes);
                             fout.write(bytes);
                             fout.close();
-                        } catch (FileNotFoundException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
                         } catch (IOException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
                         }
                     }
+                    log.info("ISAPI协议报警信息：{}", sAlarmType);
                     break;
                 default:
                     newRow[0] = dateFormat.format(today);
@@ -1076,6 +1051,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     sIP = new String(pAlarmer.sDeviceIP).split("\0", 2);
                     newRow[2] = sIP[0];
                     //alarmTableModel.insertRow(0, newRow);
+                    log.info("其他信息：{},lCommand是传的报警类型:{}", sAlarmType, lCommand);
                     break;
             }
         } catch (UnsupportedEncodingException ex) {
