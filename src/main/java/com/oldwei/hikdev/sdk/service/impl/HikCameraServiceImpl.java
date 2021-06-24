@@ -1,23 +1,22 @@
 package com.oldwei.hikdev.sdk.service.impl;
 
 import cn.hutool.core.util.RandomUtil;
-import com.oldwei.hikdev.sdk.constant.RedisPrefixConstant;
+import com.oldwei.hikdev.constant.DataCachePrefixConstant;
 import com.oldwei.hikdev.sdk.service.FRealDataCallBack_V30;
 import com.oldwei.hikdev.sdk.service.IHikDevService;
 import com.oldwei.hikdev.sdk.service.IHikPlayCtrlService;
-import com.oldwei.hikdev.utils.ConvertVideoPacket;
+import com.oldwei.hikdev.util.ConvertVideoPacket;
 import com.oldwei.hikdev.sdk.service.IHikCameraService;
 import com.oldwei.hikdev.sdk.structure.NET_DVR_CLIENTINFO;
+import com.oldwei.hikdev.util.DataCache;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.io.Serializable;
 
 /**
  * @author oldwei
@@ -28,7 +27,7 @@ import java.io.Serializable;
 @RequiredArgsConstructor
 public class HikCameraServiceImpl implements IHikCameraService {
     private final IHikDevService hikDevService;
-    private final RedisTemplate<String, Serializable> redisTemplate;
+    private final DataCache dataCache;
     private final IHikPlayCtrlService hikPlayCtrlService;
 
     @Override
@@ -55,7 +54,7 @@ public class HikCameraServiceImpl implements IHikCameraService {
         } else {
             log.info(ip + "预览成功，previewSucValue：{}", previewSucValue);
         }
-        this.redisTemplate.opsForValue().set(RedisPrefixConstant.HIK_PREVIEW_VIEW_IP + ip, previewSucValue);
+        this.dataCache.set(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP + ip, previewSucValue);
         //======================开启设备预览========================
         //======================Javacv推流 pis管道流========================
         try {

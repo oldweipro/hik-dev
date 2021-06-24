@@ -23,11 +23,11 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Slf4j
 public class ExecutorConfig implements AsyncConfigurer {
 
-    @Value("${async.executor.thread.core_pool_size}")
+    @Value("${async.executor.thread.core-pool-size}")
     private int corePoolSize;
-    @Value("${async.executor.thread.max_pool_size}")
+    @Value("${async.executor.thread.max-pool-size}")
     private int maxPoolSize;
-    @Value("${async.executor.thread.queue_capacity}")
+    @Value("${async.executor.thread.queue-capacity}")
     private int queueCapacity;
     @Value("${async.executor.thread.name.prefix}")
     private String namePrefix;

@@ -1,4 +1,4 @@
-package com.oldwei.hikdev.sdk.constant;
+package com.oldwei.hikdev.constant;
 
 /**
  * @author oldwei

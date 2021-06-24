@@ -1,18 +1,16 @@
 package com.oldwei.hikdev.sdk.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.oldwei.hikdev.sdk.constant.HikConstant;
-import com.oldwei.hikdev.sdk.constant.RedisPrefixConstant;
+import com.oldwei.hikdev.constant.HikConstant;
+import com.oldwei.hikdev.constant.DataCachePrefixConstant;
 import com.oldwei.hikdev.sdk.service.IHikDevService;
 import com.oldwei.hikdev.sdk.service.IHikDeviceService;
 import com.oldwei.hikdev.sdk.structure.NET_DVR_DEVICEINFO_V40;
 import com.oldwei.hikdev.sdk.structure.NET_DVR_USER_LOGIN_INFO;
+import com.oldwei.hikdev.util.DataCache;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-
-import java.io.Serializable;
 
 /**
  * @author oldwei
@@ -25,11 +23,11 @@ public class HikDeviceServiceImpl implements IHikDeviceService {
 
     private final IHikDevService hikDevService;
 
-    private final RedisTemplate<String, Serializable> redisTemplate;
+    private final DataCache dataCache;
 
     @Override
     public boolean clean(String ip) {
-        Integer longUserId = (Integer) this.redisTemplate.opsForValue().get(RedisPrefixConstant.HIK_REG_USERID_IP + ip);
+        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + ip);
         //退出的时候注销\释放SDK资源
         if (null != longUserId) {
             return hikDevService.NET_DVR_Logout(longUserId);
@@ -80,10 +78,10 @@ public class HikDeviceServiceImpl implements IHikDeviceService {
             log.info("登录失败，错误码为:" + hikDevService.NET_DVR_GetLastError());
             return false;
         } else {
-            this.redisTemplate.opsForValue().set(RedisPrefixConstant.HIK_REG_USERID_IP + ip, longUserId);
+            this.dataCache.set(DataCachePrefixConstant.HIK_REG_USERID_IP + ip, longUserId);
             //设备字符集
             int iCharEncodeType = netDvrDeviceInfoV40.byCharEncodeType;
-            this.redisTemplate.opsForValue().set(RedisPrefixConstant.HIK_REG_CHAR_ENCODE_TYPE_IP + ip, iCharEncodeType);
+            this.dataCache.set(DataCachePrefixConstant.HIK_REG_CHAR_ENCODE_TYPE_IP + ip, iCharEncodeType);
             return true;
         }
     }

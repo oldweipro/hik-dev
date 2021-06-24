@@ -3,19 +3,19 @@ package com.oldwei.hikdev.sdk.service.impl;
 import cn.hutool.core.codec.Base64;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.oldwei.hikdev.sdk.constant.HikConstant;
-import com.oldwei.hikdev.sdk.constant.RedisPrefixConstant;
+import com.oldwei.hikdev.constant.HikConstant;
+import com.oldwei.hikdev.constant.DataCachePrefixConstant;
 import com.oldwei.hikdev.sdk.service.IHikDevService;
 import com.oldwei.hikdev.sdk.service.IHikUserService;
 import com.oldwei.hikdev.sdk.structure.BYTE_ARRAY;
 import com.oldwei.hikdev.sdk.structure.NET_DVR_JSON_DATA_CFG;
 import com.oldwei.hikdev.sdk.structure.NET_DVR_XML_CONFIG_INPUT;
 import com.oldwei.hikdev.sdk.structure.NET_DVR_XML_CONFIG_OUTPUT;
+import com.oldwei.hikdev.util.DataCache;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -30,14 +30,14 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class HikUserServiceImpl implements IHikUserService {
     private final IHikDevService hikDevService;
-    private final RedisTemplate<String, Serializable> redisTemplate;
+    private final DataCache dataCache;
 
     @Override
     public JSONObject getAbility(JSONObject jsonObject) {
         JSONObject result = new JSONObject();
         result.put("event", jsonObject.getString("event"));
         // 获取用户句柄
-        Integer longUserId = (Integer) this.redisTemplate.opsForValue().get(RedisPrefixConstant.HIK_REG_USERID_IP + jsonObject.getString("ip"));
+        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + jsonObject.getString("ip"));
         if (null == longUserId) {
             result.put("code", -1);
             result.put("msg", "设备状态未注册！");
@@ -110,7 +110,7 @@ public class HikUserServiceImpl implements IHikUserService {
         Integer pageNum = param.getInteger("pageNum");
         Integer pageSize = param.getInteger("pageSize");
         // 获取用户句柄
-        Integer longUserId = (Integer) this.redisTemplate.opsForValue().get(RedisPrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
+        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
         if (null == longUserId) {
             result.put("code", -1);
             result.put("msg", "设备状态未注册！");
@@ -238,7 +238,7 @@ public class HikUserServiceImpl implements IHikUserService {
         JSONObject result = new JSONObject();
         result.put("event", param.getString("event"));
         // 获取用户句柄
-        Integer longUserId = (Integer) this.redisTemplate.opsForValue().get(RedisPrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
+        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
         if (null == longUserId) {
             result.put("code", -1);
             result.put("msg", "设备状态未注册！");
@@ -375,7 +375,7 @@ public class HikUserServiceImpl implements IHikUserService {
         JSONObject result = new JSONObject();
         result.put("event", param.getString("event"));
         // 获取用户句柄
-        Integer longUserId = (Integer) this.redisTemplate.opsForValue().get(RedisPrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
+        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
         if (null == longUserId) {
             result.put("code", -1);
             result.put("msg", "设备状态未注册！");
@@ -511,7 +511,7 @@ public class HikUserServiceImpl implements IHikUserService {
         result.put("event", param.getString("event"));
         JSONArray jsonArray = new JSONArray();
         // 获取用户句柄
-        Integer longUserId = (Integer) this.redisTemplate.opsForValue().get(RedisPrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
+        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
         if (null == longUserId) {
             result.put("code", -1);
             result.put("msg", "设备状态未注册！");
@@ -661,7 +661,7 @@ public class HikUserServiceImpl implements IHikUserService {
         JSONObject result = new JSONObject();
         result.put("event", param.getString("event"));
         // 获取用户句柄
-        Integer longUserId = (Integer) this.redisTemplate.opsForValue().get(RedisPrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
+        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
         if (null == longUserId) {
             result.put("code", -1);
             result.put("msg", "设备状态未注册！");
@@ -799,7 +799,7 @@ public class HikUserServiceImpl implements IHikUserService {
         result.put("event", param.getString("event"));
         JSONArray jsonArray = new JSONArray();
         // 获取用户句柄
-        Integer longUserId = (Integer) this.redisTemplate.opsForValue().get(RedisPrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
+        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
         if (null == longUserId) {
             result.put("code", -1);
             result.put("msg", "设备状态未注册！");
@@ -966,7 +966,7 @@ public class HikUserServiceImpl implements IHikUserService {
         JSONObject fpid = new JSONObject();
         fpid.put("FPID", array);
         // 获取用户句柄
-        Integer longUserId = (Integer) this.redisTemplate.opsForValue().get(RedisPrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
+        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
         if (null == longUserId) {
             result.put("code", -1);
             result.put("msg", "设备状态未注册！");
@@ -1047,7 +1047,7 @@ public class HikUserServiceImpl implements IHikUserService {
         JSONObject userInfoDelCond = new JSONObject();
         userInfoDelCond.put("UserInfoDelCond", employeeNoList);
         // 获取用户句柄
-        Integer longUserId = (Integer) this.redisTemplate.opsForValue().get(RedisPrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
+        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
         if (null == longUserId) {
             result.put("code", -1);
             result.put("msg", "设备状态未注册！");

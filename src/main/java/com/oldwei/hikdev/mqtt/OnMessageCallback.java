@@ -31,12 +31,7 @@ public class OnMessageCallback implements MqttCallback {
 //        log.info("接收消息Qos:{}", message.getQos());
 //        log.info("接收消息内容:{}", command);
 
-        //1.接收命令：人员基本信息，下发到门禁机
-//        String name = jsonObject.getString("name");
         this.mqttConnectClient.commandMqtt(command);
-        //2.接收命令：布防监听
-        //3.接收命令：根据姓名查询人员信息
-        //4.
     }
 
     @Override

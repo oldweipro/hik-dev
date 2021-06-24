@@ -1,6 +1,6 @@
 package com.oldwei.hikdev.sdk.service.impl;
 
-import com.oldwei.hikdev.sdk.constant.HikConstant;
+import com.oldwei.hikdev.constant.HikConstant;
 import com.oldwei.hikdev.sdk.service.FRealDataCallBack_V30;
 import com.oldwei.hikdev.sdk.service.IHikPlayCtrlService;
 import com.sun.jna.NativeLong;

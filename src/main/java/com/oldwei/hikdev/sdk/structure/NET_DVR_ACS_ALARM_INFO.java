@@ -1,6 +1,6 @@
 package com.oldwei.hikdev.sdk.structure;
 
-import com.oldwei.hikdev.sdk.constant.HikConstant;
+import com.oldwei.hikdev.constant.HikConstant;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 

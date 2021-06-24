@@ -5,32 +5,22 @@ spring:
       max-file-size: 209715200
       # 总上传的数据大小限制500Mb
       max-request-size: 524288000
-  redis:
-    # Redis数据库索引（默认为 0）
-    database: 0
-    # Redis服务器地址
-    host: 127.0.0.1
-    # Redis服务器连接端口
-    port: 6379
-    # Redis 密码
-    password:
-    # 连接超时时间（毫秒）
-    timeout: 300
-    lettuce:
-      pool:
-        # 连接池最大连接数(使用负值表示没有限制) 默认为8
-        max-active: 8
-        # 连接池最大阻塞等待时间(使用负值表示没有限制) 默认为-1
-        max-wait: -1ms
-        # 连接池中的最大空闲连接 默认为8
-        max-idle: 8
-        # 连接池中的最小空闲连接 默认为 0
-        min-idle: 0
 async:
   executor:
     thread:
-      core_pool_size: 20
-      max_pool_size: 20
-      queue_capacity: 99999
+      core-pool-size: 20
+      max-pool-size: 20
+      queue-capacity: 99999
       name:
         prefix: async-service-
+mqtt:
+  # 是否开启mqtt
+  enable: false
+  # mqtt相关配置
+  settings:
+    sub-topic: topic/cloud
+    pub-topic: topic/hik
+    qos: 2
+    broker: tcp://127.0.0.1:1883
+    client-id: hik_mqtt_server
+    username: hik_mqtt_oooldwei

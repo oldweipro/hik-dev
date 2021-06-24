@@ -4,17 +4,17 @@ import cn.hutool.core.codec.Base64;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.oldwei.hikdev.sdk.constant.HikConstant;
-import com.oldwei.hikdev.sdk.constant.RedisPrefixConstant;
+import com.oldwei.hikdev.constant.HikConstant;
+import com.oldwei.hikdev.constant.DataCachePrefixConstant;
 import com.oldwei.hikdev.sdk.service.IHikCardService;
 import com.oldwei.hikdev.sdk.service.IHikDevService;
 import com.oldwei.hikdev.sdk.structure.*;
-import com.oldwei.hikdev.utils.StringEncodingUtil;
+import com.oldwei.hikdev.util.DataCache;
+import com.oldwei.hikdev.util.StringEncodingUtil;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -34,7 +34,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class HikCardServiceImpl implements IHikCardService {
 
-    private final RedisTemplate<String, Serializable> redisTemplate;
+    private final DataCache dataCache;
     private final IHikDevService hikDevService;
 
     @Override
@@ -43,7 +43,7 @@ public class HikCardServiceImpl implements IHikCardService {
         cardData.put("event", jsonObject.getString("event"));
         String strCardNo = jsonObject.getString("cardNo");
         String ip = jsonObject.getString("ip");
-        Integer longUserId = (Integer) this.redisTemplate.opsForValue().get(RedisPrefixConstant.HIK_REG_USERID_IP + ip);
+        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + ip);
         if (null == longUserId) {
             cardData.put("code", -1);
             cardData.put("msg", "设备状态未注册！");
@@ -152,7 +152,7 @@ public class HikCardServiceImpl implements IHikCardService {
             result.put("msg", "缺少必要参数字段：ip");
             return result;
         }
-        Integer longUserId = (Integer) this.redisTemplate.opsForValue().get(RedisPrefixConstant.HIK_REG_USERID_IP + ip);
+        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + ip);
         if (null == longUserId) {
             result.put("code", -1);
             result.put("msg", "设备状态未注册！");
@@ -182,7 +182,7 @@ public class HikCardServiceImpl implements IHikCardService {
         struCardRecord.write();
 
         IntByReference pInt = new IntByReference(0);
-        Integer iCharEncodeType = (Integer) this.redisTemplate.opsForValue().get(RedisPrefixConstant.HIK_REG_CHAR_ENCODE_TYPE_IP + ip);
+        Integer iCharEncodeType = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_CHAR_ENCODE_TYPE_IP + ip);
         if (null == iCharEncodeType) {
             iCharEncodeType = 6;
         }
@@ -263,7 +263,7 @@ public class HikCardServiceImpl implements IHikCardService {
         struFaceCond.dwEnableReaderNo = 1;
         struFaceCond.write();
         Pointer ptrStruFaceCond = struFaceCond.getPointer();
-        Integer longUserId = (Integer) this.redisTemplate.opsForValue().get(RedisPrefixConstant.HIK_REG_USERID_IP + jsonObject.getString("ip"));
+        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + jsonObject.getString("ip"));
         if (null == longUserId) {
             log.error("下发卡失败，longUserId为空");
             result.put("code", -1);
@@ -389,7 +389,7 @@ public class HikCardServiceImpl implements IHikCardService {
         struCardCond.dwCardNum = cardNum;
         struCardCond.write();
         Pointer ptrStrCond = struCardCond.getPointer();
-        Integer longUserId = (Integer) this.redisTemplate.opsForValue().get(RedisPrefixConstant.HIK_REG_USERID_IP + jsonObject.getString("ip"));
+        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + jsonObject.getString("ip"));
         if (null == longUserId) {
             log.error("下发卡失败，longUserId为空");
             result.put("code", -1);
@@ -520,7 +520,7 @@ public class HikCardServiceImpl implements IHikCardService {
         struCardCond.dwCardNum = 1;  //下发一张
         struCardCond.write();
         Pointer ptrStruCond = struCardCond.getPointer();
-        Integer longUserId = (Integer) this.redisTemplate.opsForValue().get(RedisPrefixConstant.HIK_REG_USERID_IP + jsonObject.getString("ip"));
+        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + jsonObject.getString("ip"));
         if (null == longUserId) {
             log.error("下发卡失败，longUserId为空");
             result.put("code", -1);
@@ -632,7 +632,7 @@ public class HikCardServiceImpl implements IHikCardService {
         struFaceDelCond.write();
 
         Pointer ptrFaceDelCond = struFaceDelCond.getPointer();
-        Integer longUserId = (Integer) this.redisTemplate.opsForValue().get(RedisPrefixConstant.HIK_REG_USERID_IP + jsonObject.getString("ip"));
+        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + jsonObject.getString("ip"));
         if (null == longUserId) {
             log.error("下发卡失败，longUserId为空");
             result.put("code", -1);

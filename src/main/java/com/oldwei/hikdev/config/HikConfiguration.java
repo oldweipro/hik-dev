@@ -2,6 +2,7 @@ package com.oldwei.hikdev.config;
 
 import com.oldwei.hikdev.sdk.service.IHikDevService;
 import com.oldwei.hikdev.sdk.service.IHikPlayCtrlService;
+import com.oldwei.hikdev.util.DataCache;
 import com.sun.jna.Native;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +24,11 @@ public class HikConfiguration {
     @Bean
     public IHikPlayCtrlService hikPlayCtrlService() {
         return (IHikPlayCtrlService) Native.loadLibrary(System.getProperty("user.dir") + "\\sdk\\PlayCtrl.dll", IHikPlayCtrlService.class);
+    }
+
+    @Bean
+    public DataCache hikMemory() {
+        return new DataCache();
     }
 
 }

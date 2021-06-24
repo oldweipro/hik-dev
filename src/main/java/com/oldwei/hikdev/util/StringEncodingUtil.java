@@ -1,4 +1,4 @@
-package com.oldwei.hikdev.utils;
+package com.oldwei.hikdev.util;
 
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;

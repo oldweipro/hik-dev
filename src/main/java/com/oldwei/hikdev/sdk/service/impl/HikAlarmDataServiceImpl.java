@@ -1,17 +1,17 @@
 package com.oldwei.hikdev.sdk.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.oldwei.hikdev.sdk.constant.HikConstant;
-import com.oldwei.hikdev.sdk.constant.RedisPrefixConstant;
+import com.oldwei.hikdev.constant.HikConstant;
+import com.oldwei.hikdev.constant.DataCachePrefixConstant;
 import com.oldwei.hikdev.sdk.service.FMSGCallBack_V31;
 import com.oldwei.hikdev.sdk.service.IHikAlarmDataService;
 import com.oldwei.hikdev.sdk.service.IHikDevService;
 import com.oldwei.hikdev.sdk.structure.*;
-import com.oldwei.hikdev.utils.CloudUploadUtil;
+import com.oldwei.hikdev.util.CloudUploadUtil;
+import com.oldwei.hikdev.util.DataCache;
 import com.sun.jna.Pointer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -30,7 +30,7 @@ import java.util.Date;
 public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBack_V31 {
     private final IHikDevService hikDevService;
 
-    private final RedisTemplate<String, Serializable> redisTemplate;
+    private final DataCache dataCache;
 
     @Override
     public boolean invoke(int lCommand, NET_DVR_ALARMER pAlarmer, Pointer pAlarmInfo, int dwBufLen, Pointer pUser) {
@@ -54,7 +54,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
             result.put("msg", "NET_DVR_StopRemoteConfig接口调用失败，错误码：" + this.hikDevService.NET_DVR_GetLastError());
             return result;
         }
-        Integer longAlarmHandle = (Integer) this.redisTemplate.opsForValue().get(RedisPrefixConstant.HIK_ALARM_HANDLE_IP + ip);
+        Integer longAlarmHandle = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + ip);
         if (null == longAlarmHandle || longAlarmHandle < 0) {
             //尚未布防,需要布防
             Pointer pUser = null;
@@ -71,7 +71,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
             //布防类型(仅针对门禁主机、人证设备)：0-客户端布防(会断网续传)，1-实时布防(只上传实时数据)
             mStrAlarmInfo.byDeployType = 0;
             mStrAlarmInfo.write();
-            Integer longUserId = (Integer) this.redisTemplate.opsForValue().get(RedisPrefixConstant.HIK_REG_USERID_IP + ip);
+            Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + ip);
             if (null == longUserId) {
                 result.put("code", -1);
                 result.put("msg", "设备状态未注册！");
@@ -84,7 +84,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                 result.put("msg", "布防失败，错误号:" + this.hikDevService.NET_DVR_GetLastError());
             } else {
                 log.info("布防成功");
-                this.redisTemplate.opsForValue().set(RedisPrefixConstant.HIK_ALARM_HANDLE_IP + ip, longAlarmHandle);
+                this.dataCache.set(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + ip, longAlarmHandle);
                 result.put("code", 0);
                 result.put("msg", "布防成功！");
             }
@@ -97,11 +97,11 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
         JSONObject result = new JSONObject();
         String ip = jsonObject.getString("ip");
         //报警撤防
-        Integer longAlarmHandle = (Integer) this.redisTemplate.opsForValue().get(RedisPrefixConstant.HIK_ALARM_HANDLE_IP + ip);
+        Integer longAlarmHandle = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + ip);
         if (null != longAlarmHandle && longAlarmHandle > -1) {
             if (this.hikDevService.NET_DVR_CloseAlarmChan_V30(longAlarmHandle)) {
                 longAlarmHandle = -1;
-                this.redisTemplate.opsForValue().set(RedisPrefixConstant.HIK_ALARM_HANDLE_IP + ip, longAlarmHandle);
+                this.dataCache.set(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + ip, longAlarmHandle);
                 log.info("撤防成功");
                 result.put("code", 0);
                 result.put("msg", "撤防成功");
@@ -123,7 +123,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
         // TODO something... fMSFCallBack = new FMSGCallBack(); let me try FMSGCallBack_V31
         Pointer pUser = null;
         int startListenV30 = this.hikDevService.NET_DVR_StartListen_V30(ip, port, null, pUser);
-        this.redisTemplate.opsForValue().set(RedisPrefixConstant.HIK_ALARM_LISTEN_IP + ip, startListenV30);
+        this.dataCache.set(DataCachePrefixConstant.HIK_ALARM_LISTEN_IP + ip, startListenV30);
         if (startListenV30 < 0) {
             log.info("启动监听失败，错误号:{}", this.hikDevService.NET_DVR_GetLastError());
             result.put("code", -1);
@@ -140,7 +140,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
     public JSONObject stopAlarmListen(JSONObject jsonObject) {
         JSONObject result = new JSONObject();
         String ip = jsonObject.getString("ip");
-        Integer startListenV30 = (Integer) this.redisTemplate.opsForValue().get(RedisPrefixConstant.HIK_ALARM_LISTEN_IP + ip);
+        Integer startListenV30 = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_ALARM_LISTEN_IP + ip);
         if (null == startListenV30 || startListenV30 < 0) {
             result.put("code", 0);
             result.put("msg", "停止监听成功");
