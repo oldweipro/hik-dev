@@ -11,7 +11,7 @@ public interface MqttConstant {
 
     int QOS = 2;
 
-    String BROKER = "tcp://127.0.0.1:2883";
+    String BROKER = "tcp://127.0.0.1:1883";
 
     String CLIENT_ID = "hik_mqtt_server";
 }

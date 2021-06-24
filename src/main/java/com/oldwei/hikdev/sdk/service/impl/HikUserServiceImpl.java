@@ -49,12 +49,11 @@ public class HikUserServiceImpl implements IHikUserService {
         ptrUrl.write();
 
         //获取能力集时输入参数为空即可
-        /*HCNetSDK.BYTE_ARRAY ptrInBuffer = new HCNetSDK.BYTE_ARRAY(ISAPI_DATA_LEN);
-        ptrInBuffer.read();
-        String strInbuffer = "";
-        ptrInBuffer.byValue = strInbuffer.getBytes();
-        ptrInBuffer.write();
-        */
+//        BYTE_ARRAY ptrInBuffer = new BYTE_ARRAY(HikConstant.ISAPI_DATA_LEN);
+//        ptrInBuffer.read();
+//        String strInbuffer = "";
+//        ptrInBuffer.byValue = strInbuffer.getBytes();
+//        ptrInBuffer.write();
 
         NET_DVR_XML_CONFIG_INPUT struXMLInput = new NET_DVR_XML_CONFIG_INPUT();
         struXMLInput.read();

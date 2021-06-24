@@ -1,7 +1,6 @@
 package com.oldwei.hikdev.sdk.service;
 
 import com.oldwei.hikdev.sdk.structure.*;
-import com.oldwei.hikdev.sdk.structure.NET_DVR_CLIENTINFO;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.win32.StdCallLibrary;
@@ -22,7 +21,7 @@ public interface IHikDevService extends StdCallLibrary {
 
     int NET_DVR_GetLastError();
 
-    int NET_DVR_StartRemoteConfig(int lUserID, int dwCommand, Pointer lpInBuffer, int dwInBufferLen, HCNetSDK.FRemoteConfigCallBack cbStateCallBack, Pointer pUserData);
+    int NET_DVR_StartRemoteConfig(int lUserID, int dwCommand, Pointer lpInBuffer, int dwInBufferLen, FRemoteConfigCallBack cbStateCallBack, Pointer pUserData);
 
     int NET_DVR_GetNextRemoteConfig(int lHandle, Pointer lpOutBuff, int dwOutBuffSize);
 

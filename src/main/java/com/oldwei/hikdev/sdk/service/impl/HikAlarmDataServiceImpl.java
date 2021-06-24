@@ -451,26 +451,15 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
 
                     if (strPDCResult.byMode == 0) {
                         strPDCResult.uStatModeParam.setType(NET_DVR_STATFRAME.class);
-                        sAlarmType = sAlarmType + "：客流量统计，进入人数：" + strPDCResult.dwEnterNum + "，离开人数：" + strPDCResult.dwLeaveNum +
+                        sAlarmType = sAlarmType + "：客流量统计，进入人数:" + strPDCResult.dwEnterNum + "，离开人数：" + strPDCResult.dwLeaveNum +
                                 ", byMode:" + strPDCResult.byMode + ", dwRelativeTime:" + strPDCResult.uStatModeParam.struStatFrame.dwRelativeTime +
                                 ", dwAbsTime:" + strPDCResult.uStatModeParam.struStatFrame.dwAbsTime;
-                    }
-                    if (strPDCResult.byMode == 1) {
+                    } else if (strPDCResult.byMode == 1) {
                         strPDCResult.uStatModeParam.setType(NET_DVR_STATTIME.class);
-                        String strtmStart = "" + String.format("%04d", strPDCResult.uStatModeParam.struStatTime.tmStart.dwYear) +
-                                String.format("%02d", strPDCResult.uStatModeParam.struStatTime.tmStart.dwMonth) +
-                                String.format("%02d", strPDCResult.uStatModeParam.struStatTime.tmStart.dwDay) +
-                                String.format("%02d", strPDCResult.uStatModeParam.struStatTime.tmStart.dwHour) +
-                                String.format("%02d", strPDCResult.uStatModeParam.struStatTime.tmStart.dwMinute) +
-                                String.format("%02d", strPDCResult.uStatModeParam.struStatTime.tmStart.dwSecond);
-                        String strtmEnd = "" + String.format("%04d", strPDCResult.uStatModeParam.struStatTime.tmEnd.dwYear) +
-                                String.format("%02d", strPDCResult.uStatModeParam.struStatTime.tmEnd.dwMonth) +
-                                String.format("%02d", strPDCResult.uStatModeParam.struStatTime.tmEnd.dwDay) +
-                                String.format("%02d", strPDCResult.uStatModeParam.struStatTime.tmEnd.dwHour) +
-                                String.format("%02d", strPDCResult.uStatModeParam.struStatTime.tmEnd.dwMinute) +
-                                String.format("%02d", strPDCResult.uStatModeParam.struStatTime.tmEnd.dwSecond);
-                        sAlarmType = sAlarmType + "：客流量统计，进入人数：" + strPDCResult.dwEnterNum + "，离开人数：" + strPDCResult.dwLeaveNum +
-                                ", byMode:" + strPDCResult.byMode + ", tmStart:" + strtmStart + ",tmEnd :" + strtmEnd;
+                        String strtmStart = strPDCResult.uStatModeParam.struStatTime.tmStart.toStringTimeDateFormat();
+                        String strtmEnd = strPDCResult.uStatModeParam.struStatTime.tmEnd.toStringTimeDateFormat();
+                        sAlarmType = sAlarmType + ":客流量统计，进入人数:" + strPDCResult.dwEnterNum + ", 离开人数:" + strPDCResult.dwLeaveNum +
+                                ", byMode:" + strPDCResult.byMode + ", 开始时间:" + strtmStart + ", 结束时间 :" + strtmEnd;
                     }
 
                     newRow[0] = dateFormat.format(today);
@@ -479,7 +468,6 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     //报警设备IP地址
                     sIP = new String(strPDCResult.struDevInfo.struDevIP.sIpV4).split("\0", 2);
                     newRow[2] = sIP[0];
-                    //alarmTableModel.insertRow(0, newRow);
                     log.info("客流量统计报警上传：{}", sAlarmType);
                     break;
 

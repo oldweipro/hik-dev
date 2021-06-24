@@ -40,6 +40,15 @@ public class NET_DVR_TIME extends Structure {
     }
 
     /**
+     * 格式化时间 yyyy-MM-dd HH:mm:ss
+     *
+     * @return
+     */
+    public String toStringTimeDateFormat() {
+        return String.format("%02d-%02d-%02d %02d:%02d:%02d", dwYear, dwMonth, dwDay, dwHour, dwMinute, dwSecond);
+    }
+
+    /**
      * 用于列表中显示
      *
      * @return
