@@ -3,6 +3,7 @@ package com.oldwei.hikdev.util;
 import lombok.Getter;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -12,7 +13,7 @@ import java.util.Map;
 @Getter
 public class DataCache implements Serializable {
     private static final long serialVersionUID = 1936076342035183560L;
-    private Map<String, Object> data;
+    private final Map<String, Object> data = new HashMap<>();
 
     public void set(String key, Object value) {
         this.data.put(key, value);
