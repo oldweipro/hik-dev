@@ -32,7 +32,7 @@ public class HikCameraServiceImpl implements IHikCameraService {
 
     @Override
     @Async("asyncServiceExecutor")
-    public void pushStream(Integer userId, String ip, String pushUrl) {
+    public void startPushStream(Integer userId, String ip, String pushUrl) {
         //======================管道流代码========================
         PipedInputStream pis = new PipedInputStream(5120);
         PipedOutputStream pos = new PipedOutputStream();
@@ -58,13 +58,27 @@ public class HikCameraServiceImpl implements IHikCameraService {
         //======================开启设备预览========================
         //======================Javacv推流 pis管道流========================
         try {
-            new ConvertVideoPacket().fromPis(pis).setGrabber().to(pushUrl).go();
+            new ConvertVideoPacket(this.dataCache).fromPis(pis).setGrabber().to(pushUrl).go(ip);
             pis.close();
             pos.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
         //======================Javacv推流 pis管道流========================
+    }
+
+    @Override
+    public boolean existPushStream(String ip) {
+        //将推流状态设置为0,在推流循环里会判断状态
+        this.dataCache.set(DataCachePrefixConstant.HIK_PUSH_STATUS_IP + ip, 0);
+        Integer previewView = this.dataCache.getInteger(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP + ip);
+        boolean b = this.hikDevService.NET_DVR_StopRealPlay(previewView);
+        if (b) {
+            log.info("退出预览成功！");
+        } else {
+            log.info("退出预览失败！");
+        }
+        return b;
     }
 
     @Override
@@ -75,7 +89,7 @@ public class HikCameraServiceImpl implements IHikCameraService {
     }
 
     @Override
-    public void pushRtspToRtmp(String rtspUrl, String pushUrl) throws IOException {
-        new ConvertVideoPacket().fromRtsp(rtspUrl).setGrabber().to(pushUrl).go();
+    public void pushRtspToRtmp(String ip, String rtspUrl, String pushUrl) throws IOException {
+        new ConvertVideoPacket(this.dataCache).fromRtsp(rtspUrl).setGrabber().to(pushUrl).go(ip);
     }
 }

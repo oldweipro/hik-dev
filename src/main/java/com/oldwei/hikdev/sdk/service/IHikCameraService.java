@@ -8,23 +8,35 @@ import java.io.IOException;
  */
 public interface IHikCameraService {
     /**
-     * 开启推流
+     * 开启sdk推流
+     *
+     * @param userId  用户ID
+     * @param ip      开启推流的设备IP地址
+     * @param pushUrl 流媒体服务器推送地址
      */
-    void pushStream(Integer userId, String ip, String pushUrl);
+    void startPushStream(Integer userId, String ip, String pushUrl);
+
+    /**
+     * 退出推流
+     *
+     * @param ip 退出推流的设备IP
+     */
+    boolean existPushStream(String ip);
 
     /**
      * sdk录像
      *
-     * @param ip
+     * @param ip 需要存储录像的IP地址
      */
     void saveCameraData(Integer ip);
 
     /**
      * rtsp推流到rtmp
      *
-     * @param rtspUrl
-     * @param pushUrl
+     * @param ip      开启推流的设备IP地址
+     * @param rtspUrl rtsp拉流地址
+     * @param pushUrl rtmp推流地址
      * @throws IOException
      */
-    void pushRtspToRtmp(String rtspUrl, String pushUrl) throws IOException;
+    void pushRtspToRtmp(String ip, String rtspUrl, String pushUrl) throws IOException;
 }

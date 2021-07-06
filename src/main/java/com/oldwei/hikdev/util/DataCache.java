@@ -19,7 +19,19 @@ public class DataCache implements Serializable {
         this.data.put(key, value);
     }
 
+    public boolean hasKey(String key) {
+        return this.data.containsKey(key);
+    }
+
     public Object get(String key) {
-        return this.data.get(key);
+        return this.hasKey(key) ? this.data.get(key) : null;
+    }
+
+    public String getString(String key) {
+        return this.hasKey(key) ? this.get(key).toString() : null;
+    }
+
+    public Integer getInteger(String key) {
+        return this.hasKey(key) ? Integer.valueOf(this.getString(key)) : null;
     }
 }

@@ -1,5 +1,8 @@
 package com.oldwei.hikdev.util;
 
+import com.oldwei.hikdev.constant.DataCachePrefixConstant;
+import com.oldwei.hikdev.constant.VideoConstant;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.ffmpeg.avcodec.AVPacket;
 import org.bytedeco.ffmpeg.avformat.AVFormatContext;
@@ -21,7 +24,10 @@ import static org.bytedeco.ffmpeg.global.avcodec.av_packet_unref;
  * @date 2021-5-19 18:42
  */
 @Slf4j
+@RequiredArgsConstructor
 public class ConvertVideoPacket {
+
+    private final DataCache dataCache;
     FFmpegFrameGrabber grabber = null;
     FFmpegFrameRecorder record = null;
     int width = -1, height = -1;
@@ -54,23 +60,34 @@ public class ConvertVideoPacket {
     /**
      * 选择视频源
      *
-     * @param pis
+     * @param pis sdk获取的裸流
      * @throws IOException
-     * @author eguid
      */
     public ConvertVideoPacket fromPis(PipedInputStream pis) {
         grabber = new FFmpegFrameGrabber(pis, 0);
         return this;
     }
 
+    /**
+     * 选择视频源
+     *
+     * @param rtspUrl rtsp流
+     * @return
+     */
     public ConvertVideoPacket fromRtsp(String rtspUrl) {
         grabber = new FFmpegFrameGrabber(rtspUrl);
-        if (rtspUrl.contains("rtsp")) {
+        if (rtspUrl.contains(VideoConstant.RTSP)) {
             grabber.setOption("rtsp_transport", "tcp");
         }
         return this;
     }
 
+    /**
+     * 设置流抓取器
+     *
+     * @return
+     * @throws FrameGrabber.Exception
+     */
     public ConvertVideoPacket setGrabber() throws FrameGrabber.Exception {
 
         // 开始之后ffmpeg会采集视频信息，之后就可以获取音视频信息
@@ -153,11 +170,11 @@ public class ConvertVideoPacket {
      * @throws IOException
      * @author eguid
      */
-    public void go() throws IOException {
+    public void go(String ip) throws IOException {
         //采集或推流导致的错误次数
         long errIndex = 0;
         //连续五次没有采集到帧则认为视频采集结束，程序错误次数超过1次即中断程序
-        log.info("推流开始：" + LocalDateTime.now());
+        log.info("推流开始 => {}",ip, LocalDateTime.now());
         for (int noFrameIndex = 0; noFrameIndex < 5 || errIndex > 1; ) {
             AVPacket pkt = null;
             try {
@@ -171,13 +188,17 @@ public class ConvertVideoPacket {
                 }
                 //不需要编码直接把音视频帧推出去
                 errIndex += (record.recordPacket(pkt) ? 0 : 1);
-                //如果失败err_index自增1
                 av_packet_unref(pkt);
+                Integer pushStatus = this.dataCache.getInteger(DataCachePrefixConstant.HIK_PUSH_STATUS_IP + ip);
+                if (null != pushStatus && pushStatus == 0) {
+                    log.info("收到推流结束命令，退出推流：{}", ip);
+                    break;
+                }
             } catch (IOException e) {
-                //推流失败
+                // 推流失败 如果失败err_index自增1
                 errIndex++;
             }
         }
-        log.info("推流失败：" + LocalDateTime.now());
+        log.info("推流 {} 结束 => {}",ip, LocalDateTime.now());
     }
 }
