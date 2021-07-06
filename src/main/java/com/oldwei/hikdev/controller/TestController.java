@@ -29,25 +29,58 @@ public class TestController {
     private final IHikCameraService hikCameraService;
     private final IAccessControlService accessControlService;
 
+    /**
+     * mqtt发送消息
+     *
+     * @param msg
+     */
     @RequestMapping("sendMsg")
     public void sendMsg(String msg) {
         this.mqttConnectClient.publish(msg);
     }
 
+    /**
+     * 设置内存信息 key value
+     *
+     * @param key
+     * @param msg
+     */
     @GetMapping("setMsg")
     public void setMsg(String key, String msg) {
         this.dataCache.set(key, msg);
     }
 
+    /**
+     * 通过key获取内存中的数据
+     *
+     * @param key
+     * @return
+     */
     @GetMapping("getMsg")
     public String getMsg(String key) {
         return (String) this.dataCache.get(key);
     }
 
+    /**
+     * 接收MQTT传输的指令进行相关操作
+     * TODO 将来会进行归档整理，详细指令进入AccessControlServiceImpl.class查看
+     *
+     * @param command
+     * @return
+     */
     @PostMapping("commandMqtt")
     public String commandMqtt(@RequestBody JSONObject command) {
         return this.accessControlService.commandMqtt(command.toJSONString());
     }
+
+    /**
+     * 设备sdk获取到流数据，进行推流，需要填写推送地址例如：rtmp://ip:port/live/stream
+     * 自行部署流媒体服务器
+     * TODO 有内存溢出问题，随时间无限增大，目前推荐使用rtspToRtmp进行推流
+     *
+     * @param jsonObject
+     * @return
+     */
     @PostMapping("playCamera")
     public String playCamera(@RequestBody JSONObject jsonObject) {
         String ip = jsonObject.getString("ip");
@@ -66,6 +99,12 @@ public class TestController {
         return "推流成功";
     }
 
+    /**
+     * 使用sdk存储视频录像到本地，每一个小时自动创建新文件
+     *
+     * @param jsonObject
+     * @return
+     */
     @PostMapping("saveCameraData")
     public String saveCameraData(@RequestBody JSONObject jsonObject) {
         Integer previewSucValue = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP + jsonObject.getString("ip"));
@@ -77,6 +116,14 @@ public class TestController {
         return "启动成功！";
     }
 
+    /**
+     * 使用rtsp推流 海康rtsp取流地址参考：https://www.jianshu.com/p/8efcea89b11f
+     *
+     * @param jsonObject rtspUrl拉流地址：rtsp://ip:port/live/stream
+     *                   pushUrl推流地址：rtmp://ip:port/live/stream
+     * @return
+     * @throws IOException
+     */
     @PostMapping("pushRtspToRtmp")
     public String pushRtspToRtmp(@RequestBody JSONObject jsonObject) throws IOException {
         String rtspUrl = jsonObject.getString("rtspUrl");
@@ -88,6 +135,11 @@ public class TestController {
         return "推流成功";
     }
 
+    /**
+     * 获取当前内存中缓存的数据，一般存的是当前已注册的设备 各种状态
+     *
+     * @return
+     */
     @PostMapping("getMemory")
     public Map<String, Object> getMemory() {
         return this.dataCache.getData();

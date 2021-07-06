@@ -18,8 +18,11 @@ mqtt:
   enable: false
   # mqtt相关配置
   settings:
+    # 订阅
     sub-topic: topic/cloud
+    # 发布订阅
     pub-topic: topic/hik
+    # 参考 https://zhuanlan.zhihu.com/p/80203905
     qos: 2
     broker: tcp://127.0.0.1:1883
     client-id: hik_mqtt_server
