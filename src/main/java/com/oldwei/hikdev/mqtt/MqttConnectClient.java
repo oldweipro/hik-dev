@@ -1,6 +1,6 @@
 package com.oldwei.hikdev.mqtt;
 
-import com.oldwei.hikdev.sdk.service.IAccessControlService;
+import com.oldwei.hikdev.service.IAccessControlService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttClient;

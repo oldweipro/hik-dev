@@ -1,7 +1,7 @@
 package com.oldwei.hikdev.config;
 
-import com.oldwei.hikdev.sdk.service.IHikDevService;
-import com.oldwei.hikdev.sdk.service.IHikPlayCtrlService;
+import com.oldwei.hikdev.service.IHikDevService;
+import com.oldwei.hikdev.service.IHikPlayCtrlService;
 import com.oldwei.hikdev.util.DataCache;
 import com.sun.jna.Native;
 import org.springframework.context.annotation.Bean;
