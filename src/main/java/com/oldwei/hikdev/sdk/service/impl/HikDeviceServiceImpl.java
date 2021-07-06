@@ -27,7 +27,7 @@ public class HikDeviceServiceImpl implements IHikDeviceService {
 
     @Override
     public boolean clean(String ip) {
-        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + ip);
+        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + ip);
         //退出的时候注销\释放SDK资源
         if (null != longUserId) {
             return hikDevService.NET_DVR_Logout(longUserId);

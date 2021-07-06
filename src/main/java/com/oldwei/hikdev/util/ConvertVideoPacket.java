@@ -174,7 +174,7 @@ public class ConvertVideoPacket {
         //采集或推流导致的错误次数
         long errIndex = 0;
         //连续五次没有采集到帧则认为视频采集结束，程序错误次数超过1次即中断程序
-        log.info("推流开始 => {}",ip, LocalDateTime.now());
+        log.info("推流 {} 开始 => {}",ip, LocalDateTime.now());
         for (int noFrameIndex = 0; noFrameIndex < 5 || errIndex > 1; ) {
             AVPacket pkt = null;
             try {

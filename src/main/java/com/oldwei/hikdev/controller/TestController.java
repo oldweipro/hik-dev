@@ -58,7 +58,7 @@ public class TestController {
      */
     @GetMapping("getMsg")
     public String getMsg(String key) {
-        return (String) this.dataCache.get(key);
+        return this.dataCache.getString(key);
     }
 
     /**
@@ -85,12 +85,12 @@ public class TestController {
     public String startPushStream(@RequestBody JSONObject jsonObject) {
         String ip = jsonObject.getString("ip");
         String pushUrl = jsonObject.getString("pushUrl");
-        Integer userId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + ip);
+        Integer userId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + ip);
         if (null == userId || userId < 0) {
             log.error("设备注册异常，可能是没注册，也可能是设备有问题，设备状态userId：{}", userId);
             return "设备注册异常，可能是没注册，也可能是设备有问题，设备状态userId：" + userId;
         }
-        Integer getPreviewSucValue = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP);
+        Integer getPreviewSucValue = this.dataCache.getInteger(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP);
         if (null != getPreviewSucValue && getPreviewSucValue != -1) {
             log.error("设备已经在预览状态了，请勿重复开启，设备状态userId：{}", userId);
             return "设备已经在预览状态了，请勿重复开启，设备状态userId：" + userId;
@@ -118,7 +118,7 @@ public class TestController {
      */
     @PostMapping("saveCameraData")
     public String saveCameraData(@RequestBody JSONObject jsonObject) {
-        Integer previewSucValue = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP + jsonObject.getString("ip"));
+        Integer previewSucValue = this.dataCache.getInteger(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP + jsonObject.getString("ip"));
         if (null == previewSucValue || previewSucValue == -1) {
             log.error("设备未开启预览");
             return "设备未开启预览";
@@ -136,7 +136,7 @@ public class TestController {
      * @throws IOException
      */
     @PostMapping("pushRtspToRtmp")
-    public String pushRtspToRtmp(@RequestBody JSONObject jsonObject) throws IOException {
+    public String pushRtspToRtmp(@RequestBody JSONObject jsonObject) {
         String ip = jsonObject.getString("ip");
         String rtspUrl = jsonObject.getString("rtspUrl");
         String pushUrl = jsonObject.getString("pushUrl");

@@ -37,7 +37,7 @@ public class HikUserServiceImpl implements IHikUserService {
         JSONObject result = new JSONObject();
         result.put("event", jsonObject.getString("event"));
         // 获取用户句柄
-        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + jsonObject.getString("ip"));
+        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + jsonObject.getString("ip"));
         if (null == longUserId) {
             result.put("code", -1);
             result.put("msg", "设备状态未注册！");
@@ -110,7 +110,7 @@ public class HikUserServiceImpl implements IHikUserService {
         Integer pageNum = param.getInteger("pageNum");
         Integer pageSize = param.getInteger("pageSize");
         // 获取用户句柄
-        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
+        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
         if (null == longUserId) {
             result.put("code", -1);
             result.put("msg", "设备状态未注册！");
@@ -238,7 +238,7 @@ public class HikUserServiceImpl implements IHikUserService {
         JSONObject result = new JSONObject();
         result.put("event", param.getString("event"));
         // 获取用户句柄
-        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
+        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
         if (null == longUserId) {
             result.put("code", -1);
             result.put("msg", "设备状态未注册！");
@@ -375,7 +375,7 @@ public class HikUserServiceImpl implements IHikUserService {
         JSONObject result = new JSONObject();
         result.put("event", param.getString("event"));
         // 获取用户句柄
-        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
+        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
         if (null == longUserId) {
             result.put("code", -1);
             result.put("msg", "设备状态未注册！");
@@ -511,7 +511,7 @@ public class HikUserServiceImpl implements IHikUserService {
         result.put("event", param.getString("event"));
         JSONArray jsonArray = new JSONArray();
         // 获取用户句柄
-        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
+        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
         if (null == longUserId) {
             result.put("code", -1);
             result.put("msg", "设备状态未注册！");
@@ -661,7 +661,7 @@ public class HikUserServiceImpl implements IHikUserService {
         JSONObject result = new JSONObject();
         result.put("event", param.getString("event"));
         // 获取用户句柄
-        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
+        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
         if (null == longUserId) {
             result.put("code", -1);
             result.put("msg", "设备状态未注册！");
@@ -799,7 +799,7 @@ public class HikUserServiceImpl implements IHikUserService {
         result.put("event", param.getString("event"));
         JSONArray jsonArray = new JSONArray();
         // 获取用户句柄
-        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
+        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
         if (null == longUserId) {
             result.put("code", -1);
             result.put("msg", "设备状态未注册！");
@@ -966,7 +966,7 @@ public class HikUserServiceImpl implements IHikUserService {
         JSONObject fpid = new JSONObject();
         fpid.put("FPID", array);
         // 获取用户句柄
-        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
+        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
         if (null == longUserId) {
             result.put("code", -1);
             result.put("msg", "设备状态未注册！");
@@ -1047,7 +1047,7 @@ public class HikUserServiceImpl implements IHikUserService {
         JSONObject userInfoDelCond = new JSONObject();
         userInfoDelCond.put("UserInfoDelCond", employeeNoList);
         // 获取用户句柄
-        Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
+        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + param.getString("ip"));
         if (null == longUserId) {
             result.put("code", -1);
             result.put("msg", "设备状态未注册！");

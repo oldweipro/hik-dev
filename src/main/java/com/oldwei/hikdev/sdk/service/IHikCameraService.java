@@ -20,6 +20,7 @@ public interface IHikCameraService {
      * 退出推流
      *
      * @param ip 退出推流的设备IP
+     * @return
      */
     boolean existPushStream(String ip);
 
@@ -36,7 +37,6 @@ public interface IHikCameraService {
      * @param ip      开启推流的设备IP地址
      * @param rtspUrl rtsp拉流地址
      * @param pushUrl rtmp推流地址
-     * @throws IOException
      */
-    void pushRtspToRtmp(String ip, String rtspUrl, String pushUrl) throws IOException;
+    void pushRtspToRtmp(String ip, String rtspUrl, String pushUrl);
 }

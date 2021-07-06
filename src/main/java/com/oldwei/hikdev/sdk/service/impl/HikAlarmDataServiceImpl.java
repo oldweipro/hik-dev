@@ -54,7 +54,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
             result.put("msg", "NET_DVR_StopRemoteConfig接口调用失败，错误码：" + this.hikDevService.NET_DVR_GetLastError());
             return result;
         }
-        Integer longAlarmHandle = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + ip);
+        Integer longAlarmHandle = this.dataCache.getInteger(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + ip);
         if (null == longAlarmHandle || longAlarmHandle < 0) {
             //尚未布防,需要布防
             Pointer pUser = null;
@@ -71,7 +71,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
             //布防类型(仅针对门禁主机、人证设备)：0-客户端布防(会断网续传)，1-实时布防(只上传实时数据)
             mStrAlarmInfo.byDeployType = 0;
             mStrAlarmInfo.write();
-            Integer longUserId = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + ip);
+            Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + ip);
             if (null == longUserId) {
                 result.put("code", -1);
                 result.put("msg", "设备状态未注册！");
@@ -97,7 +97,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
         JSONObject result = new JSONObject();
         String ip = jsonObject.getString("ip");
         //报警撤防
-        Integer longAlarmHandle = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + ip);
+        Integer longAlarmHandle = this.dataCache.getInteger(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + ip);
         if (null != longAlarmHandle && longAlarmHandle > -1) {
             if (this.hikDevService.NET_DVR_CloseAlarmChan_V30(longAlarmHandle)) {
                 longAlarmHandle = -1;
@@ -140,7 +140,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
     public JSONObject stopAlarmListen(JSONObject jsonObject) {
         JSONObject result = new JSONObject();
         String ip = jsonObject.getString("ip");
-        Integer startListenV30 = (Integer) this.dataCache.get(DataCachePrefixConstant.HIK_ALARM_LISTEN_IP + ip);
+        Integer startListenV30 = this.dataCache.getInteger(DataCachePrefixConstant.HIK_ALARM_LISTEN_IP + ip);
         if (null == startListenV30 || startListenV30 < 0) {
             result.put("code", 0);
             result.put("msg", "停止监听成功");

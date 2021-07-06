@@ -72,13 +72,17 @@ public class HikCameraServiceImpl implements IHikCameraService {
         //将推流状态设置为0,在推流循环里会判断状态
         this.dataCache.set(DataCachePrefixConstant.HIK_PUSH_STATUS_IP + ip, 0);
         Integer previewView = this.dataCache.getInteger(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP + ip);
-        boolean b = this.hikDevService.NET_DVR_StopRealPlay(previewView);
-        if (b) {
-            log.info("退出预览成功！");
+        if (null != previewView && previewView != -1) {
+            boolean b = this.hikDevService.NET_DVR_StopRealPlay(previewView);
+            if (b) {
+                log.info("退出预览成功！");
+            } else {
+                log.info("退出预览失败！");
+            }
+            return b;
         } else {
-            log.info("退出预览失败！");
+            return true;
         }
-        return b;
     }
 
     @Override
@@ -89,7 +93,11 @@ public class HikCameraServiceImpl implements IHikCameraService {
     }
 
     @Override
-    public void pushRtspToRtmp(String ip, String rtspUrl, String pushUrl) throws IOException {
-        new ConvertVideoPacket(this.dataCache).fromRtsp(rtspUrl).setGrabber().to(pushUrl).go(ip);
+    public void pushRtspToRtmp(String ip, String rtspUrl, String pushUrl) {
+        try {
+            new ConvertVideoPacket(this.dataCache).fromRtsp(rtspUrl).setGrabber().to(pushUrl).go(ip);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

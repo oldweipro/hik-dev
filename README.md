@@ -25,11 +25,38 @@
 |下发门禁人脸|完成✅|
 |门禁事件布防|完成✅|
 |门禁事件上传(含照片)|完成✅|
-|摄像机rtsp推流|进行中✅|
-|摄像机sdk推流|进行中❎|
+|摄像机rtsp推流|完成✅|
+|摄像机sdk推流|完成✅|
 
 ### MQTT配置
 
 默认关闭状态
 
 如果要使用mqtt，请将springboot配置文件中mqtt.enable设置为true
+
+### 文档
+
+进行中...
+
+### 打赏
+
+如果觉得本项目对你有帮助，可以请作者喝杯咖啡☕️
+
+微信👇 &emsp;&emsp;
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+支付宝👇
+
+<img src="https://images.cnblogs.com/cnblogs_com/oldweipro/1790747/o_210510113241weixin.jpg"  height="300" width="300">
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+<img src="https://images.cnblogs.com/cnblogs_com/oldweipro/1790747/o_210510113254zhifubao.jpg"  height="300" width="300">
+
+感谢你的支持！！！
