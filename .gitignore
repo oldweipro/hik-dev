@@ -31,3 +31,4 @@ build/
 .vscode/
 *.log
 pic/
+output/

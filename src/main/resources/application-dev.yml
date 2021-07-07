@@ -27,3 +27,6 @@ mqtt:
     broker: tcp://127.0.0.1:1883
     client-id: hik_mqtt_server
     username: hik_mqtt_oooldwei
+hik-dev:
+  #下载文件 输出文件夹
+  output: output
