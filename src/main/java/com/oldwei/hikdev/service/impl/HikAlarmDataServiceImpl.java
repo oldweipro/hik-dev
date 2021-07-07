@@ -43,10 +43,9 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
     }
 
     @Override
-    public JSONObject setupAlarmChan(JSONObject jsonObject) {
+    public JSONObject setupAlarmChan(String ip) {
         JSONObject result = new JSONObject();
-        result.put("event", jsonObject.getString("event"));
-        String ip = jsonObject.getString("ip");
+//        result.put("event", jsonObject.getString("event"));
         NET_DVR_LOCAL_GENERAL_CFG struGeneralCfg = new NET_DVR_LOCAL_GENERAL_CFG();
         // 控制JSON透传报警数据和图片是否分离，0-不分离，1-分离（分离后走COMM_ISAPI_ALARM回调返回）
         struGeneralCfg.byAlarmJsonPictureSeparate = 1;
@@ -97,23 +96,23 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
     }
 
     @Override
-    public JSONObject closeAlarmChan(JSONObject jsonObject) {
+    public JSONObject closeAlarmChan(String ip) {
         JSONObject result = new JSONObject();
-        String ip = jsonObject.getString("ip");
         //报警撤防
         Integer longAlarmHandle = this.dataCache.getInteger(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + ip);
         if (null != longAlarmHandle && longAlarmHandle > -1) {
             if (this.hikDevService.NET_DVR_CloseAlarmChan_V30(longAlarmHandle)) {
                 longAlarmHandle = -1;
                 this.dataCache.set(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + ip, longAlarmHandle);
-                log.info("撤防成功");
                 result.put("code", 0);
                 result.put("msg", "撤防成功");
             } else {
-                log.info("撤防成功");
                 result.put("code", -1);
                 result.put("msg", "撤防失败");
             }
+        } else {
+            result.put("code", -1);
+            result.put("msg", "未布防，无须撤防");
         }
         return result;
     }

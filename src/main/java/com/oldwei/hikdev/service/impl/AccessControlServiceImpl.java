@@ -3,6 +3,7 @@ package com.oldwei.hikdev.service.impl;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.oldwei.hikdev.entity.Device;
 import com.oldwei.hikdev.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +56,8 @@ public class AccessControlServiceImpl implements IAccessControlService {
         switch (code) {
             case "HIK_DEVICE_LOGIN":
                 //设备登录 Done.
-                boolean b = this.hikDeviceService.deviceLogin(data);
+                Device device = data.toJavaObject(Device.class);
+                boolean b = this.hikDeviceService.deviceLogin(device);
                 if (b) {
                     result.put("code", 0);
                     result.put("event", data.getString("event"));
@@ -132,7 +134,7 @@ public class AccessControlServiceImpl implements IAccessControlService {
             case "CLOUD_ORGANIZE_DEFENCE":
                 //布防
                 if (data.containsKey("ip")) {
-                    result = this.hikAlarmDataService.setupAlarmChan(data);
+                    result = this.hikAlarmDataService.setupAlarmChan(data.getString("ip"));
                 } else {
                     result.put("code", -1);
                     result.put("event", data.getString("event"));
@@ -142,7 +144,7 @@ public class AccessControlServiceImpl implements IAccessControlService {
             case "CLOUD_WITHDRAW_DEFENCE":
                 //撤防
                 if (data.containsKey("ip")) {
-                    result = this.hikAlarmDataService.closeAlarmChan(data);
+                    result = this.hikAlarmDataService.closeAlarmChan(data.getString("ip"));
                 } else {
                     result.put("code", -1);
                     result.put("event", data.getString("event"));

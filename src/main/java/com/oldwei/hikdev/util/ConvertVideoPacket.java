@@ -105,8 +105,8 @@ public class ConvertVideoPacket {
             i++;
         }
         IplImage iplImage = converter.convert(frame);
-        //保存第一帧图片
-        opencv_imgcodecs.cvSaveImage("./pic/first_frame.jpg", iplImage);
+//        //保存第一帧图片
+//        opencv_imgcodecs.cvSaveImage("./pic/first_frame.jpg", iplImage);
         if (width < 0 || height < 0) {
             width = grabber.getImageWidth();
             height = grabber.getImageHeight();

@@ -75,43 +75,6 @@ public class TestController {
     }
 
     /**
-     * 设备sdk打开预览，获取到流数据，进行推流，需要填写推送地址例如：rtmp://ip:port/live/stream
-     * 自行部署流媒体服务器
-     * TODO 有内存溢出问题，随时间无限增大，目前推荐使用rtspToRtmp进行推流
-     *
-     * @param jsonObject
-     * @return
-     */
-    @PostMapping("startPushStream")
-    public String startPushStream(@RequestBody JSONObject jsonObject) {
-        String ip = jsonObject.getString("ip");
-        String pushUrl = jsonObject.getString("pushUrl");
-        Integer userId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + ip);
-        if (null == userId || userId < 0) {
-            log.error("设备注册异常，可能是没注册，也可能是设备有问题，设备状态userId：{}", userId);
-            return "设备注册异常，可能是没注册，也可能是设备有问题，设备状态userId：" + userId;
-        }
-        Integer getPreviewSucValue = this.dataCache.getInteger(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP);
-        if (null != getPreviewSucValue && getPreviewSucValue != -1) {
-            log.error("设备已经在预览状态了，请勿重复开启，设备状态userId：{}", userId);
-            return "设备已经在预览状态了，请勿重复开启，设备状态userId：" + userId;
-        }
-        this.hikCameraService.startPushStream(userId, ip, pushUrl);
-        return "推流成功";
-    }
-
-    /**
-     * 退出推流
-     *
-     * @param jsonObject 退出推流的设备IP
-     */
-    @PostMapping("existPushStream")
-    public boolean existPushStream(@RequestBody JSONObject jsonObject) {
-        String ip = jsonObject.getString("ip");
-        return this.hikCameraService.existPushStream(ip);
-    }
-
-    /**
      * 使用sdk存储视频录像到本地，每一个小时自动创建新文件
      *
      * @param jsonObject
@@ -126,26 +89,6 @@ public class TestController {
         }
         this.hikCameraService.saveCameraData(previewSucValue);
         return "启动成功！";
-    }
-
-    /**
-     * 使用rtsp推流 海康rtsp取流地址参考：https://www.jianshu.com/p/8efcea89b11f
-     *
-     * @param jsonObject rtspUrl拉流地址：rtsp://ip:port/live/stream
-     *                   pushUrl推流地址：rtmp://ip:port/live/stream
-     * @return
-     * @throws IOException
-     */
-    @PostMapping("pushRtspToRtmp")
-    public String pushRtspToRtmp(@RequestBody JSONObject jsonObject) {
-        String ip = jsonObject.getString("ip");
-        String rtspUrl = jsonObject.getString("rtspUrl");
-        String pushUrl = jsonObject.getString("pushUrl");
-        if (StrUtil.isBlank(ip) || StrUtil.isBlank(rtspUrl) || StrUtil.isBlank(pushUrl)) {
-            return "缺少参数: ip rtspUrl 或 pushUrl";
-        }
-        this.hikCameraService.pushRtspToRtmp(ip, rtspUrl, pushUrl);
-        return "推流成功";
     }
 
     /**

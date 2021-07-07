@@ -93,6 +93,7 @@ public class HikCameraServiceImpl implements IHikCameraService {
     }
 
     @Override
+    @Async("asyncServiceExecutor")
     public void pushRtspToRtmp(String ip, String rtspUrl, String pushUrl) {
         try {
             new ConvertVideoPacket(this.dataCache).fromRtsp(rtspUrl).setGrabber().to(pushUrl).go(ip);

@@ -1,6 +1,6 @@
 package com.oldwei.hikdev.service;
 
-import com.alibaba.fastjson.JSONObject;
+import com.oldwei.hikdev.entity.Device;
 
 /**
  * @author oldwei
@@ -10,10 +10,10 @@ public interface IHikDeviceService {
     /**
      * 设备注册
      *
-     * @param jsonObject
+     * @param device
      * @return
      */
-    boolean deviceLogin(JSONObject jsonObject);
+    boolean deviceLogin(Device device);
 
     /**
      * 清除设备注册
