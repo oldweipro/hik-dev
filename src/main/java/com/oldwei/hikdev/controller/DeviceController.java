@@ -24,8 +24,8 @@ import java.io.IOException;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api")
-public class ApiController {
+@RequestMapping("api/device")
+public class DeviceController {
 
     private final IHikDeviceService hikDeviceService;
 

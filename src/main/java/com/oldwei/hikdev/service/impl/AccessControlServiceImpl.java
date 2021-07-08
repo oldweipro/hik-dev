@@ -157,41 +157,41 @@ public class AccessControlServiceImpl implements IAccessControlService {
                 break;
             case "CLOUD_USER_SELECT_USERINFO":
                 //查询用户信息
-                if (data.containsKey("pageNum") && data.containsKey("pageSize")) {
-                    result = this.hikUserService.searchUserInfo(data);
-                } else {
-                    result.put("code", -1);
-                    result.put("event", data.getString("event"));
-                    result.put("msg", "缺少相关字段: pageNum或pageSize");
-                }
+//                if (data.containsKey("pageNum") && data.containsKey("pageSize")) {
+//                    result = this.hikUserService.searchUserInfo(data);
+//                } else {
+//                    result.put("code", -1);
+//                    result.put("event", data.getString("event"));
+//                    result.put("msg", "缺少相关字段: pageNum或pageSize");
+//                }
                 break;
             case "CLOUD_USER_ADD_USERINFO":
                 //新增下发用户
-                result = this.hikUserService.addUserInfo(data);
+//                result = this.hikUserService.addUserInfo(data);
                 break;
             case "CLOUD_USER_MODIFY_USERINFO":
                 //修改下发用户
-                result = this.hikUserService.modifyUserInfo(data);
+//                result = this.hikUserService.modifyUserInfo(data);
                 break;
             case "CLOUD_USER_ADD_MULTI_USERINFO":
                 //批量下发用户
-                result = this.hikUserService.addMultiUserInfo(data);
+//                result = this.hikUserService.addMultiUserInfo(data);
                 break;
             case "CLOUD_USER_SELECT_FACE":
                 //根据工号查询人脸
-                result = this.hikUserService.searchFaceInfo(data);
+//                result = this.hikUserService.searchFaceInfo(data);
                 break;
             case "CLOUD_USER_ADD_MULTI_FACE":
                 //批量下发人脸
-                result = this.hikUserService.addMultiFace(data);
+//                result = this.hikUserService.addMultiFace(data);
                 break;
             case "CLOUD_USER_DELETE_FACE":
                 //批量删除人脸
-                result = this.hikUserService.delFaceInfo(data);
+//                result = this.hikUserService.delFaceInfo(data);
                 break;
             case "CLOUD_USER_DELETE_USERINFO":
                 //批量删除用户
-                result = this.hikUserService.delUserInfo(data);
+//                result = this.hikUserService.delUserInfo(data);
                 break;
             default:
                 result.put("code", -1);
