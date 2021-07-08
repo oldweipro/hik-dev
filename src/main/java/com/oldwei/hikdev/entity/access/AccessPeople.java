@@ -1,8 +1,6 @@
 package com.oldwei.hikdev.entity.access;
 
-import com.oldwei.hikdev.entity.access.PersonInfoExtends;
-import com.oldwei.hikdev.entity.access.RightPlan;
-import com.oldwei.hikdev.entity.access.Valid;
+import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -16,22 +14,26 @@ import java.util.List;
 public class AccessPeople implements Serializable {
     private static final long serialVersionUID = 6585020083695187516L;
     private String employeeNo;
+    @JSONField(name = "name", serialize = false)
     private String realName;
+    @JSONField(deserialize = false)
     private byte[] name;
     private String base64Pic;
-    private String doorRight;
-    private Integer roomNumber;
+    private String doorRight = "1";
+    private Integer roomNumber = 1;
     private String gender;
     private Integer numOfCard;
     private Boolean closeDelayEnabled;
-    private String password;
+    private String password = "123456";
     private String belongGroup;
-    private Integer maxOpenDoorTime;
+    private Integer maxOpenDoorTime = 0;
     private Integer openDoorTime;
-    private Integer floorNumber;
+    private Integer floorNumber = 1;
     private Boolean localUIRight;
-    private String userType;
+    private String userType = "normal";
     private Integer numOfFace;
+    private Boolean openDelayEnabled = false;
+    private Boolean checkUser = false;
     private List<RightPlan> rightPlan;
     private List<PersonInfoExtends> personInfoExtends;
     private Valid valid;
