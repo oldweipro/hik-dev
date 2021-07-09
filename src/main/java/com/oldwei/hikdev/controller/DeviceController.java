@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.oldwei.hikdev.component.AliyunComponent;
 import com.oldwei.hikdev.constant.DataCachePrefixConstant;
 import com.oldwei.hikdev.entity.Device;
+import com.oldwei.hikdev.entity.StreamAddress;
 import com.oldwei.hikdev.service.IHikAlarmDataService;
 import com.oldwei.hikdev.service.IHikCameraService;
 import com.oldwei.hikdev.service.IHikDeviceService;
@@ -15,8 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author oldwei
@@ -64,19 +63,19 @@ public class DeviceController {
      * 设备sdk打开预览，获取到流数据，进行推流，需要填写推送地址例如：rtmp://ip:port/live/stream
      * 自行部署流媒体服务器
      *
-     * @param device
-     * @return
+     * @param ip 设备IP
+     * @return 拉流地址
      */
-    @PostMapping("startPushStream")
-    public JSONObject startPushStream(@RequestBody Device device) {
+    @PostMapping("startPushStream/{ip}")
+    public JSONObject startPushStream(@PathVariable String ip) {
         JSONObject result = new JSONObject();
-        Integer userId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + device.getIp());
+        Integer userId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + ip);
         if (null == userId || userId < 0) {
             result.put("code", -1);
             result.put("msg", "设备注册异常，可能是没注册，也可能是设备有问题，设备状态userId：" + userId);
             return result;
         }
-        Integer getPreviewSucValue = this.dataCache.getInteger(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP);
+        Integer getPreviewSucValue = this.dataCache.getInteger(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP + ip);
         if (null != getPreviewSucValue && getPreviewSucValue != -1) {
             result.put("code", -1);
             result.put("msg", "设备已经在预览状态了，请勿重复开启，设备状态userId：" + userId);
@@ -84,9 +83,9 @@ public class DeviceController {
         }
         String stream = RandomUtil.randomString(32);
         String pushStreamDomain = this.aliyunComponent.getPushStreamDomain(stream);
-        List<Map<String, Object>> pullStreamDomain = this.aliyunComponent.getPullStreamDomain(stream);
-        this.hikCameraService.startPushStream(userId, device.getIp(), pushStreamDomain);
-        this.dataCache.set(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP, pullStreamDomain);
+        StreamAddress pullStreamDomain = this.aliyunComponent.getPullStreamDomain(stream);
+        this.hikCameraService.startPushStream(userId, ip, pushStreamDomain);
+        this.dataCache.set(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP + ip, pullStreamDomain);
         result.put("code", 0);
         result.put("data", pullStreamDomain);
         return result;
@@ -95,9 +94,9 @@ public class DeviceController {
     @GetMapping("streamList/{ip}")
     public JSONObject getStreamList(@PathVariable String ip) {
         JSONObject result = new JSONObject();
-        List<Map<String, Object>> mapList = (List<Map<String, Object>>) this.dataCache.get(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP + ip);
+        StreamAddress streamAddress = (StreamAddress) this.dataCache.get(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP + ip);
         result.put("code", 0);
-        result.put("data", mapList);
+        result.put("data", streamAddress);
         return result;
     }
 

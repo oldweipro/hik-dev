@@ -43,6 +43,8 @@ hik-dev:
         domain: https://your.domain
       #直播
       live:
+        #此key在:阿里云控制台->空间管理->域名管理->访问控制->鉴权URL设置->主KEY
+        auth-key: aythKey
         #推流域名
         push-stream-domain: push.example.com
         #拉流域名

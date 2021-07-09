@@ -5,6 +5,7 @@ import cn.hutool.core.util.RandomUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
+import com.oldwei.hikdev.entity.StreamAddress;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -19,10 +20,6 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,6 +45,8 @@ public class AliyunComponent {
     @Value("${hik-dev.event-push-url}")
     private String eventPushUrl;
 
+    @Value("${hik-dev.cloud.aliyun.live.auth-key}")
+    private String authKey;
     @Value("${hik-dev.cloud.aliyun.live.push-stream-domain}")
     private String pushStreamDomain;
     @Value("${hik-dev.cloud.aliyun.live.pull-stream-domain}")
@@ -117,25 +116,21 @@ public class AliyunComponent {
      * @param stream 流名
      * @return 拉流地址列表
      */
-    public List<Map<String, Object>> getPullStreamDomain(String stream) {
-        List<Map<String, Object>> mapList = new ArrayList<>();
-        Map<String, Object> map = new HashMap<>();
+    public StreamAddress getPullStreamDomain(String stream) {
+        StreamAddress streamAddress = new StreamAddress();
         //rtmp
         String rtmp = "rtmp://" + pullStreamDomain + "/live/" + stream;
         rtmp = this.authUri(rtmp);
-        map.put("rtmp", rtmp);
-        mapList.add(map);
+        streamAddress.setRtmp(rtmp);
         //flv
         String flv = "https://" + pullStreamDomain + "/live/" + stream + ".flv";
         flv = this.authUri(flv);
-        map.put("hls", flv);
-        mapList.add(map);
+        streamAddress.setFlv(flv);
         //hls
-        String hls = "https://" + pullStreamDomain + "/live/" + stream + ".flv";
+        String hls = "https://" + pullStreamDomain + "/live/" + stream + ".m3u8";
         hls = this.authUri(hls);
-        map.put("hls", hls);
-        mapList.add(map);
-        return mapList;
+        streamAddress.setHls(hls);
+        return streamAddress;
     }
 
     /**
@@ -146,8 +141,8 @@ public class AliyunComponent {
      */
     private String authUri(String uri) {
         // 过期时间: 当前时间后的时间戳，秒级
-        long exp = System.currentTimeMillis() / 1000 + validSecond;
-        String pattern = "^(rtmp://)?([^/?]+)(/[^?]*)?(\\\\?.*)?$";
+        long exp = System.currentTimeMillis() / 1000 + 3600;
+        String pattern = "^(rtmp://|https://|http://)?([^/?]+)(/[^?]*)?(\\\\?.*)?$";
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(uri);
         String scheme = "", host = "", path = "", args = "";
@@ -163,7 +158,7 @@ public class AliyunComponent {
         String rand = "0";
         // "0" by default, other value is ok
         String uid = "0";
-        String sString = String.format("%s-%s-%s-%s-%s", path, exp, rand, uid, accessKeySecret);
+        String sString = String.format("%s-%s-%s-%s-%s", path, exp, rand, uid, authKey);
         String authKey = "";
         try {
             MessageDigest md5 = MessageDigest.getInstance("MD5");
