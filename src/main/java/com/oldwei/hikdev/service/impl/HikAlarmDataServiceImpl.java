@@ -1,21 +1,18 @@
 package com.oldwei.hikdev.service.impl;
 
-import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.RandomUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.oldwei.hikdev.component.AliyunComponent;
 import com.oldwei.hikdev.constant.HikConstant;
 import com.oldwei.hikdev.constant.DataCachePrefixConstant;
 import com.oldwei.hikdev.service.FMSGCallBack_V31;
 import com.oldwei.hikdev.service.IHikAlarmDataService;
 import com.oldwei.hikdev.service.IHikDevService;
 import com.oldwei.hikdev.structure.*;
-import com.oldwei.hikdev.util.CloudUploadUtil;
 import com.oldwei.hikdev.util.DataCache;
+import com.oldwei.hikdev.component.FileStream;
 import com.sun.jna.Pointer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -35,6 +32,10 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
     private final IHikDevService hikDevService;
 
     private final DataCache dataCache;
+
+    private final FileStream fileStream;
+
+    private final AliyunComponent aliyunComponent;
 
     @Override
     public boolean invoke(int lCommand, NET_DVR_ALARMER pAlarmer, Pointer pAlarmInfo, int dwBufLen, Pointer pUser) {
@@ -303,8 +304,8 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     newRow[2] = sAlarmType.toString();
 
                     if (strVcaAlarm.dwPicDataLen > 0) {
-                        String filename = this.touchJPG();
-                        this.downloadToLocal(filename, strVcaAlarm.pImage.getByteArray(0, strVcaAlarm.dwPicDataLen));
+                        String filename = this.fileStream.touchJpg();
+                        this.fileStream.downloadToLocal(filename, strVcaAlarm.pImage.getByteArray(0, strVcaAlarm.dwPicDataLen));
                     }
                     log.info("行为分析信息上传：{}", sAlarmType.toString());
                     break;
@@ -320,8 +321,8 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     newRow[2] = sAlarmType.toString();
 
                     if (strPlateResult.dwPicLen > 0) {
-                        String filename = touchJPG();
-                        this.downloadToLocal(filename, strPlateResult.pBuffer1.getByteArray(0, strPlateResult.dwPicLen));
+                        String filename = this.fileStream.touchJpg();
+                        this.fileStream.downloadToLocal(filename, strPlateResult.pBuffer1.getByteArray(0, strPlateResult.dwPicLen));
                     }
                     log.info("交通抓拍结果上传：{}", sAlarmType.toString());
                     break;
@@ -336,8 +337,8 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     newRow[2] = sAlarmType.toString();
                     for (int i = 0; i < strItsPlateResult.dwPicNum; i++) {
                         if (strItsPlateResult.struPicInfo[i].dwDataLen > 0) {
-                            String filename = this.touchJPG();
-                            this.downloadToLocal(filename, strItsPlateResult.struPicInfo[i].pBuffer.getByteArray(0, strItsPlateResult.struPicInfo[i].dwDataLen));
+                            String filename = this.fileStream.touchJpg();
+                            this.fileStream.downloadToLocal(filename, strItsPlateResult.struPicInfo[i].pBuffer.getByteArray(0, strItsPlateResult.struPicInfo[i].dwDataLen));
                         }
                     }
                     log.info("交通抓拍的终端图片上传：{}", sAlarmType.toString());
@@ -376,8 +377,8 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     newRow[2] = sAlarmType.toString();
                     for (int i = 0; i < strItsParkVehicle.dwPicNum; i++) {
                         if (strItsParkVehicle.struPicInfo[i].dwDataLen > 0) {
-                            String filename = touchJPG();
-                            this.downloadToLocal(filename, strItsParkVehicle.struPicInfo[i].pBuffer.getByteArray(0, strItsParkVehicle.struPicInfo[i].dwDataLen));
+                            String filename = this.fileStream.touchJpg();
+                            this.fileStream.downloadToLocal(filename, strItsParkVehicle.struPicInfo[i].pBuffer.getByteArray(0, strItsParkVehicle.struPicInfo[i].dwDataLen));
                         }
                     }
                     log.info("停车场数据：{}", sAlarmType.toString());
@@ -431,11 +432,11 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     newRow[2] = sAlarmType.toString();
                     if (strFaceSnapInfo.dwFacePicLen > 0) {
                         //人脸图片写文件 小图 人脸图
-                        this.downloadToLocal(this.touchJPG(), strFaceSnapInfo.pBuffer1.getByteArray(0, strFaceSnapInfo.dwFacePicLen));
+                        this.fileStream.downloadToLocal(this.fileStream.touchJpg(), strFaceSnapInfo.pBuffer1.getByteArray(0, strFaceSnapInfo.dwFacePicLen));
                     }
                     if (strFaceSnapInfo.dwBackgroundPicLen > 0) {
                         //人脸图片写文件 大图 背景图
-                        this.downloadToLocal(this.touchJPG(), strFaceSnapInfo.pBuffer2.getByteArray(0, strFaceSnapInfo.dwBackgroundPicLen));
+                        this.fileStream.downloadToLocal(this.fileStream.touchJpg(), strFaceSnapInfo.pBuffer2.getByteArray(0, strFaceSnapInfo.dwBackgroundPicLen));
                     }
                     log.info("人脸识别结果：{}", sAlarmType.toString());
                     break;
@@ -448,17 +449,17 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     strFaceSnapMatch.read();
 
                     if ((strFaceSnapMatch.dwSnapPicLen > 0) && (strFaceSnapMatch.byPicTransType == 0)) {
-                        String filename = this.touchJPG();
-                        this.downloadToLocal(filename, strFaceSnapMatch.pSnapPicBuffer.getByteArray(0, strFaceSnapMatch.dwSnapPicLen));
+                        String filename = this.fileStream.touchJpg();
+                        this.fileStream.downloadToLocal(filename, strFaceSnapMatch.pSnapPicBuffer.getByteArray(0, strFaceSnapMatch.dwSnapPicLen));
                     }
                     if ((strFaceSnapMatch.struSnapInfo.dwSnapFacePicLen > 0) && (strFaceSnapMatch.byPicTransType == 0)) {
-                        String filename = this.touchJPG();
+                        String filename = this.fileStream.touchJpg();
                         //将字节写入文件
-                        this.downloadToLocal(filename, strFaceSnapMatch.struSnapInfo.pBuffer1.getByteArray(0, strFaceSnapMatch.struSnapInfo.dwSnapFacePicLen));
+                        this.fileStream.downloadToLocal(filename, strFaceSnapMatch.struSnapInfo.pBuffer1.getByteArray(0, strFaceSnapMatch.struSnapInfo.dwSnapFacePicLen));
                     }
                     if ((strFaceSnapMatch.struBlockListInfo.dwBlockListPicLen > 0) && (strFaceSnapMatch.byPicTransType == 0)) {
-                        String filename = this.touchJPG();
-                        this.downloadToLocal(filename, strFaceSnapMatch.struBlockListInfo.pBuffer1.getByteArray(0, strFaceSnapMatch.struBlockListInfo.dwBlockListPicLen));
+                        String filename = this.fileStream.touchJpg();
+                        this.fileStream.downloadToLocal(filename, strFaceSnapMatch.struBlockListInfo.pBuffer1.getByteArray(0, strFaceSnapMatch.struBlockListInfo.dwBlockListPicLen));
                     }
 
                     sAlarmType.append("：人脸名单比对报警，相识度：").append(strFaceSnapMatch.fSimilarity).append("，名单姓名：").append(new String(strFaceSnapMatch.struBlockListInfo.struBlockListInfo.struAttribute.byName, "GBK").trim()).append("，\n名单证件信息：").append(new String(strFaceSnapMatch.struBlockListInfo.struBlockListInfo.struAttribute.byCertificateNumber).trim());
@@ -493,8 +494,8 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     pACSInfo.write(0, pAlarmInfo.getByteArray(0, strACSInfo.size()), 0, strACSInfo.size());
                     strACSInfo.read();
                     if (strACSInfo.dwPicDataLen > 0) {
-                        String pathname = this.touchJPG();
-                        this.downloadToLocal(pathname, strACSInfo.pPicData.getByteArray(0, strACSInfo.dwPicDataLen));
+                        String pathname = this.fileStream.touchJpg();
+                        this.fileStream.downloadToLocal(pathname, strACSInfo.pPicData.getByteArray(0, strACSInfo.dwPicDataLen));
                         String eventTime = strACSInfo.struTime.toStringTimeDateFormat();
                         log.info("事件:{} 发生时间：{}", pathname, eventTime);
 //                        this.upload(pathname, strACSInfo, pAlarmer);
@@ -512,14 +513,14 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     newRow[2] = sAlarmType.toString();
                     //身份证图片
                     if (strIDCardInfo.dwPicDataLen > 0) {
-                        String filename = this.touchJPG();
-                        this.downloadToLocal(filename, strIDCardInfo.pPicData.getByteArray(0, strIDCardInfo.dwPicDataLen));
+                        String filename = this.fileStream.touchJpg();
+                        this.fileStream.downloadToLocal(filename, strIDCardInfo.pPicData.getByteArray(0, strIDCardInfo.dwPicDataLen));
                     }
 
                     //抓拍图片
                     if (strIDCardInfo.dwCapturePicDataLen > 0) {
-                        String filename = this.touchJPG();
-                        this.downloadToLocal(filename, strIDCardInfo.pCapturePicData.getByteArray(0, strIDCardInfo.dwCapturePicDataLen));
+                        String filename = this.fileStream.touchJpg();
+                        this.fileStream.downloadToLocal(filename, strIDCardInfo.pCapturePicData.getByteArray(0, strIDCardInfo.dwCapturePicDataLen));
                     }
                     log.info("门禁身份证刷卡信息：{}", sAlarmType.toString());
                     break;
@@ -535,12 +536,12 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     //报警类型
                     newRow[2] = sAlarmType.toString();
                     if (struAIOPVideo.dwAIOPDataSize > 0) {
-                        String filename = this.touchJSON();
-                        this.downloadToLocal(filename, struAIOPVideo.pBufferAIOPData.getByteArray(0, struAIOPVideo.dwAIOPDataSize));
+                        String filename = this.fileStream.touchJson();
+                        this.fileStream.downloadToLocal(filename, struAIOPVideo.pBufferAIOPData.getByteArray(0, struAIOPVideo.dwAIOPDataSize));
                     }
                     if (struAIOPVideo.dwPictureSize > 0) {
-                        String filename = this.touchJPG();
-                        this.downloadToLocal(filename, struAIOPVideo.pBufferPicture.getByteArray(0, struAIOPVideo.dwPictureSize));
+                        String filename = this.fileStream.touchJpg();
+                        this.fileStream.downloadToLocal(filename, struAIOPVideo.pBufferPicture.getByteArray(0, struAIOPVideo.dwPictureSize));
                     }
                     log.info("设备支持AI开放平台接入，上传视频检测数据：{}", sAlarmType.toString());
                     break;
@@ -557,8 +558,8 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     //报警类型
                     newRow[2] = sAlarmType.toString();
                     if (struAIOPPic.dwAIOPDataSize > 0) {
-                        String filename = this.touchJSON();
-                        this.downloadToLocal(filename, struAIOPPic.pBufferAIOPData.getByteArray(0, struAIOPPic.dwAIOPDataSize));
+                        String filename = this.fileStream.touchJson();
+                        this.fileStream.downloadToLocal(filename, struAIOPPic.pBufferAIOPData.getByteArray(0, struAIOPPic.dwAIOPDataSize));
                     }
                     log.info("设备支持AI开放平台接入，上传图片检测数据：{}", sAlarmType.toString());
                     break;
@@ -573,8 +574,8 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     //报警类型
                     newRow[2] = sAlarmType.toString();
                     if (struEventISAPI.dwAlarmDataLen > 0) {
-                        String filename = this.touchJSON();
-                        this.downloadToLocal(filename, struEventISAPI.pAlarmData.getByteArray(0, struEventISAPI.dwAlarmDataLen));
+                        String filename = this.fileStream.touchJson();
+                        this.fileStream.downloadToLocal(filename, struEventISAPI.pAlarmData.getByteArray(0, struEventISAPI.dwAlarmDataLen));
                     }
 
                     for (int i = 0; i < struEventISAPI.byPicturesNumber; i++) {
@@ -585,8 +586,8 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                         struPicData.read();
 
                         if (struPicData.dwPicLen > 0) {
-                            String filename = this.touchJPG();
-                            this.downloadToLocal(filename, struPicData.pPicData.getByteArray(0, struPicData.dwPicLen));
+                            String filename = this.fileStream.touchJpg();
+                            this.fileStream.downloadToLocal(filename, struPicData.pPicData.getByteArray(0, struPicData.dwPicLen));
                         }
                     }
                     log.info("ISAPI协议报警信息：{}", sAlarmType.toString());
@@ -602,36 +603,9 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
         }
     }
 
-    private String touchJPG() {
-        return this.touchFile(".jpg");
-    }
-
-    private String touchJSON() {
-        return this.touchFile(".json");
-    }
-
-    @Value("${hik-dev.output}")
-    private String output;
-
-    private String touchFile(String suffix) {
-        String filename = RandomUtil.randomString(32) + suffix;
-        String path = System.getProperty("user.dir") + "/" + output + "/" + DateUtil.thisYear() + "/" + DateUtil.thisMonth() + "/" + DateUtil.thisDayOfMonth() + "/" + filename;
-        FileUtil.touch(path);
-        return path;
-    }
-
-    private void downloadToLocal(String pathname, byte[] bytes) {
-        try {
-            FileOutputStream fos = new FileOutputStream(pathname);
-            fos.write(bytes);
-            fos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     private void upload(String pathname, NET_DVR_ACS_ALARM_INFO strACSInfo, NET_DVR_ALARMER pAlarmer) {
-        String uploadFile = CloudUploadUtil.uploadFile(new File(pathname));
+        String uploadFile = this.aliyunComponent.uploadFile(new File(pathname));
         JSONObject data = new JSONObject();
         String cardNo = new String(strACSInfo.struAcsEventInfo.byCardNo).trim();
         int employeeNo = strACSInfo.struAcsEventInfo.dwEmployeeNo;
@@ -647,7 +621,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
         data.put("minorAlarmType", strACSInfo.dwMinor);
         data.put("cardType", strACSInfo.struAcsEventInfo.byCardType);
         data.put("uploadFile", uploadFile);
-        CloudUploadUtil.sendDataToCloudApi(data);
+        this.aliyunComponent.sendDataToCloudApi(data);
         log.info("门禁主机报警信息=====>{}", data);
     }
 }

@@ -73,6 +73,16 @@ public interface IHikUserService {
     JSONObject searchFaceInfo(String ip, AccessPeople people);
 
     /**
+     * 查询人脸信息
+     *
+     * @param ip 设备ID
+     * @param people employeeId
+     * @return JSONObject
+     */
+    JSONObject addPeopleFace(String ip, AccessPeople people);
+
+
+    /**
      * 批量添加人脸
      *
      * @param ip         jsonObject

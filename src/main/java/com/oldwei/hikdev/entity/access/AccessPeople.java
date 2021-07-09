@@ -17,7 +17,7 @@ public class AccessPeople implements Serializable {
     @JSONField(name = "name", serialize = false)
     private String realName;
     @JSONField(deserialize = false)
-    private byte[] name;
+    private String name;
     private String base64Pic;
     private String doorRight = "1";
     private Integer roomNumber = 1;
@@ -29,7 +29,8 @@ public class AccessPeople implements Serializable {
     private Integer maxOpenDoorTime = 0;
     private Integer openDoorTime;
     private Integer floorNumber = 1;
-    private Boolean localUIRight;
+    @JSONField(name = "localUIRight")
+    private Boolean localUiRight;
     private String userType = "normal";
     private Integer numOfFace;
     private Boolean openDelayEnabled = false;

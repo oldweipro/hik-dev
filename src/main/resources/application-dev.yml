@@ -29,4 +29,25 @@ mqtt:
     username: hik_mqtt_oooldwei
 hik-dev:
   #下载文件 输出文件夹
-  output: output
+  output-dir: output
+  #设备报警事件信息推送地址
+  event-push-url: https://推送地址
+  cloud:
+    aliyun:
+      ram:
+        access-key-id: accessKeyId
+        access-key-secret: accessKeySecret
+      oss:
+        bucket-name: your bucket name
+        endpoint: https://your.endpoint
+        domain: https://your.domain
+      #直播
+      live:
+        #推流域名
+        push-stream-domain: push.example.com
+        #拉流域名
+        pull-stream-domain: pull.example.com
+        #rui鉴权有效时间,秒级：60、3600、43200、86400
+        valid-second: 86400
+
+

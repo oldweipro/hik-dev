@@ -1,7 +1,9 @@
 package com.oldwei.hikdev.controller;
 
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.oldwei.hikdev.component.AliyunComponent;
 import com.oldwei.hikdev.constant.DataCachePrefixConstant;
 import com.oldwei.hikdev.entity.Device;
 import com.oldwei.hikdev.service.IHikAlarmDataService;
@@ -10,12 +12,11 @@ import com.oldwei.hikdev.service.IHikDeviceService;
 import com.oldwei.hikdev.util.DataCache;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author oldwei
@@ -35,11 +36,13 @@ public class DeviceController {
 
     private final IHikAlarmDataService hikAlarmDataService;
 
+    private final AliyunComponent aliyunComponent;
+
     /**
      * 设备注册登录
      *
      * @param device 设备基本信息IP、username、password、port
-     * @return
+     * @return 登录结果 true/false
      */
     @PostMapping("deviceLogin")
     public boolean deviceLogin(@RequestBody Device device) {
@@ -50,7 +53,7 @@ public class DeviceController {
      * 设备注销退出
      *
      * @param device 设备IP
-     * @return
+     * @return 注销结果 true/false
      */
     @PostMapping("deviceClean")
     public boolean deviceClean(@RequestBody Device device) {
@@ -61,23 +64,41 @@ public class DeviceController {
      * 设备sdk打开预览，获取到流数据，进行推流，需要填写推送地址例如：rtmp://ip:port/live/stream
      * 自行部署流媒体服务器
      *
-     * @param jsonObject
+     * @param device
      * @return
      */
     @PostMapping("startPushStream")
-    public String startPushStream(@RequestBody JSONObject jsonObject) {
-        String ip = jsonObject.getString("ip");
-        String pushUrl = jsonObject.getString("pushUrl");
-        Integer userId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + ip);
+    public JSONObject startPushStream(@RequestBody Device device) {
+        JSONObject result = new JSONObject();
+        Integer userId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + device.getIp());
         if (null == userId || userId < 0) {
-            return "设备注册异常，可能是没注册，也可能是设备有问题，设备状态userId：" + userId;
+            result.put("code", -1);
+            result.put("msg", "设备注册异常，可能是没注册，也可能是设备有问题，设备状态userId：" + userId);
+            return result;
         }
         Integer getPreviewSucValue = this.dataCache.getInteger(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP);
         if (null != getPreviewSucValue && getPreviewSucValue != -1) {
-            return "设备已经在预览状态了，请勿重复开启，设备状态userId：" + userId;
+            result.put("code", -1);
+            result.put("msg", "设备已经在预览状态了，请勿重复开启，设备状态userId：" + userId);
+            return result;
         }
-        this.hikCameraService.startPushStream(userId, ip, pushUrl);
-        return "推流成功";
+        String stream = RandomUtil.randomString(32);
+        String pushStreamDomain = this.aliyunComponent.getPushStreamDomain(stream);
+        List<Map<String, Object>> pullStreamDomain = this.aliyunComponent.getPullStreamDomain(stream);
+        this.hikCameraService.startPushStream(userId, device.getIp(), pushStreamDomain);
+        this.dataCache.set(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP, pullStreamDomain);
+        result.put("code", 0);
+        result.put("data", pullStreamDomain);
+        return result;
+    }
+
+    @GetMapping("streamList/{ip}")
+    public JSONObject getStreamList(@PathVariable String ip) {
+        JSONObject result = new JSONObject();
+        List<Map<String, Object>> mapList = (List<Map<String, Object>>) this.dataCache.get(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP + ip);
+        result.put("code", 0);
+        result.put("data", mapList);
+        return result;
     }
 
     /**

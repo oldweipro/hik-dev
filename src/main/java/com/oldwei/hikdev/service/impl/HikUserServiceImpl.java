@@ -19,6 +19,7 @@ import com.oldwei.hikdev.structure.NET_DVR_JSON_DATA_CFG;
 import com.oldwei.hikdev.structure.NET_DVR_XML_CONFIG_INPUT;
 import com.oldwei.hikdev.structure.NET_DVR_XML_CONFIG_OUTPUT;
 import com.oldwei.hikdev.util.DataCache;
+import com.oldwei.hikdev.component.FileStream;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,6 +42,7 @@ import java.util.Map;
 public class HikUserServiceImpl implements IHikUserService {
     private final IHikDevService hikDevService;
     private final DataCache dataCache;
+    private final FileStream fileStream;
 
     @Override
     public JSONObject getAbility(JSONObject jsonObject) {
@@ -63,17 +64,12 @@ public class HikUserServiceImpl implements IHikUserService {
         if (employeeNos.length > 0) {
             jsonSearchCond.put("EmployeeNoList", 封装用户ID(employeeNos));
         }
-        //必填，string，搜索记录唯一标识，用来确认上层客户端是否为同一个（倘若是同一个,设备记录内存,下次搜索加快速度）
-        //暂时写死吧，反正同一个查询还快
+        //必填，string，搜索记录唯一标识，用来确认上层客户端是否为同一个（倘若是同一个,设备记录内存,下次搜索加快速度）暂时写死吧，反正同一个查询还快
         jsonSearchCond.put("searchID", "123e4567-e89b-12d3-a456-426655440000");
-        //必填，integer，查询结果在结果列表中的起始位置。
-        //当记录条数很多时，一次查询不能获取所有的记录，下一次查询时指定位置可以查询后面的
-        //记录（若设备支持的最大 totalMatches 为 M 个，但是当前设备已存储的 totalMatches 为 N 个
-        //（N<=M），则该字段的合法范围为 0~N-1）
-        //分页当前第几页
+        // 必填，integer，查询结果在结果列表中的起始位置。当记录条数很多时，一次查询不能获取所有的记录，下一次查询时指定位置可以查询后面的记录
+        // （若设备支持的最大 totalMatches 为 M 个，但是当前设备已存储的 totalMatches 为 N 个（N<=M），则该字段的合法范围为 0~N-1）
         jsonSearchCond.put("searchResultPosition", 10 * (queryRequest.getPageNum() - 1));
         //必填，integer，本次协议调用可获取的最大记录数（如maxResults 值大于设备能力集返回的范围，则设备按照能力集最大值返回，设备不进行报错）
-        //分页大小
         jsonSearchCond.put("maxResults", queryRequest.getPageSize());
         jsonObject.put("UserInfoSearchCond", jsonSearchCond);
 
@@ -122,7 +118,8 @@ public class HikUserServiceImpl implements IHikUserService {
 
     private JSONObject aboutUserInfo(String ip, AccessPeople people, String urlInBuffer) {
         //name需要转为字节数组 将中文字符编码之后用数组拷贝的方式，避免因为编码导致的长度问题
-        people.setName(people.getRealName().getBytes(StandardCharsets.UTF_8));
+//        people.setName(people.getRealName().getBytes(StandardCharsets.UTF_8));
+        people.setName(people.getRealName());
         people.setValid(new Valid());
         List<RightPlan> rightPlanList = new ArrayList<>();
         rightPlanList.add(new RightPlan());
@@ -199,25 +196,9 @@ public class HikUserServiceImpl implements IHikUserService {
                 //确认有人脸
                 // TODO 还没有返回信息
                 if (numOfMatches != 0) {
-                    JSONArray MatchList = jsonResult.getJSONArray("MatchList");
-                    JSONObject MatchList_1 = MatchList.getJSONObject(0);
-                    //获取json中人脸关联的工号
-                    String FPID = MatchList_1.getString("FPID");
-
-                    FileOutputStream fout;
-                    try {
-                        fout = new FileOutputStream(".\\pic\\FPID_[" + FPID + "]_FacePic.jpg");
-                        //将字节写入文件
-                        long offset = 0;
-                        ByteBuffer buffers = strJsonData.lpPicData.getByteBuffer(offset, strJsonData.dwPicDataSize);
-                        byte[] bytes = new byte[strJsonData.dwPicDataSize];
-                        buffers.rewind();
-                        buffers.get(bytes);
-                        fout.write(bytes);
-                        fout.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    String filename = this.fileStream.touchJpg();
+                    log.info(filename);
+                    this.fileStream.downloadToLocal(filename, strJsonData.lpPicData.getByteArray(0, strJsonData.dwPicDataSize));
                 }
             } else if (dwState == HikConstant.NET_SDK_CONFIG_STATUS_FINISH) {
                 log.info("获取人脸完成");
@@ -234,11 +215,21 @@ public class HikUserServiceImpl implements IHikUserService {
         return result;
     }
 
-    private JSONObject addFace(String ip, AccessPeople people) {
+    @Override
+    public JSONObject addPeopleFace(String ip, AccessPeople people) {
         String urlInBuffer = "POST /ISAPI/Intelligent/FDLib/FaceDataRecord?format=json";
+        Integer lHandler = this.startRemoteConfig(ip, urlInBuffer, 2551);
+        JSONObject result = new JSONObject();
+        if (lHandler < 0) {
+            result.put("code", -1);
+            result.put("msg", "NET_DVR_StartRemoteConfig 接口调用失败，错误码：" + this.hikDevService.NET_DVR_GetLastError());
+            return result;
+        }
         NET_DVR_JSON_DATA_CFG strAddFaceDataCfg = new NET_DVR_JSON_DATA_CFG();
         strAddFaceDataCfg.read();
         strAddFaceDataCfg.dwSize = strAddFaceDataCfg.size();
+        //字符串拷贝到数组中
+        BYTE_ARRAY ptrByteArray = new BYTE_ARRAY(1024);
 
         String employeeNo = people.getEmployeeNo();
         JSONObject jsonObject = new JSONObject();
@@ -248,8 +239,6 @@ public class HikUserServiceImpl implements IHikUserService {
         jsonObject.put("FPID", employeeNo);
         String strJsonData = jsonObject.toString();
         System.out.println("下发人脸的json报文:" + strJsonData);
-        //字符串拷贝到数组中
-        BYTE_ARRAY ptrByteArray = new BYTE_ARRAY(1024);
         System.arraycopy(strJsonData.getBytes(), 0, ptrByteArray.byValue, 0, strJsonData.length());
         ptrByteArray.write();
         strAddFaceDataCfg.lpJsonData = ptrByteArray.getPointer();
@@ -266,11 +255,7 @@ public class HikUserServiceImpl implements IHikUserService {
         int picdataLength = picfile.available();
         if (picdataLength < 0) {
             System.out.println("input file dataSize < 0");
-//            result.put("code", -1);
-//            result.put("msg", "input file dataSize < 0");
-//            return result;
         }
-
         BYTE_ARRAY ptrpicByte = new BYTE_ARRAY(picdataLength);
         try {
             picfile.read(ptrpicByte.byValue);
@@ -278,119 +263,42 @@ public class HikUserServiceImpl implements IHikUserService {
         } catch (IOException e2) {
             e2.printStackTrace();
         }
+        ptrpicByte.write();
         strAddFaceDataCfg.dwPicDataSize = picdataLength;
         strAddFaceDataCfg.lpPicData = ptrpicByte.getPointer();
         strAddFaceDataCfg.write();
 
-        return this.userInfo(ip, urlInBuffer, strAddFaceDataCfg.getPointer(), strAddFaceDataCfg.dwSize, 2551, 1024);
+        BYTE_ARRAY ptrOutBuff = new BYTE_ARRAY(1024);
+        IntByReference pInt = new IntByReference(0);
+        int dwState = this.hikDevService.NET_DVR_SendWithRecvRemoteConfig(lHandler,
+                strAddFaceDataCfg.getPointer(), strAddFaceDataCfg.dwSize,
+                ptrOutBuff.getPointer(), ptrOutBuff.size(), pInt);
+        //读取返回的json并解析
+        ptrOutBuff.read();
+        String strResult = new String(ptrOutBuff.byValue).trim();
+        JSONObject jsonResult = JSONObject.parseObject(strResult);
+        result.put("data", jsonResult);
+        if (dwState == HikConstant.NET_SDK_CONFIG_STATUS_SUCCESS) {
+            //返回NET_SDK_CONFIG_STATUS_SUCCESS代表流程走通了，但并不代表下发成功，比如有些设备可能因为人员已存在等原因下发失败，所以需要解析Json报文
+            result.put("code", 0);
+            result.put("msg", "如果statusCode=1无异常情况,否则就是有异常情况");
+        } else {
+            result.put("code", -1);
+            result.put("msg", "NET_DVR_SendWithRecvRemoteConfig接口调用失败，错误码：" + this.hikDevService.NET_DVR_GetLastError());
+        }
+        // TODO 下发人员时：dwState其实不会走到这里，因为设备不知道我们会下发多少个人，所以长连接需要我们主动关闭
+        if (!this.hikDevService.NET_DVR_StopRemoteConfig(lHandler)) {
+            result.put("code", -1);
+            result.put("msg", "NET_DVR_StopRemoteConfig接口调用失败，错误码：" + this.hikDevService.NET_DVR_GetLastError());
+        }
+        return result;
     }
 
     @Override
     public JSONObject addMultiFace(String ip, List<AccessPeople> peopleList) {
-        String urlInBuffer = "POST /ISAPI/Intelligent/FDLib/FaceDataRecord?format=json";
-        //批量下发多个人脸（不同工号）
-        NET_DVR_JSON_DATA_CFG[] struAddFaceDataCfg = (NET_DVR_JSON_DATA_CFG[]) new NET_DVR_JSON_DATA_CFG().toArray(peopleList.size());
-
-//        userInfo(ip, urlInBuffer, "", 2551);
         JSONObject result = new JSONObject();
-        JSONArray jsonArray = new JSONArray();
-        Integer lHandler = this.startRemoteConfig(ip, urlInBuffer, 2551);
-        if (lHandler < 0) {
-            result.put("code", -1);
-            result.put("msg", "NET_DVR_StartRemoteConfig 失败,错误码为：" + this.hikDevService.NET_DVR_GetLastError());
-            return result;
-        } else {
-            log.info("addMultiFace NET_DVR_StartRemoteConfig 成功!");
-            for (AccessPeople people : peopleList) {
-                int index = peopleList.indexOf(people);
-                String employeeNo = people.getEmployeeNo();
-                //下发的人脸图片
-                String base64Pic = people.getBase64Pic();
-                JSONObject singleJson = new JSONObject();
-                struAddFaceDataCfg[index].read();
-
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("faceLibType", "blackFD");
-                jsonObject.put("FDID", "1");
-                //人脸下发关联的工号
-                jsonObject.put("FPID", employeeNo);
-
-                String strJsonData = jsonObject.toString();
-                System.out.println("下发人脸的json报文:" + strJsonData);
-
-                //字符串拷贝到数组中
-                BYTE_ARRAY ptrByteArray = new BYTE_ARRAY(1024);
-                System.arraycopy(strJsonData.getBytes(), 0, ptrByteArray.byValue, 0, strJsonData.length());
-                ptrByteArray.write();
-
-                struAddFaceDataCfg[index].dwSize = struAddFaceDataCfg[index].size();
-                struAddFaceDataCfg[index].lpJsonData = ptrByteArray.getPointer();
-                struAddFaceDataCfg[index].dwJsonDataSize = strJsonData.length();
-
-                /*****************************************
-                 * 从本地文件里面读取JPEG图片二进制数据
-                 *****************************************/
-
-                byte[] decode = Base64.decode(base64Pic);
-                //转化为输入流
-                ByteArrayInputStream picfile = new ByteArrayInputStream(decode);
-                int picdataLength = picfile.available();
-                if (picdataLength < 0) {
-                    System.out.println("input file dataSize < 0");
-                    result.put("code", -1);
-                    result.put("msg", "input file dataSize < 0");
-                    return result;
-                }
-
-                BYTE_ARRAY ptrpicByte = new BYTE_ARRAY(picdataLength);
-                try {
-                    picfile.read(ptrpicByte.byValue);
-                    picfile.close();
-                } catch (IOException e2) {
-                    e2.printStackTrace();
-                }
-                ptrpicByte.write();
-                struAddFaceDataCfg[index].dwPicDataSize = picdataLength;
-                struAddFaceDataCfg[index].lpPicData = ptrpicByte.getPointer();
-                struAddFaceDataCfg[index].write();
-
-                BYTE_ARRAY ptrOutuff = new BYTE_ARRAY(1024);
-                IntByReference pInt = new IntByReference(0);
-
-                int dwState = this.hikDevService.NET_DVR_SendWithRecvRemoteConfig(lHandler, struAddFaceDataCfg[index].getPointer(), struAddFaceDataCfg[index].dwSize, ptrOutuff.getPointer(), ptrOutuff.size(), pInt);
-                //读取返回的json并解析
-                ptrOutuff.read();
-                String strResult = new String(ptrOutuff.byValue).trim();
-                log.info("dwState:" + dwState + ",strResult:" + strResult);
-
-                if (strResult.isEmpty()) {
-                    result.put("code", -1);
-                    result.put("msg", "strResultIsEmpty");
-                    return result;
-                }
-                JSONObject jsonResult = JSONObject.parseObject(strResult);
-                result.put("data", jsonResult);
-                if (dwState == HikConstant.NET_SDK_CONFIG_STATUS_SUCCESS) {
-                    //返回NET_SDK_CONFIG_STATUS_SUCCESS代表流程走通了，但并不代表下发成功，比如有些设备可能因为人员已存在等原因下发失败，所以需要解析Json报文
-                    result.put("code", 0);
-                    result.put("msg", "如果statusCode=1无异常情况,否则就是有异常情况");
-                } else {
-                    result.put("code", -1);
-                    result.put("msg", "NET_DVR_SendWithRecvRemoteConfig接口调用失败，错误码：" + this.hikDevService.NET_DVR_GetLastError());
-                }
-            }
-
-            if (!this.hikDevService.NET_DVR_StopRemoteConfig(lHandler)) {
-                result.put("code", -1);
-                result.put("msg", "NET_DVR_StopRemoteConfig接口调用失败，错误码：" + this.hikDevService.NET_DVR_GetLastError());
-            } else {
-                log.info("NET_DVR_StopRemoteConfig接口成功");
-            }
-        }
-        if (!result.containsKey("code")) {
-            result.put("code", 1);
-            result.put("msg", "下发完成");
-            result.put("data", jsonArray);
+        for (AccessPeople people : peopleList) {
+            result = addPeopleFace(ip, people);
         }
         return result;
     }

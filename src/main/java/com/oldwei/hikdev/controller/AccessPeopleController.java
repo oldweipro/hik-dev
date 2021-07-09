@@ -45,7 +45,6 @@ public class AccessPeopleController {
 
     /**
      * 根据工号查询人脸
-     * TODO 根据工号查询人脸
      *
      * @param ip     设备IP
      * @param people employeeNo
@@ -82,7 +81,6 @@ public class AccessPeopleController {
 
     /**
      * 批量下发用户
-     * TODO 批量下发用户
      *
      * @param ip         设备IP
      * @param peopleList 用户列表
@@ -94,8 +92,19 @@ public class AccessPeopleController {
     }
 
     /**
+     * 下发用户人脸
+     *
+     * @param ip     设备IP
+     * @param people 用户列表
+     * @return
+     */
+    @PostMapping("addPeopleFace/{ip}")
+    public JSONObject addPeopleFace(@PathVariable String ip, @RequestBody AccessPeople people) {
+        return this.hikUserService.addPeopleFace(ip, people);
+    }
+
+    /**
      * 批量下发用户人脸
-     * TODO 批量下发用户人脸
      *
      * @param ip         设备IP
      * @param peopleList 用户列表
@@ -108,7 +117,6 @@ public class AccessPeopleController {
 
     /**
      * 根据工号批量删除人脸
-     * TODO 根据工号批量删除人脸
      *
      * @param ip          设备IP
      * @param employeeIds 用户ID列表 employeeIds
@@ -122,7 +130,6 @@ public class AccessPeopleController {
 
     /**
      * 根据工号批量删除用户
-     * TODO 根据工号批量删除用户
      *
      * @param ip          设备IP
      * @param employeeIds 用户ID列表

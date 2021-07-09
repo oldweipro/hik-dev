@@ -1,0 +1,69 @@
+package com.oldwei.hikdev.component;
+
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.RandomUtil;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+/**
+ * 文件流工具类
+ *
+ * @author oldwei
+ * @date 2021-7-9 10:09
+ */
+@Component
+public class FileStream {
+    @Value("${hik-dev.output-dir}")
+    private String outputDir;
+
+    /**
+     * 创建jpg文件
+     *
+     * @return 文件绝对路径
+     */
+    public String touchJpg() {
+        return this.touchFile(".jpg");
+    }
+
+    /**
+     * 创建json文件
+     *
+     * @return 文件绝对路径
+     */
+    public String touchJson() {
+        return this.touchFile(".json");
+    }
+
+    /**
+     * 创建文件
+     *
+     * @param suffix 后缀名
+     * @return 文件绝对路径
+     */
+    public String touchFile(String suffix) {
+        String filename = RandomUtil.randomString(32) + suffix;
+        String path = System.getProperty("user.dir") + "/" + outputDir + "/" + DateUtil.thisYear() + "/" + DateUtil.thisMonth() + "/" + DateUtil.thisDayOfMonth() + "/" + filename;
+        FileUtil.touch(path);
+        return path;
+    }
+
+    /**
+     * 下载字节流文件到本地
+     *
+     * @param pathname 下载地址
+     * @param bytes 字节流
+     */
+    public void downloadToLocal(String pathname, byte[] bytes) {
+        try {
+            FileOutputStream fos = new FileOutputStream(pathname);
+            fos.write(bytes);
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
