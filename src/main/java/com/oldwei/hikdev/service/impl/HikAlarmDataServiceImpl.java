@@ -21,6 +21,8 @@ import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author oldwei
@@ -256,11 +258,24 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             break;
                         case 3:
                             sAlarmType.append("：移动侦测，报警通道：");
+                            StringBuilder alarmMsg = new StringBuilder();
+                            alarmMsg.append("设备:").append(deviceIp).append("，发生移动侦测，报警通道：");
                             for (int i = 0; i < 64; i++) {
                                 if (strAlarmInfoV30.byChannel[i] == 1) {
-                                    sAlarmType.append("ch").append(i + 1).append(" ");
+                                    sAlarmType.append("ch").append(i + 1);
+                                    alarmMsg.append("ch").append(i + 1);
                                 }
                             }
+                            //==================写自己的业务代码===========================
+                            JSONObject result = new JSONObject();
+                            Map<String, Object> map = new HashMap<>();
+                            map.put("deviceIp", deviceIp);
+                            map.put("msg", alarmMsg);
+                            map.put("alarmMsg", "移动侦测");
+                            result.put("code", 3);
+                            result.put("data", map);
+                            this.mqttConnectClient.publish(result.toJSONString());
+                            //==================写自己的业务代码===========================
                             break;
                         case 4:
                             sAlarmType.append("：硬盘未格式化");
@@ -280,7 +295,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     }
                     //报警类型
                     newRow[2] = sAlarmType.toString();
-                    log.info("报警信息主动上传V30：{}", sAlarmType.toString());
+                    log.info("报警信息主动上传V30：{}", sAlarmType);
                     break;
                 case HikConstant.COMM_ALARM_RULE:
                     NET_VCA_RULE_ALARM strVcaAlarm = new NET_VCA_RULE_ALARM();
@@ -501,13 +516,15 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                         this.fileStream.downloadToLocal(pathname, strACSInfo.pPicData.getByteArray(0, strACSInfo.dwPicDataLen));
                         String eventTime = strACSInfo.struTime.toStringTimeDateFormat();
                         log.info("事件:{} 发生时间：{}", pathname, eventTime);
+                        //==================写自己的推送业务===========================
                         String upload = this.upload(pathname);
                         JSONObject data = this.personInfo(strACSInfo, pAlarmer);
                         JSONObject mqttMsg = new JSONObject();
                         data.put("pic", upload);
-                        mqttMsg.put("code", 3);
+                        mqttMsg.put("code", 4);
                         mqttMsg.put("data", data);
                         this.mqttConnectClient.publish(mqttMsg.toJSONString());
+                        //==================写自己的推送业务===========================
                     }
                     break;
                 case HikConstant.COMM_ID_INFO_ALARM: //身份证信息

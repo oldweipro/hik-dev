@@ -34,4 +34,8 @@ public class DataCache implements Serializable {
     public Integer getInteger(String key) {
         return this.hasKey(key) ? Integer.valueOf(this.getString(key)) : null;
     }
+
+    public boolean removeKey(String key) {
+        return this.data.keySet().removeIf(keys -> keys.contains(key));
+    }
 }

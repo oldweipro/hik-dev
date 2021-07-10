@@ -16,6 +16,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author oldwei
@@ -91,12 +96,41 @@ public class DeviceController {
         return result;
     }
 
+    /**
+     * 根据设备IP获取流地址
+     *
+     * @param ip 设备IP
+     * @return 流地址
+     */
     @GetMapping("streamList/{ip}")
     public JSONObject getStreamList(@PathVariable String ip) {
         JSONObject result = new JSONObject();
         StreamAddress streamAddress = (StreamAddress) this.dataCache.get(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP + ip);
         result.put("code", 0);
         result.put("data", streamAddress);
+        return result;
+    }
+
+    /**
+     * 获取所有设备的流地址
+     *
+     * @return 所有设备的流地址
+     */
+    @GetMapping("streamList")
+    public JSONObject streamList() {
+        JSONObject result = new JSONObject();
+        Map<String, Object> streamAddress = this.dataCache.getData().entrySet().stream()
+                .filter(map-> map.getKey().contains(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        List<Map<String, Object>> mapList = new ArrayList<>();
+        streamAddress.forEach((key, value)-> {
+            Map<String, Object> map = new HashMap<>(2);
+            map.put("deviceIp", key);
+            map.put("streamAddress", value);
+            mapList.add(map);
+        });
+        result.put("code", 0);
+        result.put("data", mapList);
         return result;
     }
 

@@ -71,6 +71,8 @@ public class HikCameraServiceImpl implements IHikCameraService {
     public boolean existPushStream(String ip) {
         //将推流状态设置为0,在推流循环里会判断状态
         this.dataCache.set(DataCachePrefixConstant.HIK_PUSH_STATUS_IP + ip, 0);
+        this.dataCache.removeKey(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP + ip);
+        this.dataCache.removeKey(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP + ip);
         Integer previewView = this.dataCache.getInteger(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP + ip);
         if (null != previewView && previewView != -1) {
             boolean b = this.hikDevService.NET_DVR_StopRealPlay(previewView);
