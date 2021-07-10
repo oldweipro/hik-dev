@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.oldwei.hikdev.component.AliyunComponent;
 import com.oldwei.hikdev.constant.HikConstant;
 import com.oldwei.hikdev.constant.DataCachePrefixConstant;
+import com.oldwei.hikdev.mqtt.MqttConnectClient;
 import com.oldwei.hikdev.service.FMSGCallBack_V31;
 import com.oldwei.hikdev.service.IHikAlarmDataService;
 import com.oldwei.hikdev.service.IHikDevService;
@@ -36,6 +37,8 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
     private final FileStream fileStream;
 
     private final AliyunComponent aliyunComponent;
+
+    private final MqttConnectClient mqttConnectClient;
 
     @Override
     public boolean invoke(int lCommand, NET_DVR_ALARMER pAlarmer, Pointer pAlarmInfo, int dwBufLen, Pointer pUser) {
@@ -498,7 +501,13 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                         this.fileStream.downloadToLocal(pathname, strACSInfo.pPicData.getByteArray(0, strACSInfo.dwPicDataLen));
                         String eventTime = strACSInfo.struTime.toStringTimeDateFormat();
                         log.info("事件:{} 发生时间：{}", pathname, eventTime);
-//                        this.upload(pathname, strACSInfo, pAlarmer);
+                        String upload = this.upload(pathname);
+                        JSONObject data = this.personInfo(strACSInfo, pAlarmer);
+                        JSONObject mqttMsg = new JSONObject();
+                        data.put("pic", upload);
+                        mqttMsg.put("code", 3);
+                        mqttMsg.put("data", data);
+                        this.mqttConnectClient.publish(mqttMsg.toJSONString());
                     }
                     break;
                 case HikConstant.COMM_ID_INFO_ALARM: //身份证信息
@@ -590,7 +599,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             this.fileStream.downloadToLocal(filename, struPicData.pPicData.getByteArray(0, struPicData.dwPicLen));
                         }
                     }
-                    log.info("ISAPI协议报警信息：{}", sAlarmType.toString());
+                    log.info("ISAPI协议报警信息：{}", sAlarmType);
                     break;
                 default:
                     //报警类型
@@ -604,24 +613,29 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
     }
 
 
-    private void upload(String pathname, NET_DVR_ACS_ALARM_INFO strACSInfo, NET_DVR_ALARMER pAlarmer) {
-        String uploadFile = this.aliyunComponent.uploadFile(new File(pathname));
+    private String upload(String pathname) {
+        return this.aliyunComponent.uploadFile(new File(pathname));
+    }
+
+    public JSONObject personInfo(NET_DVR_ACS_ALARM_INFO strACSInfo, NET_DVR_ALARMER pAlarmer) {
         JSONObject data = new JSONObject();
         String cardNo = new String(strACSInfo.struAcsEventInfo.byCardNo).trim();
         int employeeNo = strACSInfo.struAcsEventInfo.dwEmployeeNo;
 
         String deviceIp = new String(pAlarmer.sDeviceIP).trim();
+        String deviceName = new String(pAlarmer.sDeviceName).trim();
         data.put("cardNo", cardNo);
         data.put("employeeNo", employeeNo);
         data.put("deviceIp", deviceIp);
+        data.put("deviceName", deviceName);
         NET_DVR_TIME struTime = strACSInfo.struTime;
         String eventTime = struTime.dwYear + "-" + struTime.dwMonth + "-" + struTime.dwDay + " " + struTime.dwHour + ":" + struTime.dwMinute + ":" + struTime.dwSecond;
         data.put("eventTime", eventTime);
         data.put("majorAlarmType", strACSInfo.dwMajor);
         data.put("minorAlarmType", strACSInfo.dwMinor);
         data.put("cardType", strACSInfo.struAcsEventInfo.byCardType);
-        data.put("uploadFile", uploadFile);
-        this.aliyunComponent.sendDataToCloudApi(data);
+//        this.aliyunComponent.sendDataToCloudApi(data);
         log.info("门禁主机报警信息=====>{}", data);
+        return data;
     }
 }

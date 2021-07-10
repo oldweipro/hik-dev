@@ -20,7 +20,7 @@ public class AccessControlServiceImpl implements IAccessControlService {
 
     private final IHikCardService hikCardService;
 
-    private final IHikAlarmDataService hikAlarmDataService;
+//    private final IHikAlarmDataService hikAlarmDataService;
 
     private final IHikDeviceService hikDeviceService;
 
@@ -134,7 +134,7 @@ public class AccessControlServiceImpl implements IAccessControlService {
             case "CLOUD_ORGANIZE_DEFENCE":
                 //布防
                 if (data.containsKey("ip")) {
-                    result = this.hikAlarmDataService.setupAlarmChan(data.getString("ip"));
+//                    result = this.hikAlarmDataService.setupAlarmChan(data.getString("ip"));
                 } else {
                     result.put("code", -1);
                     result.put("event", data.getString("event"));
@@ -144,7 +144,7 @@ public class AccessControlServiceImpl implements IAccessControlService {
             case "CLOUD_WITHDRAW_DEFENCE":
                 //撤防
                 if (data.containsKey("ip")) {
-                    result = this.hikAlarmDataService.closeAlarmChan(data.getString("ip"));
+//                    result = this.hikAlarmDataService.closeAlarmChan(data.getString("ip"));
                 } else {
                     result.put("code", -1);
                     result.put("event", data.getString("event"));

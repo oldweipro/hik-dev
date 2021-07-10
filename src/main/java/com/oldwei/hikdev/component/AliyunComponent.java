@@ -64,14 +64,14 @@ public class AliyunComponent {
         //上传文件
         String uuid = RandomUtil.randomString(32);
         // 文件路径
-        String objectName = "project/smart-theatre/" + DateUtil.today() + "/" + uuid + ".jpg";
+        String objectName = "project/smart-theatre/" + DateUtil.thisYear() + "/" + DateUtil.thisMonth() + "/" + DateUtil.thisDayOfMonth() + "/" + uuid + ".jpg";
         // 创建OSSClient实例。
         OSS ossClient = new OSSClientBuilder().build(ossEndpoint, accessKeyId, accessKeySecret);
         // 上传Byte数组。
         ossClient.putObject(ossBucketName, objectName, file);
         // 关闭OSSClient。
         ossClient.shutdown();
-        return ossDomain + objectName;
+        return ossDomain + "/" + objectName;
     }
 
     /**
