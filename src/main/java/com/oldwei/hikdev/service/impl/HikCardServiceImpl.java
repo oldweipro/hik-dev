@@ -9,7 +9,7 @@ import com.oldwei.hikdev.constant.DataCachePrefixConstant;
 import com.oldwei.hikdev.service.IHikCardService;
 import com.oldwei.hikdev.service.IHikDevService;
 import com.oldwei.hikdev.structure.*;
-import com.oldwei.hikdev.util.DataCache;
+import com.oldwei.hikdev.component.DataCache;
 import com.oldwei.hikdev.util.StringEncodingUtil;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;

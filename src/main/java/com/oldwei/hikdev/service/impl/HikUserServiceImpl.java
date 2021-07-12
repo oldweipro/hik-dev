@@ -18,7 +18,7 @@ import com.oldwei.hikdev.structure.BYTE_ARRAY;
 import com.oldwei.hikdev.structure.NET_DVR_JSON_DATA_CFG;
 import com.oldwei.hikdev.structure.NET_DVR_XML_CONFIG_INPUT;
 import com.oldwei.hikdev.structure.NET_DVR_XML_CONFIG_OUTPUT;
-import com.oldwei.hikdev.util.DataCache;
+import com.oldwei.hikdev.component.DataCache;
 import com.oldwei.hikdev.component.FileStream;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;

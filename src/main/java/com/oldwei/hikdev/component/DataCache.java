@@ -1,4 +1,4 @@
-package com.oldwei.hikdev.util;
+package com.oldwei.hikdev.component;
 
 import lombok.Getter;
 

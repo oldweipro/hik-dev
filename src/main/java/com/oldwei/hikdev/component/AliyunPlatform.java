@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
  */
 @Slf4j
 @Component
-public class AliyunComponent {
+public class AliyunPlatform {
     @Value("${hik-dev.cloud.aliyun.ram.access-key-id}")
     private String accessKeyId;
     @Value("${hik-dev.cloud.aliyun.ram.access-key-secret}")

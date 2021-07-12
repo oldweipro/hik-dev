@@ -3,14 +3,14 @@ package com.oldwei.hikdev.controller;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
-import com.oldwei.hikdev.component.AliyunComponent;
+import com.oldwei.hikdev.component.AliyunPlatform;
 import com.oldwei.hikdev.constant.DataCachePrefixConstant;
 import com.oldwei.hikdev.entity.Device;
 import com.oldwei.hikdev.entity.StreamAddress;
 import com.oldwei.hikdev.service.IHikAlarmDataService;
 import com.oldwei.hikdev.service.IHikCameraService;
 import com.oldwei.hikdev.service.IHikDeviceService;
-import com.oldwei.hikdev.util.DataCache;
+import com.oldwei.hikdev.component.DataCache;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +40,7 @@ public class DeviceController {
 
     private final IHikAlarmDataService hikAlarmDataService;
 
-    private final AliyunComponent aliyunComponent;
+    private final AliyunPlatform aliyunPlatform;
 
     /**
      * 设备注册登录
@@ -87,8 +87,8 @@ public class DeviceController {
             return result;
         }
         String stream = RandomUtil.randomString(32);
-        String pushStreamDomain = this.aliyunComponent.getPushStreamDomain(stream);
-        StreamAddress pullStreamDomain = this.aliyunComponent.getPullStreamDomain(stream);
+        String pushStreamDomain = this.aliyunPlatform.getPushStreamDomain(stream);
+        StreamAddress pullStreamDomain = this.aliyunPlatform.getPullStreamDomain(stream);
         this.hikCameraService.startPushStream(userId, ip, pushStreamDomain);
         this.dataCache.set(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP + ip, pullStreamDomain);
         result.put("code", 0);

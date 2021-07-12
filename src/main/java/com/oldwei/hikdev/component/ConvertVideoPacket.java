@@ -1,4 +1,4 @@
-package com.oldwei.hikdev.util;
+package com.oldwei.hikdev.component;
 
 import com.oldwei.hikdev.constant.DataCachePrefixConstant;
 import com.oldwei.hikdev.constant.VideoConstant;
@@ -10,6 +10,7 @@ import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.javacv.*;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.IplImage;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.PipedInputStream;
@@ -21,82 +22,61 @@ import static org.bytedeco.ffmpeg.global.avcodec.av_packet_unref;
  * rtsp转rtmp（转封装方式）
  *
  * @author oldwei
- * @date 2021-5-19 18:42
+ * @date 2021-7-12 22:07
  */
-@Slf4j
 @RequiredArgsConstructor
+@Slf4j
+@Component
 public class ConvertVideoPacket {
-
     private final DataCache dataCache;
-    FFmpegFrameGrabber grabber = null;
-    FFmpegFrameRecorder record = null;
-    int width = -1, height = -1;
-
-    /**
-     * 视频编码ID
-     */
-    protected int codecId;
-    /**
-     * 帧率
-     */
-    protected double frameRate;
-    /**
-     * 比特率
-     */
-    protected int bitRate;
-
-    /**
-     * 音频参数
-     * 想要录制音频，这三个参数必须有：audioChannels > 0 && audioBitrate > 0 && sampleRate > 0
-     */
-    private int audioChannels;
-    private int audioBitRate;
-    private int sampleRate;
-    /**
-     * 音频编码ID
-     */
-    private int audioCodecId;
+    private final FileStream fileStream;
 
     /**
      * 选择视频源
      *
-     * @param pis sdk获取的裸流
-     * @throws IOException
+     * @param pis sdk码流数据
+     * @param out 输出地址/推流地址
+     * @param ip  推流设备IP地址/推流ID
+     * @throws IOException 推流失败
      */
-    public ConvertVideoPacket fromPis(PipedInputStream pis) {
-        grabber = new FFmpegFrameGrabber(pis, 0);
-        return this;
+    public void fromPis(PipedInputStream pis, String out, String ip) throws IOException {
+        FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(pis, 0);
+        this.setGrabber(grabber, out, ip);
     }
 
     /**
      * 选择视频源
      *
-     * @param rtspUrl rtsp流
-     * @return
+     * @param rtspUrl rtsp流地址
+     * @param out     输出地址/推流地址
+     * @param ip      推流设备IP地址/推流ID
+     * @throws IOException 推流失败
      */
-    public ConvertVideoPacket fromRtsp(String rtspUrl) {
-        grabber = new FFmpegFrameGrabber(rtspUrl);
+    public void fromRtsp(String rtspUrl, String out, String ip) throws IOException {
+        FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(rtspUrl);
         if (rtspUrl.contains(VideoConstant.RTSP)) {
             grabber.setOption("rtsp_transport", "tcp");
         }
-        return this;
+        this.setGrabber(grabber, out, ip);
     }
 
     /**
      * 设置流抓取器
      *
-     * @return
-     * @throws FrameGrabber.Exception
+     * @param grabber rtsp流地址
+     * @param out     输出地址/推流地址
+     * @param ip      推流设备IP地址/推流ID
+     * @throws IOException 推流失败
      */
-    public ConvertVideoPacket setGrabber() throws FrameGrabber.Exception {
-
+    private void setGrabber(FFmpegFrameGrabber grabber, String out, String ip) throws IOException {
         // 开始之后ffmpeg会采集视频信息，之后就可以获取音视频信息
         grabber.start();
         //一个opencv视频帧转换器
         OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
         int i = 0;
         Frame frame = null;
-        while (i < 10) {
+        int len = 10;
+        while (i < len) {
             frame = grabber.grabFrame();
             if (frame.image != null) {
                 log.info("取到第一帧：" + i);
@@ -105,85 +85,67 @@ public class ConvertVideoPacket {
             i++;
         }
         IplImage iplImage = converter.convert(frame);
-//        //保存第一帧图片
-//        opencv_imgcodecs.cvSaveImage("./pic/first_frame.jpg", iplImage);
-        if (width < 0 || height < 0) {
-            width = grabber.getImageWidth();
-            height = grabber.getImageHeight();
-        }
-        // 视频参数
-        audioCodecId = grabber.getAudioCodec();
-        log.info("音频编码：" + audioCodecId);
-        codecId = grabber.getVideoCodec();
+        //保存第一帧图片
+        String touchJpg = this.fileStream.touchJpg();
+        opencv_imgcodecs.cvSaveImage(touchJpg, iplImage);
+        int width = grabber.getImageWidth();
+        int height = grabber.getImageHeight();
+        // 视频参数 视频编码ID
+        int codecId = grabber.getVideoCodec();
         // 帧率
-        frameRate = grabber.getVideoFrameRate();
-        // 比特率
-        int videoCodec = grabber.getVideoCodec();
-        log.info("视频编码：" + videoCodec);
-        bitRate = grabber.getVideoBitrate();
-        // 音频参数
+        double frameRate = grabber.getVideoFrameRate();
+        //比特率
+        int bitRate = grabber.getVideoBitrate();
+        // 音频参数 音频编码ID
+        int audioCodecId = grabber.getAudioCodec();
         // 想要录制音频，这三个参数必须有：audioChannels > 0 && audioBitrate > 0 && sampleRate > 0
-        audioChannels = grabber.getAudioChannels();
-        audioBitRate = grabber.getAudioBitrate();
+        int audioChannels = grabber.getAudioChannels();
+        int audioBitRate = grabber.getAudioBitrate();
+        int sampleRate = grabber.getSampleRate();
 
         if (audioBitRate < 1) {
             // 默认音频比特率
             audioBitRate = 128 * 1000;
         }
-        return this;
-    }
 
-    /**
-     * 选择输出
-     *
-     * @param out
-     * @throws IOException
-     * @author eguid
-     */
-    public ConvertVideoPacket to(String out) throws IOException {
-        // 录制/推流器
-        record = new FFmpegFrameRecorder(out, width, height);
+        // 录制/推流器 选择输出 out 输出路径
+        FFmpegFrameRecorder record = new FFmpegFrameRecorder(out, width, height);
         record.setVideoOption("crf", "18");
         record.setGopSize(2);
         record.setFrameRate(frameRate);
         record.setVideoBitrate(bitRate);
 
+        record.setAudioCodec(audioCodecId);
         record.setAudioChannels(audioChannels);
         record.setAudioBitrate(audioBitRate);
         record.setSampleRate(sampleRate);
         record.setVideoCodec(avcodec.AV_CODEC_ID_MPEG4);
         AVFormatContext fc = null;
-        if (out.contains("rtmp") || out.indexOf("flv") > 0) {
+        String rtmp = "rtmp";
+        String flv = "flv";
+        if (out.contains(rtmp) || out.indexOf(flv) > 0) {
             // 封装格式flv
-            record.setFormat("flv");
+            record.setFormat(flv);
             record.setAudioCodecName("aac");
             record.setVideoCodec(codecId);
             fc = grabber.getFormatContext();
         }
         record.start(fc);
-        return this;
-    }
 
-    /**
-     * 转封装
-     *
-     * @throws IOException
-     * @author eguid
-     */
-    public void go(String ip) throws IOException {
+        // ip 转封装
         //采集或推流导致的错误次数
         long errIndex = 0;
         //连续五次没有采集到帧则认为视频采集结束，程序错误次数超过1次即中断程序
-        log.info("推流 {} 开始 => {}",ip, LocalDateTime.now());
+        log.info("推流 {} 开始 => {}", ip, LocalDateTime.now());
+        this.dataCache.set(DataCachePrefixConstant.HIK_PUSH_STATUS_IP + ip, 1);
         for (int noFrameIndex = 0; noFrameIndex < 5 || errIndex > 1; ) {
-            AVPacket pkt = null;
             try {
                 //没有解码的音视频帧
-                pkt = grabber.grabPacket();
+                AVPacket pkt = grabber.grabPacket();
                 if (pkt == null || pkt.size() <= 0 || pkt.data() == null) {
                     //空包记录次数跳过
-                    int i = noFrameIndex++;
-                    System.err.println("空包记录次数跳过" + i);
+                    int nfi = noFrameIndex++;
+                    log.error("空包记录次数跳过" + nfi);
                     continue;
                 }
                 //不需要编码直接把音视频帧推出去
@@ -196,9 +158,10 @@ public class ConvertVideoPacket {
                 }
             } catch (IOException e) {
                 // 推流失败 如果失败err_index自增1
+                log.error("推流失败:{}", e.getMessage());
                 errIndex++;
             }
         }
-        log.info("推流 {} 结束 => {}",ip, LocalDateTime.now());
+        log.info("推流 {} 结束 => {}", ip, LocalDateTime.now());
     }
 }

@@ -9,7 +9,6 @@ import com.sun.jna.ptr.ByteByReference;
 import com.sun.jna.ptr.NativeLongByReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 
 import java.io.IOException;
 import java.io.PipedOutputStream;
@@ -27,15 +26,11 @@ public class HikCameraRealDataCallBackImpl implements FRealDataCallBack_V30 {
      * sdk回调输出管道，用于从sdk回调函数读取视频字节流
      */
     private final PipedOutputStream pos;
-    /**
-     * 回调预览时播放库端口指针
-     * TODO 这个值需要动态获取
-     */
-    private NativeLongByReference m_lPort = new NativeLongByReference(new NativeLong(0));
 
     @Override
-    @Async("asyncServiceExecutor")
     public void invoke(int lRealHandle, int dwDataType, ByteByReference pBuffer, int dwBufSize, Pointer pUser) {
+        //TODO 这个值需要动态获取回调预览时播放库端口指针
+        NativeLongByReference m_lPort = new NativeLongByReference(new NativeLong(0));
         switch (dwDataType) {
             //系统头
             case HikConstant.NET_DVR_SYSHEAD:
@@ -60,7 +55,7 @@ public class HikCameraRealDataCallBackImpl implements FRealDataCallBack_V30 {
                 //码流数据
             case HikConstant.NET_DVR_STREAMDATA:
                 if (dwBufSize <= 0) {
-                    System.out.println("没有数据");
+                    log.info("没有数据");
                 }
                 if ((dwBufSize > 0) && (m_lPort.getValue().intValue() != -1)) {
                     //视频流数据
@@ -68,7 +63,7 @@ public class HikCameraRealDataCallBackImpl implements FRealDataCallBack_V30 {
                     if (videoStreamData.length > 0) {
                         writeMediaStream(videoStreamData, 0, dwBufSize, false);
                     } else {
-                        System.out.println("怎么回事小老弟！怎么没有数据了！");
+                        log.info("怎么回事小老弟！怎么没有数据了！");
                     }
                     //输入 流数据
                     if (!this.hikPlayCtrlService.PlayM4_InputData(m_lPort.getValue(), pBuffer, dwBufSize)) {
@@ -97,7 +92,7 @@ public class HikCameraRealDataCallBackImpl implements FRealDataCallBack_V30 {
                 pos.write(data, offset, length);
             }
         } catch (IOException e) {
-            log.error(e.getMessage());
+            log.error("写入管道流出错:{}", e.getMessage());
         }
     }
 }

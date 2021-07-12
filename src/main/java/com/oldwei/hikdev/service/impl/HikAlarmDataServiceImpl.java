@@ -1,7 +1,7 @@
 package com.oldwei.hikdev.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.oldwei.hikdev.component.AliyunComponent;
+import com.oldwei.hikdev.component.AliyunPlatform;
 import com.oldwei.hikdev.constant.HikConstant;
 import com.oldwei.hikdev.constant.DataCachePrefixConstant;
 import com.oldwei.hikdev.mqtt.MqttConnectClient;
@@ -9,7 +9,7 @@ import com.oldwei.hikdev.service.FMSGCallBack_V31;
 import com.oldwei.hikdev.service.IHikAlarmDataService;
 import com.oldwei.hikdev.service.IHikDevService;
 import com.oldwei.hikdev.structure.*;
-import com.oldwei.hikdev.util.DataCache;
+import com.oldwei.hikdev.component.DataCache;
 import com.oldwei.hikdev.component.FileStream;
 import com.sun.jna.Pointer;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +38,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
 
     private final FileStream fileStream;
 
-    private final AliyunComponent aliyunComponent;
+    private final AliyunPlatform aliyunPlatform;
 
     private final MqttConnectClient mqttConnectClient;
 
@@ -51,7 +51,6 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
     @Override
     public JSONObject setupAlarmChan(String ip) {
         JSONObject result = new JSONObject();
-//        result.put("event", jsonObject.getString("event"));
         NET_DVR_LOCAL_GENERAL_CFG struGeneralCfg = new NET_DVR_LOCAL_GENERAL_CFG();
         // 控制JSON透传报警数据和图片是否分离，0-不分离，1-分离（分离后走COMM_ISAPI_ALARM回调返回）
         struGeneralCfg.byAlarmJsonPictureSeparate = 1;
@@ -172,13 +171,14 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
         try {
             String[] newRow = new String[3];
             //报警时间
-            Date today = new Date();
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-            String deviceIp = new String(pAlarmer.sDeviceIP).trim();
-            StringBuilder sAlarmType = new StringBuilder("lCommand=0x" + Integer.toHexString(lCommand));
-            newRow[0] = dateFormat.format(today);
+            String datetime = dateFormat.format(new Date());
+            newRow[0] = datetime;
             //报警设备IP地址
+            String deviceIp = new String(pAlarmer.sDeviceIP).trim();
             newRow[1] = deviceIp;
+            //报警信息
+            StringBuilder sAlarmType = new StringBuilder("lCommand=0x" + Integer.toHexString(lCommand));
             //lCommand是传的报警类型
             switch (lCommand) {
                 case HikConstant.COMM_ALARM_V40:
@@ -268,9 +268,10 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             }
                             //==================写自己的业务代码===========================
                             JSONObject result = new JSONObject();
-                            Map<String, Object> map = new HashMap<>();
+                            Map<String, Object> map = new HashMap<>(4);
                             map.put("deviceIp", deviceIp);
                             map.put("msg", alarmMsg);
+                            map.put("datetime", datetime);
                             map.put("alarmMsg", "移动侦测");
                             result.put("code", 3);
                             result.put("data", map);
@@ -631,7 +632,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
 
 
     private String upload(String pathname) {
-        return this.aliyunComponent.uploadFile(new File(pathname));
+        return this.aliyunPlatform.uploadFile(new File(pathname));
     }
 
     public JSONObject personInfo(NET_DVR_ACS_ALARM_INFO strACSInfo, NET_DVR_ALARMER pAlarmer) {
