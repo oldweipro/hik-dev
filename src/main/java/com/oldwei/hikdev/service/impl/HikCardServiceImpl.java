@@ -4,6 +4,7 @@ import cn.hutool.core.codec.Base64;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.oldwei.hikdev.component.FileStream;
 import com.oldwei.hikdev.constant.HikConstant;
 import com.oldwei.hikdev.constant.DataCachePrefixConstant;
 import com.oldwei.hikdev.service.IHikCardService;
@@ -36,18 +37,13 @@ public class HikCardServiceImpl implements IHikCardService {
 
     private final DataCache dataCache;
     private final IHikDevService hikDevService;
+    private final FileStream fileStream;
 
     @Override
-    public JSONObject selectFaceByCardNo(JSONObject jsonObject) {
-        JSONObject cardData = new JSONObject();
-        cardData.put("event", jsonObject.getString("event"));
-        String strCardNo = jsonObject.getString("cardNo");
-        String ip = jsonObject.getString("ip");
+    public String selectFaceByCardNo(String strCardNo, String ip) {
         Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + ip);
         if (null == longUserId) {
-            cardData.put("code", -1);
-            cardData.put("msg", "设备状态未注册！");
-            return cardData;
+            return "";
         }
         NET_DVR_FACE_COND struFaceCond = new NET_DVR_FACE_COND();
         struFaceCond.read();
@@ -65,9 +61,7 @@ public class HikCardServiceImpl implements IHikCardService {
         struFaceCond.write();
         int m_lHandle = this.hikDevService.NET_DVR_StartRemoteConfig(longUserId, HikConstant.NET_DVR_GET_FACE, struFaceCond.getPointer(), struFaceCond.size(), null, null);
         if (m_lHandle == -1) {
-            cardData.put("code", -1);
-            cardData.put("msg", "建立查询人脸参数长连接失败，错误码为" + this.hikDevService.NET_DVR_GetLastError());
-            return cardData;
+            return "";
         } else {
             log.info("建立查询人脸参数长连接成功！");
         }
@@ -76,70 +70,67 @@ public class HikCardServiceImpl implements IHikCardService {
         NET_DVR_FACE_RECORD struFaceRecord = new NET_DVR_FACE_RECORD();
         struFaceRecord.read();
 
-        List<String> list = new ArrayList<>();
-        while (true) {
             int dwState = this.hikDevService.NET_DVR_GetNextRemoteConfig(m_lHandle, struFaceRecord.getPointer(), struFaceRecord.size());
             struFaceRecord.read();
-            if (dwState == -1) {
-                cardData.put("code", -1);
-                cardData.put("msg", "NET_DVR_GetNextRemoteConfig查询人脸调用失败，错误码：" + this.hikDevService.NET_DVR_GetLastError());
-                log.info("NET_DVR_GetNextRemoteConfig查询人脸调用失败，错误码：" + this.hikDevService.NET_DVR_GetLastError());
-                break;
+            if (dwState == -1 || dwState == HikConstant.NET_SDK_CONFIG_STATUS_FAILED || dwState == HikConstant.NET_SDK_CONFIG_STATUS_EXCEPTION) {
+                return "";
             } else if (dwState == HikConstant.NET_SDK_CONFIG_STATUS_NEEDWAIT) {
                 log.info("查询中，请等待...");
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            } else if (dwState == HikConstant.NET_SDK_CONFIG_STATUS_FAILED) {
-                cardData.put("code", -1);
-                cardData.put("msg", "获取人脸参数失败, 卡号: " + strCardNo);
-                log.info("获取人脸参数失败, 卡号: " + strCardNo);
-                break;
             } else if (dwState == HikConstant.NET_SDK_CONFIG_STATUS_SUCCESS) {
                 if ((struFaceRecord.dwFaceLen > 0) && (struFaceRecord.pFaceBuffer != null)) {
-                    FileOutputStream fout;
-                    try {
-                        String filename = System.getProperty("user.dir") + "\\pic\\menjin_" + strCardNo + "_FaceData.jpg";
-                        fout = new FileOutputStream(filename);
-                        //将字节写入文件
-                        long offset = 0;
-                        ByteBuffer buffers = struFaceRecord.pFaceBuffer.getByteBuffer(offset, struFaceRecord.dwFaceLen);
-                        byte[] bytes = new byte[struFaceRecord.dwFaceLen];
-                        buffers.rewind();
-                        buffers.get(bytes);
-                        fout.write(bytes);
-                        fout.close();
-                        File file = new File(filename);
-                        String encodeFile = Base64.encode(file);
-                        list.add(encodeFile);
-                        log.info("获取人脸参数成功, 卡号: " + strCardNo + ", 图片保存路径: " + filename);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    String pathname = this.fileStream.touchJpg();
+                    this.fileStream.downloadToLocal(pathname, struFaceRecord.pFaceBuffer.getByteArray(0, struFaceRecord.dwFaceLen));
+                    return pathname;
                 }
             } else if (dwState == HikConstant.NET_SDK_CONFIG_STATUS_FINISH) {
-                cardData.put("code", -1);
-                cardData.put("msg", "获取人脸参数完成");
                 log.info("获取人脸参数完成");
-                break;
             }
+        return "";
+    }
+
+    @Override
+    public String selectPersonByCardNo(String strCardNo, String ip) {
+        NET_DVR_CARD_COND struCardCond = new NET_DVR_CARD_COND();
+        struCardCond.read();
+        struCardCond.dwSize = struCardCond.size();
+        //查询一个卡参数
+        struCardCond.dwCardNum = 1;
+        struCardCond.write();
+        Pointer ptrStruCond = struCardCond.getPointer();
+        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + ip);
+        if (null == longUserId) {
+            return "";
         }
-        if (!this.hikDevService.NET_DVR_StopRemoteConfig(m_lHandle)) {
-            cardData.put("code", -1);
-            cardData.put("msg", "NET_DVR_StopRemoteConfig接口调用失败，错误码：" + this.hikDevService.NET_DVR_GetLastError());
-            return cardData;
-        } else {
-            log.info("NET_DVR_StopRemoteConfig接口成功");
+        int m_lSetFaceCfgHandle = this.hikDevService.NET_DVR_StartRemoteConfig(longUserId, HikConstant.NET_DVR_GET_CARD, ptrStruCond, struCardCond.size(), null, null);
+        if (m_lSetFaceCfgHandle == -1) {
+            return "";
         }
-        if (list.size() > 0) {
-            cardData.put("code", 1);
-            cardData.put("data", list);
-            cardData.put("msg", "查询完成！");
+        //查找指定卡号的参数，需要下发查找的卡号条件
+        NET_DVR_CARD_SEND_DATA struCardNo = new NET_DVR_CARD_SEND_DATA();
+        struCardNo.read();
+        struCardNo.dwSize = struCardNo.size();
+        for (int i = 0; i < HikConstant.ACS_CARD_NO_LEN; i++) {
+            struCardNo.byCardNo[i] = 0;
         }
-        return cardData;
+        for (int i = 0; i < strCardNo.length(); i++) {
+            struCardNo.byCardNo[i] = strCardNo.getBytes()[i];
+        }
+        struCardNo.write();
+        NET_DVR_CARD_RECORD struCardRecord = new NET_DVR_CARD_RECORD();
+        struCardRecord.read();
+        IntByReference pInt = new IntByReference(0);
+        int dwState = this.hikDevService.NET_DVR_SendWithRecvRemoteConfig(m_lSetFaceCfgHandle, struCardNo.getPointer(), struCardNo.size(), struCardRecord.getPointer(), struCardRecord.size(), pInt);
+        struCardRecord.read();
+        if(dwState == -1 || dwState == HikConstant.NET_SDK_CONFIG_STATUS_FAILED || dwState == HikConstant.NET_SDK_CONFIG_STATUS_EXCEPTION) {
+            System.out.println("NET_DVR_SendWithRecvRemoteConfig查询卡参数调用失败，错误码：" + this.hikDevService.NET_DVR_GetLastError());
+        } else if (dwState == HikConstant.NET_SDK_CONFIG_STATUS_NEEDWAIT) {
+            log.info("查询中，请等待...");
+        } else if (dwState == HikConstant.NET_SDK_CONFIG_STATUS_SUCCESS) {
+            String strName = StringEncodingUtil.guessEncodingTransformString(struCardRecord.byName);
+            log.info("获取人员信息姓名:{} 卡号:{}", strName, strCardNo);
+            return strName;
+        }
+        return "";
     }
 
     @Override

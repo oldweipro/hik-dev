@@ -138,21 +138,46 @@ public class DeviceController {
      * 使用rtsp推流 海康rtsp取流地址参考：https://www.jianshu.com/p/8efcea89b11f
      *
      * @param jsonObject rtspUrl拉流地址：rtsp://ip:port/live/stream
-     *                   pushUrl推流地址：rtmp://ip:port/live/stream
      * @return
      * @throws IOException
      */
     @PostMapping("pushRtspToRtmp")
-    public String pushRtspToRtmp(@RequestBody JSONObject jsonObject) {
+    public JSONObject pushRtspToRtmp(@RequestBody JSONObject jsonObject) {
         //TODO 只需要一个IP地址，推送至指定流媒体服务器，在配置文件中配置推送的流媒体服务器
+        JSONObject result = new JSONObject();
         String ip = jsonObject.getString("ip");
         String rtspUrl = jsonObject.getString("rtspUrl");
         String pushUrl = jsonObject.getString("pushUrl");
-        if (StrUtil.isBlank(ip) || StrUtil.isBlank(rtspUrl) || StrUtil.isBlank(pushUrl)) {
-            return "缺少参数: ip rtspUrl 或 pushUrl";
+        if (StrUtil.isBlank(ip) || StrUtil.isBlank(rtspUrl)) {
+            result.put("code", -1);
+            result.put("msg", "缺少参数: ip 或 rtspUrl");
+            return result;
         }
         this.hikCameraService.pushRtspToRtmp(ip, rtspUrl, pushUrl);
-        return "推流成功";
+        result.put("code", 0);
+        result.put("data", pushUrl);
+        return result;
+    }
+
+    @GetMapping("wurenji")
+    public JSONObject wurenji(String name) {
+        String stream = RandomUtil.randomString(32);
+        String pushStreamDomain = this.aliyunPlatform.getPushStreamDomain(stream);
+        StreamAddress pullStreamDomain = this.aliyunPlatform.getPullStreamDomain(stream);
+        this.dataCache.set(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP + name, pullStreamDomain);
+        JSONObject result = new JSONObject();
+        result.put("code", 0);
+        result.put("data", pullStreamDomain);
+        result.put("msg", pushStreamDomain);
+        return result;
+    }
+
+    @GetMapping("shanchuwurenji")
+    public JSONObject shanchuwurenji(String name) {
+        this.dataCache.removeKey(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP + name);
+        JSONObject result = new JSONObject();
+        result.put("code", 0);
+        return result;
     }
 
     /**

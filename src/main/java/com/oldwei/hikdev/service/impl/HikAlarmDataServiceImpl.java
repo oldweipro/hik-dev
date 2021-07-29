@@ -1,5 +1,6 @@
 package com.oldwei.hikdev.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.oldwei.hikdev.component.AliyunPlatform;
 import com.oldwei.hikdev.constant.HikConstant;
@@ -7,6 +8,7 @@ import com.oldwei.hikdev.constant.DataCachePrefixConstant;
 import com.oldwei.hikdev.mqtt.MqttConnectClient;
 import com.oldwei.hikdev.service.FMSGCallBack_V31;
 import com.oldwei.hikdev.service.IHikAlarmDataService;
+import com.oldwei.hikdev.service.IHikCardService;
 import com.oldwei.hikdev.service.IHikDevService;
 import com.oldwei.hikdev.structure.*;
 import com.oldwei.hikdev.component.DataCache;
@@ -20,9 +22,7 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author oldwei
@@ -41,6 +41,8 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
     private final AliyunPlatform aliyunPlatform;
 
     private final MqttConnectClient mqttConnectClient;
+
+    private final IHikCardService hikCardService;
 
     @Override
     public boolean invoke(int lCommand, NET_DVR_ALARMER pAlarmer, Pointer pAlarmInfo, int dwBufLen, Pointer pUser) {
@@ -512,20 +514,38 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     Pointer pACSInfo = strACSInfo.getPointer();
                     pACSInfo.write(0, pAlarmInfo.getByteArray(0, strACSInfo.size()), 0, strACSInfo.size());
                     strACSInfo.read();
+                    String eventDatetime = strACSInfo.struTime.toStringTimeDateFormat();
                     if (strACSInfo.dwPicDataLen > 0) {
+                        JSONObject data = this.personInfo(strACSInfo, pAlarmer);
                         String pathname = this.fileStream.touchJpg();
                         this.fileStream.downloadToLocal(pathname, strACSInfo.pPicData.getByteArray(0, strACSInfo.dwPicDataLen));
-                        String eventTime = strACSInfo.struTime.toStringTimeDateFormat();
-                        log.info("事件:{} 发生时间：{}", pathname, eventTime);
-                        //==================写自己的推送业务===========================
+                        log.info("新设备抓取实时照片事件:{} 发生时间：{}", pathname, eventDatetime);
                         String upload = this.upload(pathname);
-                        JSONObject data = this.personInfo(strACSInfo, pAlarmer);
-                        JSONObject mqttMsg = new JSONObject();
                         data.put("pic", upload);
+                        JSONObject mqttMsg = new JSONObject();
                         mqttMsg.put("code", 4);
                         mqttMsg.put("data", data);
                         this.mqttConnectClient.publish(mqttMsg.toJSONString());
-                        //==================写自己的推送业务===========================
+                    } else {
+                        JSONObject data = this.personInfo(strACSInfo, pAlarmer);
+                        //获取到卡信息
+                        String cardNo = new String(strACSInfo.struAcsEventInfo.byCardNo).trim();
+                        if (StrUtil.isNotBlank(cardNo)) {
+                            String pathname = this.hikCardService.selectFaceByCardNo(cardNo, deviceIp);
+                            log.info("旧设备读取人脸照片:{},发生时间:{}", pathname, eventDatetime);
+                            String personName = this.hikCardService.selectPersonByCardNo(cardNo, deviceIp);
+                            if (StrUtil.isNotBlank(personName) && StrUtil.isNotBlank(pathname)) {
+                                log.info("the employeeNo:{}", personName);
+                                log.info("the employeeNo:{}", personName.length());
+                                data.put("employeeNo", personName);
+                                String upload = this.upload(pathname);
+                                data.put("pic", upload);
+                                JSONObject mqttMsg = new JSONObject();
+                                mqttMsg.put("code", 4);
+                                mqttMsg.put("data", data);
+                                this.mqttConnectClient.publish(mqttMsg.toJSONString());
+                            }
+                        }
                     }
                     break;
                 case HikConstant.COMM_ID_INFO_ALARM: //身份证信息

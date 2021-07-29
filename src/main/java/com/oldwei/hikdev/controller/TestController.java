@@ -1,6 +1,8 @@
 package com.oldwei.hikdev.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.oldwei.hikdev.component.AliyunPlatform;
+import com.oldwei.hikdev.entity.StreamAddress;
 import com.oldwei.hikdev.mqtt.MqttConnectClient;
 import com.oldwei.hikdev.constant.DataCachePrefixConstant;
 import com.oldwei.hikdev.service.IAccessControlService;
@@ -27,6 +29,7 @@ public class TestController {
     private final DataCache dataCache;
     private final IHikCameraService hikCameraService;
     private final IAccessControlService accessControlService;
+    private final AliyunPlatform aliyunPlatform;
 
     /**
      * mqtt发送消息
@@ -97,5 +100,15 @@ public class TestController {
     @PostMapping("getMemory")
     public Map<String, Object> getMemory() {
         return this.dataCache.getData();
+    }
+
+    @GetMapping("getPushStream")
+    public String getPushStream(String stream) {
+        return this.aliyunPlatform.getPushStreamDomain(stream);
+    }
+
+    @GetMapping("getPullStream")
+    public StreamAddress getPullStream(String stream) {
+        return this.aliyunPlatform.getPullStreamDomain(stream);
     }
 }

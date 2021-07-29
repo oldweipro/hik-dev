@@ -10,10 +10,19 @@ public interface IHikCardService {
     /**
      * 根据cardNo查询人脸信息
      *
-     * @param jsonObject
+     * @param strCardNo
+     * @param ip
      * @return
      */
-    JSONObject selectFaceByCardNo(JSONObject jsonObject);
+    String selectFaceByCardNo(String strCardNo, String ip);
+    /**
+     * 根据cardNo查询人员信息
+     *
+     * @param strCardNo
+     * @param ip
+     * @return
+     */
+    String selectPersonByCardNo(String strCardNo, String ip);
 
     /**
      * 根据设备IP查询所有卡信息

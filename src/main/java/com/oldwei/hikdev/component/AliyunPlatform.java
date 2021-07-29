@@ -63,7 +63,7 @@ public class AliyunPlatform {
     public String uploadFile(File file) {
         //上传文件
         String uuid = RandomUtil.randomString(32);
-        // 文件路径
+        // TODO 可以写活文件路径
         String objectName = "project/smart-theatre/" + DateUtil.thisYear() + "/" + DateUtil.thisMonth() + "/" + DateUtil.thisDayOfMonth() + "/" + uuid + ".jpg";
         // 创建OSSClient实例。
         OSS ossClient = new OSSClientBuilder().build(ossEndpoint, accessKeyId, accessKeySecret);
@@ -142,7 +142,7 @@ public class AliyunPlatform {
     private String authUri(String uri) {
         // 过期时间: 当前时间后的时间戳，秒级
         long exp = System.currentTimeMillis() / 1000 + 3600;
-        String pattern = "^(rtmp://|https://|http://)?([^/?]+)(/[^?]*)?(\\\\?.*)?$";
+        String pattern = "^(rtmp://|https://)?([^/?]+)(/[^?]*)?(\\\\?.*)?$";
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(uri);
         String scheme = "", host = "", path = "", args = "";

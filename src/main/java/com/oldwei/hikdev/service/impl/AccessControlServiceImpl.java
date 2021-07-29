@@ -86,7 +86,7 @@ public class AccessControlServiceImpl implements IAccessControlService {
                 break;
             case "CLOUD_SELECT_FACE_BY_CARD_NO":
                 //根据卡号查询人脸 Done.
-                result = this.hikCardService.selectFaceByCardNo(data);
+//                result = this.hikCardService.selectFaceByCardNo(data);
                 break;
             case "CLOUD_MULTI_DISTRIBUTE_CARD":
                 //批量下发卡 Done.

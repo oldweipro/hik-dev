@@ -1,5 +1,6 @@
 package com.oldwei.hikdev.mqtt;
 
+import cn.hutool.core.util.RandomUtil;
 import com.oldwei.hikdev.service.IAccessControlService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,15 +29,13 @@ public class MqttConnectClient {
     private String username;
     @Value("${mqtt.settings.broker}")
     private String broker;
-    @Value("${mqtt.settings.client-id}")
-    private String clientId;
     private final IAccessControlService accessControlService;
 
     private MqttClient mqttClient;
 
     public void initMqttClient() {
         try {
-            this.mqttClient = new MqttClient(broker, clientId, new MemoryPersistence());
+            this.mqttClient = new MqttClient(broker, RandomUtil.randomString(16), new MemoryPersistence());
             //设置回调
             this.mqttClient.setCallback(new OnMessageCallback(this));
         } catch (MqttException e) {

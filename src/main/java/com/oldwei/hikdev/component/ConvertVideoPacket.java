@@ -91,17 +91,22 @@ public class ConvertVideoPacket {
         int width = grabber.getImageWidth();
         int height = grabber.getImageHeight();
         // 视频参数 视频编码ID
-        int codecId = grabber.getVideoCodec();
+        int videoCodecId = grabber.getVideoCodec();
+        log.info("视频编码ID:{}", videoCodecId);
         // 帧率
         double frameRate = grabber.getVideoFrameRate();
         //比特率
         int bitRate = grabber.getVideoBitrate();
         // 音频参数 音频编码ID
         int audioCodecId = grabber.getAudioCodec();
+        log.info("音频编码ID:{}", audioCodecId);
         // 想要录制音频，这三个参数必须有：audioChannels > 0 && audioBitrate > 0 && sampleRate > 0
         int audioChannels = grabber.getAudioChannels();
+        log.info("音频通道:{}", audioChannels);
         int audioBitRate = grabber.getAudioBitrate();
+        log.info("音频比特率:{}", audioBitRate);
         int sampleRate = grabber.getSampleRate();
+        log.info("音频采样率:{}", sampleRate);
 
         if (audioBitRate < 1) {
             // 默认音频比特率
@@ -116,18 +121,18 @@ public class ConvertVideoPacket {
         record.setVideoBitrate(bitRate);
 
         record.setAudioCodec(audioCodecId);
-        record.setAudioChannels(audioChannels);
+//        record.setAudioChannels(audioChannels);
         record.setAudioBitrate(audioBitRate);
         record.setSampleRate(sampleRate);
-        record.setVideoCodec(avcodec.AV_CODEC_ID_MPEG4);
+        record.setVideoCodec(videoCodecId);
         AVFormatContext fc = null;
         String rtmp = "rtmp";
         String flv = "flv";
         if (out.contains(rtmp) || out.indexOf(flv) > 0) {
-            // 封装格式flv
+            // 兼容rtmp处理: 封装格式flv 音频编码aac 视频编码h264
             record.setFormat(flv);
-            record.setAudioCodecName("aac");
-            record.setVideoCodec(codecId);
+            record.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
+            record.setVideoCodec(avcodec.AV_CODEC_ID_H264);
             fc = grabber.getFormatContext();
         }
         record.start(fc);
