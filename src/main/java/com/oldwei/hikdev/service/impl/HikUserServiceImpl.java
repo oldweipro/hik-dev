@@ -3,7 +3,6 @@ package com.oldwei.hikdev.service.impl;
 import cn.hutool.core.codec.Base64;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.oldwei.hikdev.constant.HikConstant;
 import com.oldwei.hikdev.constant.DataCachePrefixConstant;
@@ -92,7 +91,7 @@ public class HikUserServiceImpl implements IHikUserService {
                     byte[] bytes = JSON.parseObject(nameByte, byte[].class);
                     String realName = new String(bytes).trim();
                     people.setRealName(realName);
-                } catch (JSONException | ArrayIndexOutOfBoundsException ignored) {
+                } catch (ArrayIndexOutOfBoundsException ignored) {
                     // 汉字是越界异常超出256，不加上瘾好是expect '[', but error, pos 1, line 1, column 2
                     // 已经是汉字的名字，也就是说他们的名字是从设备上直接录制的，并没有走sdk，
                     // 这时候就会反序列化错误，那么我们就直接忽略这些错误，把realName原样输出

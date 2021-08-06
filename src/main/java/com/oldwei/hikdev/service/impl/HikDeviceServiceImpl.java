@@ -29,12 +29,12 @@ public class HikDeviceServiceImpl implements IHikDeviceService {
         Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + ip);
         //退出的时候注销\释放SDK资源
         if (null != longUserId && longUserId != -1) {
-            this.dataCache.set(DataCachePrefixConstant.HIK_REG_USERID_IP + ip, -1);
+            this.dataCache.removeKey(DataCachePrefixConstant.HIK_REG_USERID_IP + ip);
             return hikDevService.NET_DVR_Logout(longUserId);
         }
-//        return true;
-        //退出程序时调用注销登录、反初始化接口
-        return hikDevService.NET_DVR_Cleanup();
+        return true;
+        //退出程序时调用注销登录、反初始化接口、销毁sdk初始化
+//        return hikDevService.NET_DVR_Cleanup();
     }
 
     /**

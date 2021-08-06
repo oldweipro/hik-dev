@@ -1,5 +1,6 @@
 package com.oldwei.hikdev.controller;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -41,6 +42,39 @@ public class DeviceController {
     private final IHikAlarmDataService hikAlarmDataService;
 
     private final AliyunPlatform aliyunPlatform;
+
+    /**
+     * 设备注册登录状态
+     *
+     * @param device 设备基本信息IP、username、password、port
+     * @return 登录结果 true/false
+     */
+    @GetMapping("deviceLoginStatus")
+    public String deviceStatus(Device device) {
+        return ObjectUtil.isNotEmpty(this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + device.getIp())) ? "已登录" : "未登录";
+    }
+
+    /**
+     * 设备推流状态
+     *
+     * @param device 设备基本信息IP、username、password、port
+     * @return 登录结果 true/false
+     */
+    @GetMapping("devicePushStatus")
+    public String devicePushStatus(Device device) {
+        return ObjectUtil.isNotEmpty(this.dataCache.get(DataCachePrefixConstant.HIK_PUSH_STATUS_IP + device.getIp())) ? "推流中" : "未推流";
+    }
+
+    /**
+     * 设备布防状态
+     *
+     * @param device 设备基本信息IP、username、password、port
+     * @return 登录结果 true/false
+     */
+    @GetMapping("deviceAlarmStatus")
+    public String deviceAlarmStatus(Device device) {
+        return ObjectUtil.isNotEmpty(this.dataCache.get(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + device.getIp())) ? "已布防" : "未布防";
+    }
 
     /**
      * 设备注册登录
@@ -120,10 +154,10 @@ public class DeviceController {
     public JSONObject streamList() {
         JSONObject result = new JSONObject();
         Map<String, Object> streamAddress = this.dataCache.getData().entrySet().stream()
-                .filter(map-> map.getKey().contains(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP))
+                .filter(map -> map.getKey().contains(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         List<Map<String, Object>> mapList = new ArrayList<>();
-        streamAddress.forEach((key, value)-> {
+        streamAddress.forEach((key, value) -> {
             Map<String, Object> map = new HashMap<>(2);
             map.put("deviceIp", key);
             map.put("streamAddress", value);
@@ -186,8 +220,12 @@ public class DeviceController {
      * @param device 退出推流的设备IP
      */
     @PostMapping("existPushStream")
-    public boolean existPushStream(@RequestBody Device device) {
-        return this.hikCameraService.existPushStream(device.getIp());
+    public JSONObject existPushStream(@RequestBody Device device) {
+        this.hikCameraService.existPushStream(device.getIp());
+        JSONObject result = new JSONObject();
+        result.put("code", 0);
+        result.put("msg", "已退出推流:" + device.getIp());
+        return result;
     }
 
     /**

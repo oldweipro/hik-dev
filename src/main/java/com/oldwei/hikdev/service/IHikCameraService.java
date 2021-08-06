@@ -20,7 +20,7 @@ public interface IHikCameraService {
      * @param ip 退出推流的设备IP
      * @return
      */
-    boolean existPushStream(String ip);
+    void existPushStream(String ip);
 
     /**
      * sdk录像

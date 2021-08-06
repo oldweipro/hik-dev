@@ -15,6 +15,10 @@ public class Device implements Serializable {
     private String username;
     private String password;
     private Short port;
+    private String title;
+    private String flv;
+    private String hls;
+    private String rtmp;
     private Boolean useAsync = false;
     private Byte type;
     private String rtspUrl;

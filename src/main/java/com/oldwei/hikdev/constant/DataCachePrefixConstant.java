@@ -26,7 +26,7 @@ public interface DataCachePrefixConstant {
      */
     String HIK_ALARM_LISTEN_IP = "hik:alarm:listen:ip:";
     /**
-     * 设备编码基辅级
+     * 设备编码
      */
     String HIK_REG_CHAR_ENCODE_TYPE_IP = "hik:reg:char:encode:type:ip:";
     /**

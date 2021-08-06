@@ -38,8 +38,6 @@ public interface IHikUserService {
      *
      * @param people jsonObject
      * @return JSONObject
-     * @throws UnsupportedEncodingException UnsupportedEncodingException
-     * @throws InterruptedException         InterruptedException
      */
     JSONObject addUserInfo(String ip, AccessPeople people);
 
@@ -48,8 +46,6 @@ public interface IHikUserService {
      *
      * @param people jsonObject
      * @return JSONObject
-     * @throws UnsupportedEncodingException UnsupportedEncodingException
-     * @throws InterruptedException         InterruptedException
      */
     JSONObject modifyUserInfo(String ip, AccessPeople people);
 
@@ -58,8 +54,6 @@ public interface IHikUserService {
      *
      * @param peopleList 用户列表
      * @return JSONObject
-     * @throws UnsupportedEncodingException UnsupportedEncodingException
-     * @throws InterruptedException         InterruptedException
      */
     JSONObject addMultiUserInfo(String ip, List<AccessPeople> peopleList);
 

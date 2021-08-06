@@ -109,8 +109,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
         Integer longAlarmHandle = this.dataCache.getInteger(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + ip);
         if (null != longAlarmHandle && longAlarmHandle > -1) {
             if (this.hikDevService.NET_DVR_CloseAlarmChan_V30(longAlarmHandle)) {
-                longAlarmHandle = -1;
-                this.dataCache.set(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + ip, longAlarmHandle);
+                this.dataCache.removeKey(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + ip);
                 result.put("code", 0);
                 result.put("msg", "撤防成功");
             } else {
@@ -181,6 +180,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
             newRow[1] = deviceIp;
             //报警信息
             StringBuilder sAlarmType = new StringBuilder("lCommand=0x" + Integer.toHexString(lCommand));
+            System.out.println("lcomman:" + lCommand);
             //lCommand是传的报警类型
             switch (lCommand) {
                 case HikConstant.COMM_ALARM_V40:

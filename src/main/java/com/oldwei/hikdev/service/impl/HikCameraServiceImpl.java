@@ -69,25 +69,21 @@ public class HikCameraServiceImpl implements IHikCameraService {
     }
 
     @Override
-    public boolean existPushStream(String ip) {
-        //将推流状态设置为0,在推流循环里会判断状态
-        this.dataCache.set(DataCachePrefixConstant.HIK_PUSH_STATUS_IP + ip, 0);
-        //移除缓存中的拉流地址
-        this.dataCache.removeKey(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP + ip);
-        this.dataCache.removeKey(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP + ip);
+    public void existPushStream(String ip) {
         //获取sdk预览状态
         Integer previewView = this.dataCache.getInteger(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP + ip);
         if (null != previewView && previewView != -1) {
-            boolean b = this.hikDevService.NET_DVR_StopRealPlay(previewView);
-            if (b) {
-                log.info("退出预览成功！");
+            if (this.hikDevService.NET_DVR_StopRealPlay(previewView)) {
+                log.info("退出SDK预览成功！");
             } else {
-                log.info("退出预览失败！");
+                log.info("退出SDK预览失败！");
             }
-            return b;
-        } else {
-            return true;
         }
+        //将推流状态设置为0,在推流循环里会判断状态
+        this.dataCache.removeKey(DataCachePrefixConstant.HIK_PUSH_STATUS_IP + ip);
+        //移除缓存中的拉流地址
+        this.dataCache.removeKey(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP + ip);
+        this.dataCache.removeKey(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP + ip);
     }
 
     @Override
