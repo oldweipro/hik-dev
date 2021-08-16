@@ -19,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,21 +69,21 @@ public class HikCardServiceImpl implements IHikCardService {
         NET_DVR_FACE_RECORD struFaceRecord = new NET_DVR_FACE_RECORD();
         struFaceRecord.read();
 
-            int dwState = this.hikDevService.NET_DVR_GetNextRemoteConfig(m_lHandle, struFaceRecord.getPointer(), struFaceRecord.size());
-            struFaceRecord.read();
-            if (dwState == -1 || dwState == HikConstant.NET_SDK_CONFIG_STATUS_FAILED || dwState == HikConstant.NET_SDK_CONFIG_STATUS_EXCEPTION) {
-                return "";
-            } else if (dwState == HikConstant.NET_SDK_CONFIG_STATUS_NEEDWAIT) {
-                log.info("查询中，请等待...");
-            } else if (dwState == HikConstant.NET_SDK_CONFIG_STATUS_SUCCESS) {
-                if ((struFaceRecord.dwFaceLen > 0) && (struFaceRecord.pFaceBuffer != null)) {
-                    String pathname = this.fileStream.touchJpg();
-                    this.fileStream.downloadToLocal(pathname, struFaceRecord.pFaceBuffer.getByteArray(0, struFaceRecord.dwFaceLen));
-                    return pathname;
-                }
-            } else if (dwState == HikConstant.NET_SDK_CONFIG_STATUS_FINISH) {
-                log.info("获取人脸参数完成");
+        int dwState = this.hikDevService.NET_DVR_GetNextRemoteConfig(m_lHandle, struFaceRecord.getPointer(), struFaceRecord.size());
+        struFaceRecord.read();
+        if (dwState == -1 || dwState == HikConstant.NET_SDK_CONFIG_STATUS_FAILED || dwState == HikConstant.NET_SDK_CONFIG_STATUS_EXCEPTION) {
+            return "";
+        } else if (dwState == HikConstant.NET_SDK_CONFIG_STATUS_NEEDWAIT) {
+            log.info("查询中，请等待...");
+        } else if (dwState == HikConstant.NET_SDK_CONFIG_STATUS_SUCCESS) {
+            if ((struFaceRecord.dwFaceLen > 0) && (struFaceRecord.pFaceBuffer != null)) {
+                String pathname = this.fileStream.touchJpg();
+                this.fileStream.downloadToLocal(pathname, struFaceRecord.pFaceBuffer.getByteArray(0, struFaceRecord.dwFaceLen));
+                return pathname;
             }
+        } else if (dwState == HikConstant.NET_SDK_CONFIG_STATUS_FINISH) {
+            log.info("获取人脸参数完成");
+        }
         return "";
     }
 
@@ -121,7 +120,7 @@ public class HikCardServiceImpl implements IHikCardService {
         IntByReference pInt = new IntByReference(0);
         int dwState = this.hikDevService.NET_DVR_SendWithRecvRemoteConfig(m_lSetFaceCfgHandle, struCardNo.getPointer(), struCardNo.size(), struCardRecord.getPointer(), struCardRecord.size(), pInt);
         struCardRecord.read();
-        if(dwState == -1 || dwState == HikConstant.NET_SDK_CONFIG_STATUS_FAILED || dwState == HikConstant.NET_SDK_CONFIG_STATUS_EXCEPTION) {
+        if (dwState == -1 || dwState == HikConstant.NET_SDK_CONFIG_STATUS_FAILED || dwState == HikConstant.NET_SDK_CONFIG_STATUS_EXCEPTION) {
             System.out.println("NET_DVR_SendWithRecvRemoteConfig查询卡参数调用失败，错误码：" + this.hikDevService.NET_DVR_GetLastError());
         } else if (dwState == HikConstant.NET_SDK_CONFIG_STATUS_NEEDWAIT) {
             log.info("查询中，请等待...");
@@ -134,10 +133,8 @@ public class HikCardServiceImpl implements IHikCardService {
     }
 
     @Override
-    public JSONObject selectCardInfoByDeviceIp(JSONObject jsonObject) {
+    public JSONObject selectCardInfoByDeviceIp(String ip) {
         JSONObject result = new JSONObject();
-        result.put("event", jsonObject.getString("event"));
-        String ip = jsonObject.getString("ip");
         if (StrUtil.isBlank(ip)) {
             result.put("code", -1);
             result.put("msg", "缺少必要参数字段：ip");
@@ -194,7 +191,6 @@ public class HikCardServiceImpl implements IHikCardService {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-                continue;
             } else if (dwState == HikConstant.NET_SDK_CONFIG_STATUS_FAILED) {
                 result.put("code", -1);
                 result.put("msg", "获取卡参数失败");
@@ -327,22 +323,27 @@ public class HikCardServiceImpl implements IHikCardService {
                 //可以继续下发下一个
             } else if (dwFaceState == HikConstant.NET_SDK_CONFIG_STATUS_EXCEPTION) {
                 result.put("code", -1);
-                Map<String,Object> map  = new HashMap<>(1);
-                map.put("cardNo",new String(struFaceStatus.byCardNo).trim());
-                map.put("msg","下发人脸异常, 卡号: " + new String(struFaceStatus.byCardNo).trim() + ", 错误码：" + this.hikDevService.NET_DVR_GetLastError());
-                result.put("msg",map);
+                Map<String, Object> map = new HashMap<>(1);
+                map.put("cardNo", new String(struFaceStatus.byCardNo).trim());
+                map.put("msg", "下发人脸异常, 卡号: " + new String(struFaceStatus.byCardNo).trim() + ", 错误码：" + this.hikDevService.NET_DVR_GetLastError());
+                result.put("msg", map);
                 System.out.println("下发人脸异常, 卡号: " + new String(struFaceStatus.byCardNo).trim() + ", 错误码：" + this.hikDevService.NET_DVR_GetLastError());
-                return  result;
+                return result;
                 //异常是长连接异常，不能继续下发后面的数据，需要重新建立长连接
             } else if (dwFaceState == HikConstant.NET_SDK_CONFIG_STATUS_SUCCESS) {
                 if (struFaceStatus.byRecvStatus != 1) {
                     result.put("code", -1);
-                    Map<String,Object> map  = new HashMap<>(1);
-                    map.put("cardNo",new String(struFaceStatus.byCardNo).trim());
-                    map.put("msg","下发人脸失败，人脸读卡器状态" + struFaceStatus.byRecvStatus + ", 卡号：" + new String(struFaceStatus.byCardNo).trim());
+                    Map<String, Object> map = new HashMap<>(1);
+                    map.put("cardNo", new String(struFaceStatus.byCardNo).trim());
+                    // 人脸读卡器状态，按字节表示，0-失败，1-成功，2-重试或人脸质量差，
+                    // 3-内存已满(人脸数据满)，4-已存在该人脸，5-非法人脸 ID，6-算法建模失败，7-未下发卡权限，
+                    // 8-未定义（保留），9-人眼间距小距小，10-图片数据长度小于 1KB，11-图片格式不符（png/jpg/bmp），
+                    // 12-图片像素数量超过上限，13-图片像素数量低于下限，14-图片信息校验失败，15-图片解码失败，
+                    // 16-人脸检测失败，17-人脸评分失败
+                    map.put("msg", "下发人脸失败，人脸读卡器状态" + struFaceStatus.byRecvStatus + ", 卡号：" + new String(struFaceStatus.byCardNo).trim());
                     result.put("msg", map);
                     System.out.println("下发人脸失败，人脸读卡器状态" + struFaceStatus.byRecvStatus + ", 卡号：" + new String(struFaceStatus.byCardNo).trim());
-                    return  result;
+                    return result;
                 } else {
                     System.out.println("下发人脸成功, 卡号: " + new String(struFaceStatus.byCardNo).trim() + ", 状态：" + struFaceStatus.byRecvStatus);
                 }
@@ -412,6 +413,7 @@ public class HikCardServiceImpl implements IHikCardService {
             String cardNo = userCardInfo.getString("cardNo");
             Integer employeeNo = userCardInfo.getInteger("employeeNo");
             String cardName = userCardInfo.getString("cardName");
+            Short wPlanTemplateNumber = userCardInfo.getShort("planTemplateNumber");
             struCardRecord[i].read();
             struCardRecord[i].dwSize = struCardRecord[i].size();
 
@@ -428,7 +430,7 @@ public class HikCardServiceImpl implements IHikCardService {
             //门1有权限
             struCardRecord[i].byDoorRight[0] = 1;
             // TODO 关联门计划模板，使用了前面配置的计划模板
-//            struCardRecord[i].wCardRightPlan[0] = wPlanTemplateNumber;
+            struCardRecord[i].wCardRightPlan[0] = wPlanTemplateNumber;
 
             //卡有效期使能，下面是卡有效期从2000-1-1 11:11:11到2030-1-1 11:11:11
             struCardRecord[i].struValid.byEnable = 1;
@@ -641,5 +643,129 @@ public class HikCardServiceImpl implements IHikCardService {
             result.put("msg", "删除人脸成功！");
         }
         return result;
+    }
+
+    @Override
+    public void setCartTemplate(int iPlanTemplateNumber, String ip) {
+        int iErr = 0;
+
+        //设置卡权限计划模板参数
+        NET_DVR_PLAN_TEMPLATE_COND struPlanCond = new NET_DVR_PLAN_TEMPLATE_COND();
+        struPlanCond.dwSize = struPlanCond.size();
+        struPlanCond.dwPlanTemplateNumber = iPlanTemplateNumber;//计划模板编号，从1开始，最大值从门禁能力集获取
+        struPlanCond.wLocalControllerID = 0;//就地控制器序号[1,64]，0表示门禁主机
+        struPlanCond.write();
+
+        NET_DVR_PLAN_TEMPLATE struPlanTemCfg = new NET_DVR_PLAN_TEMPLATE();
+        struPlanTemCfg.dwSize = struPlanTemCfg.size();
+        struPlanTemCfg.byEnable =1; //是否使能：0- 否，1- 是
+        struPlanTemCfg.dwWeekPlanNo = 1;//周计划编号，0表示无效
+        struPlanTemCfg.dwHolidayGroupNo[0] = 0;//假日组编号，按值表示，采用紧凑型排列，中间遇到0则后续无效
+
+        byte[] byTemplateName;
+        try {
+            byTemplateName = "计划模板名称测试".getBytes("GBK");
+            //计划模板名称
+            for (int i = 0; i < HikConstant.NAME_LEN; i++)
+            {
+                struPlanTemCfg.byTemplateName[i] = 0;
+            }
+            System.arraycopy(byTemplateName, 0, struPlanTemCfg.byTemplateName, 0, byTemplateName.length);
+        } catch (UnsupportedEncodingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        struPlanTemCfg.write();
+
+        IntByReference pInt = new IntByReference(0);
+        Pointer lpStatusList = pInt.getPointer();
+        Integer lUserID = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + ip);
+        if (!this.hikDevService.NET_DVR_SetDeviceConfig(lUserID, HikConstant.NET_DVR_SET_CARD_RIGHT_PLAN_TEMPLATE_V50, 1, struPlanCond.getPointer(), struPlanCond.size(), lpStatusList, struPlanTemCfg.getPointer(), struPlanTemCfg.size())) {
+            iErr = this.hikDevService.NET_DVR_GetLastError();
+            System.out.println("NET_DVR_SET_CARD_RIGHT_PLAN_TEMPLATE_V50失败，错误号：" + iErr);
+            return;
+        }
+        System.out.println("NET_DVR_SET_CARD_RIGHT_PLAN_TEMPLATE_V50成功！");
+
+        //获取卡权限周计划参数
+        NET_DVR_WEEK_PLAN_COND struWeekPlanCond = new NET_DVR_WEEK_PLAN_COND();
+        struWeekPlanCond.dwSize = struWeekPlanCond.size();
+        struWeekPlanCond.dwWeekPlanNumber  = 1;
+        struWeekPlanCond.wLocalControllerID = 0;
+
+        NET_DVR_WEEK_PLAN_CFG struWeekPlanCfg = new NET_DVR_WEEK_PLAN_CFG();
+
+        struWeekPlanCond.write();
+        struWeekPlanCfg.write();
+
+        Pointer lpCond = struWeekPlanCond.getPointer();
+        Pointer lpInbuferCfg = struWeekPlanCfg.getPointer();
+
+        if (!this.hikDevService.NET_DVR_GetDeviceConfig(lUserID, HikConstant.NET_DVR_GET_CARD_RIGHT_WEEK_PLAN_V50, 1, lpCond, struWeekPlanCond.size(), lpStatusList, lpInbuferCfg, struWeekPlanCfg.size()))
+        {
+            iErr = this.hikDevService.NET_DVR_GetLastError();
+            System.out.println("NET_DVR_GET_CARD_RIGHT_WEEK_PLAN_V50失败，错误号：" + iErr);
+            return;
+        }
+        struWeekPlanCfg.read();
+
+        struWeekPlanCfg.byEnable = 1; //是否使能：0- 否，1- 是
+
+        //避免时间段交叉，先初始化
+        for(int i=0;i<7;i++)
+        {
+            for(int j=0;j<8;j++)
+            {
+                struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[j].byEnable = 0;
+                struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[j].struTimeSegment.struBeginTime.byHour = 0;
+                struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[j].struTimeSegment.struBeginTime.byMinute = 0;
+                struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[j].struTimeSegment.struBeginTime.bySecond = 0;
+                struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[j].struTimeSegment.struEndTime.byHour = 0;
+                struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[j].struTimeSegment.struEndTime.byMinute = 0;
+                struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[j].struTimeSegment.struEndTime.bySecond = 0;
+            }
+        }
+
+        //一周7天，全天24小时
+        for(int i=0;i<7;i++)
+        {
+            struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[0].byEnable = 1;
+            struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[0].struTimeSegment.struBeginTime.byHour = 0;
+            struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[0].struTimeSegment.struBeginTime.byMinute = 0;
+            struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[0].struTimeSegment.struBeginTime.bySecond = 0;
+            struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[0].struTimeSegment.struEndTime.byHour = 24;
+            struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[0].struTimeSegment.struEndTime.byMinute = 0;
+            struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[0].struTimeSegment.struEndTime.bySecond = 0;
+        }
+
+        //一周7天，每天设置2个时间段
+	    /*for(int i=0;i<7;i++)
+	    {
+	            struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[0].byEnable = 1;
+	            struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[0].struTimeSegment.struBeginTime.byHour = 0;
+	            struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[0].struTimeSegment.struBeginTime.byMinute = 0;
+	            struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[0].struTimeSegment.struBeginTime.bySecond = 0;
+	            struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[0].struTimeSegment.struEndTime.byHour = 11;
+	            struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[0].struTimeSegment.struEndTime.byMinute = 59;
+	            struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[0].struTimeSegment.struEndTime.bySecond = 59;
+
+	            struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[1].byEnable = 1;
+	            struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[1].struTimeSegment.struBeginTime.byHour = 13;
+	            struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[1].struTimeSegment.struBeginTime.byMinute = 30;
+	            struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[1].struTimeSegment.struBeginTime.bySecond = 0;
+	            struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[1].struTimeSegment.struEndTime.byHour = 19;
+	            struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[1].struTimeSegment.struEndTime.byMinute = 59;
+	            struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[1].struTimeSegment.struEndTime.bySecond = 59;
+	    }*/
+        struWeekPlanCfg.write();
+
+        //设置卡权限周计划参数
+        if (!this.hikDevService.NET_DVR_SetDeviceConfig(lUserID, HikConstant.NET_DVR_SET_CARD_RIGHT_WEEK_PLAN_V50, 1, lpCond, struWeekPlanCond.size(), lpStatusList, lpInbuferCfg, struWeekPlanCfg.size())) {
+            iErr = this.hikDevService.NET_DVR_GetLastError();
+            System.out.println("NET_DVR_SET_CARD_RIGHT_WEEK_PLAN_V50失败，错误号：" + iErr);
+            return;
+        }
+        System.out.println("NET_DVR_SET_CARD_RIGHT_WEEK_PLAN_V50成功！");
     }
 }

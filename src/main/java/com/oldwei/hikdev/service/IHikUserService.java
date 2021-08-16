@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.oldwei.hikdev.entity.access.AccessPeople;
 import com.oldwei.hikdev.entity.QueryRequest;
 
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 

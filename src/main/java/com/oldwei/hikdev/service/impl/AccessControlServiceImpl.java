@@ -82,7 +82,7 @@ public class AccessControlServiceImpl implements IAccessControlService {
                 break;
             case "CLOUD_ALL_CARD_BY_DEVICE_IP":
                 //查询所有卡 Done.
-                result = this.hikCardService.selectCardInfoByDeviceIp(data);
+//                result = this.hikCardService.selectCardInfoByDeviceIp(data);
                 break;
             case "CLOUD_SELECT_FACE_BY_CARD_NO":
                 //根据卡号查询人脸 Done.

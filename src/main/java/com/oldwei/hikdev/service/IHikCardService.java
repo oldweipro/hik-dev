@@ -15,6 +15,7 @@ public interface IHikCardService {
      * @return
      */
     String selectFaceByCardNo(String strCardNo, String ip);
+
     /**
      * 根据cardNo查询人员信息
      *
@@ -27,10 +28,10 @@ public interface IHikCardService {
     /**
      * 根据设备IP查询所有卡信息
      *
-     * @param jsonObject
+     * @param ip
      * @return
      */
-    JSONObject selectCardInfoByDeviceIp(JSONObject jsonObject);
+    JSONObject selectCardInfoByDeviceIp(String ip);
 
     /**
      * 批量下发门禁卡
@@ -42,6 +43,7 @@ public interface IHikCardService {
 
     /**
      * 下发人脸
+     *
      * @param jsonObject
      * @return
      */
@@ -49,6 +51,7 @@ public interface IHikCardService {
 
     /**
      * 根据卡号删除卡
+     *
      * @param jsonObject
      * @return
      */
@@ -56,9 +59,18 @@ public interface IHikCardService {
 
     /**
      * 根据卡号删除人脸
+     *
      * @param jsonObject
      * @return
      */
     JSONObject deleteFaceByCardNo(JSONObject jsonObject);
+
+    /**
+     * 设置计划模板
+     *
+     * @param iPlanTemplateNumber
+     * @param ip
+     */
+    void setCartTemplate(int iPlanTemplateNumber, String ip);
 
 }

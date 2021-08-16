@@ -203,4 +203,12 @@ public interface HikConstant {
 
     int STREAME_REALTIME = 0;
     int STREAME_FILE = 1;
+
+    int TEMPLATE_NAME_LEN = 32;      //计划模板名称长度
+    int MAX_HOLIDAY_GROUP_NUM = 16;  //计划模板最大假日组数
+    int NET_DVR_GET_CARD_RIGHT_WEEK_PLAN_V50 = 2304;  //获取卡权限周计划参数V50
+    int NET_DVR_SET_CARD_RIGHT_WEEK_PLAN_V50 = 2305;  //设置卡权限周计划参数V50
+    int NET_DVR_SET_CARD_RIGHT_PLAN_TEMPLATE_V50 = 2323;//设置卡权限计划模板参数V50
+    int MAX_TIMESEGMENT_V30 = 8;    //9000设备最大时间段数
+    int MAX_DAYS = 7;      //每周天数
 }
