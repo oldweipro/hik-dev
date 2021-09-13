@@ -1,5 +1,6 @@
 package com.oldwei.hikdev.controller;
 
+import cn.hutool.core.util.IdUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.oldwei.hikdev.component.AliyunPlatform;
 import com.oldwei.hikdev.entity.StreamAddress;
@@ -12,7 +13,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import java.io.IOException;
+import java.net.*;
+import java.util.*;
 
 /**
  * @Description
@@ -30,6 +33,7 @@ public class TestController {
     private final IHikCameraService hikCameraService;
     private final IAccessControlService accessControlService;
     private final AliyunPlatform aliyunPlatform;
+    private final DatagramSocket datagramSocket;
 
     /**
      * mqtt发送消息
@@ -110,5 +114,18 @@ public class TestController {
     @GetMapping("getPullStream")
     public StreamAddress getPullStream(String stream) {
         return this.aliyunPlatform.getPullStreamDomain(stream);
+    }
+
+    @GetMapping("udpClient")
+    public void udpClient() {
+        try {
+            InetAddress address = InetAddress.getByName("239.255.255.250");
+            String uuid = "<Probe><Uuid>" + IdUtil.randomUUID().toUpperCase() + "</Uuid><Types>inquiry</Types></Probe>";
+            byte[] data = uuid.getBytes();
+            DatagramPacket packet = new DatagramPacket(data, data.length, address, 37020);
+            datagramSocket.send(packet);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -167,8 +167,16 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
         return result;
     }
 
-    @Override
-    public void alarmDataHandle(int lCommand, NET_DVR_ALARMER pAlarmer, Pointer pAlarmInfo, int dwBufLen, Pointer pUser) {
+    /**
+     * 回调函数
+     *
+     * @param lCommand
+     * @param pAlarmer
+     * @param pAlarmInfo
+     * @param dwBufLen
+     * @param pUser
+     */
+    private void alarmDataHandle(int lCommand, NET_DVR_ALARMER pAlarmer, Pointer pAlarmInfo, int dwBufLen, Pointer pUser) {
         try {
             String[] newRow = new String[3];
             //报警时间
