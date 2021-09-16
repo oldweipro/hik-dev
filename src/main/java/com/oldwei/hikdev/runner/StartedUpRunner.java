@@ -1,7 +1,6 @@
 package com.oldwei.hikdev.runner;
 
 import com.oldwei.hikdev.mqtt.MqttConnectClient;
-import com.oldwei.hikdev.service.IUdpService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class StartedUpRunner implements ApplicationRunner {
     private final MqttConnectClient mqttConnectClient;
-    private final IUdpService udpService;
 
     @Value("${mqtt.enable}")
     private boolean mqttEnable;
@@ -32,7 +30,6 @@ public class StartedUpRunner implements ApplicationRunner {
             this.mqttConnectClient.initMqttClient();
             this.mqttConnectClient.mqttConnect();
         }
-        this.udpService.receive();
         log.info("=========================项目启动完成=========================");
     }
 }

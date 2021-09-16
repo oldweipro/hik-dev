@@ -36,7 +36,7 @@
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
-            <version>6.1</version>
+            <version>6.6</version>
         </dependency>
         <!-- lombok -->
         <dependency>
@@ -49,13 +49,13 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>1.2.75</version>
+            <version>1.2.78</version>
         </dependency>
         <!-- aliyun-sdk-oss https://github.com/aliyun/aliyun-oss-java-sdk -->
         <dependency>
             <groupId>com.aliyun.oss</groupId>
             <artifactId>aliyun-sdk-oss</artifactId>
-            <version>3.11.2</version>
+            <version>3.13.1</version>
         </dependency>
         <!-- HIK设备所需的jar 开始 -->
         <dependency>
@@ -78,14 +78,14 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
-            <version>5.6.6</version>
+            <version>5.7.11</version>
         </dependency>
 
         <!-- mqtt -->
         <dependency>
             <groupId>org.eclipse.paho</groupId>
             <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-            <version>1.2.2</version>
+            <version>1.2.5</version>
         </dependency>
         <!--判断字符串编码格式-->
         <dependency>

@@ -7,9 +7,6 @@ import com.sun.jna.Native;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.net.DatagramSocket;
-import java.net.SocketException;
-
 /**
  * @author oldwei
  * @date 2021-5-13 15:06
@@ -32,11 +29,6 @@ public class HikConfiguration {
     @Bean
     public DataCache hikMemory() {
         return new DataCache();
-    }
-
-    @Bean
-    public DatagramSocket datagramSocket() throws SocketException {
-        return new DatagramSocket(37020);
     }
 
 }

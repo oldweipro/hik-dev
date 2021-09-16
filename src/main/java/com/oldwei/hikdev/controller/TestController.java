@@ -6,6 +6,7 @@ import com.oldwei.hikdev.component.AliyunPlatform;
 import com.oldwei.hikdev.entity.StreamAddress;
 import com.oldwei.hikdev.mqtt.MqttConnectClient;
 import com.oldwei.hikdev.constant.DataCachePrefixConstant;
+import com.oldwei.hikdev.runner.UdpListener;
 import com.oldwei.hikdev.service.IAccessControlService;
 import com.oldwei.hikdev.service.IHikCameraService;
 import com.oldwei.hikdev.component.DataCache;
@@ -14,7 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
 import java.util.*;
 
 /**
@@ -33,7 +35,6 @@ public class TestController {
     private final IHikCameraService hikCameraService;
     private final IAccessControlService accessControlService;
     private final AliyunPlatform aliyunPlatform;
-    private final DatagramSocket datagramSocket;
 
     /**
      * mqtt发送消息
@@ -117,15 +118,11 @@ public class TestController {
     }
 
     @GetMapping("udpClient")
-    public void udpClient() {
-        try {
-            InetAddress address = InetAddress.getByName("239.255.255.250");
-            String uuid = "<Probe><Uuid>" + IdUtil.randomUUID().toUpperCase() + "</Uuid><Types>inquiry</Types></Probe>";
-            byte[] data = uuid.getBytes();
-            DatagramPacket packet = new DatagramPacket(data, data.length, address, 37020);
-            datagramSocket.send(packet);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void udpClient() throws IOException {
+        String uuid = "<Probe><Uuid>" + IdUtil.randomUUID().toUpperCase() + "</Uuid><Types>inquiry</Types></Probe>";
+        InetAddress address = InetAddress.getByName("239.255.255.250");
+        byte[] data = uuid.getBytes();
+        DatagramPacket packet = new DatagramPacket(data, data.length, address, 37020);
+        UdpListener.datagramSocket.send(packet);
     }
 }
