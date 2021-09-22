@@ -1,6 +1,8 @@
 package com.oldwei.hikdev.service.impl;
 
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.oldwei.hikdev.component.AliyunPlatform;
 import com.oldwei.hikdev.constant.HikConstant;
@@ -51,7 +53,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
     }
 
     @Override
-    public JSONObject setupAlarmChan(String ip) {
+    public JSONObject setupAlarmChan(String deviceSn) {
         JSONObject result = new JSONObject();
         NET_DVR_LOCAL_GENERAL_CFG struGeneralCfg = new NET_DVR_LOCAL_GENERAL_CFG();
         // 控制JSON透传报警数据和图片是否分离，0-不分离，1-分离（分离后走COMM_ISAPI_ALARM回调返回）
@@ -64,7 +66,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
             result.put("msg", "NET_DVR_StopRemoteConfig接口调用失败，错误码：" + this.hikDevService.NET_DVR_GetLastError());
             return result;
         }
-        Integer longAlarmHandle = this.dataCache.getInteger(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + ip);
+        Integer longAlarmHandle = this.dataCache.getInteger(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + deviceSn);
         if (null == longAlarmHandle || longAlarmHandle < 0) {
             //尚未布防,需要布防
             Pointer pUser = null;
@@ -81,7 +83,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
             //布防类型(仅针对门禁主机、人证设备)：0-客户端布防(会断网续传)，1-实时布防(只上传实时数据)
             mStrAlarmInfo.byDeployType = 0;
             mStrAlarmInfo.write();
-            Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + ip);
+            Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + deviceSn);
             if (null == longUserId) {
                 result.put("code", -1);
                 result.put("msg", "设备状态未注册！");
@@ -94,7 +96,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                 result.put("msg", "布防失败，错误号:" + this.hikDevService.NET_DVR_GetLastError());
             } else {
                 log.info("布防成功");
-                this.dataCache.set(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + ip, longAlarmHandle);
+                this.dataCache.set(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + deviceSn, longAlarmHandle);
                 result.put("code", 0);
                 result.put("msg", "布防成功！");
             }
@@ -285,7 +287,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             map.put("alarmMsg", "移动侦测");
                             result.put("code", 3);
                             result.put("data", map);
-                            this.mqttConnectClient.publish(result.toJSONString());
+//                            this.mqttConnectClient.publish(result.toJSONString());
                             //==================写自己的业务代码===========================
                             break;
                         case 4:
@@ -528,12 +530,15 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                         String pathname = this.fileStream.touchJpg();
                         this.fileStream.downloadToLocal(pathname, strACSInfo.pPicData.getByteArray(0, strACSInfo.dwPicDataLen));
                         log.info("新设备抓取实时照片事件:{} 发生时间：{}", pathname, eventDatetime);
-                        String upload = this.upload(pathname);
+                        String upload = cn.hutool.core.codec.Base64.encode(new File(pathname));
                         data.put("pic", upload);
                         JSONObject mqttMsg = new JSONObject();
                         mqttMsg.put("code", 4);
                         mqttMsg.put("data", data);
-                        this.mqttConnectClient.publish(mqttMsg.toJSONString());
+//                        this.mqttConnectClient.publish(mqttMsg.toJSONString());
+                        //TODO url处理
+                        ThreadUtil.execAsync(() -> HttpUtil.post("http://localhost:4068/hik/api/accessControlEvent", JSONObject.toJSONString(mqttMsg)));
+
                     } else {
                         JSONObject data = this.personInfo(strACSInfo, pAlarmer);
                         //获取到卡信息
@@ -546,12 +551,14 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                                 log.info("the employeeNo:{}", personName);
                                 log.info("the employeeNo:{}", personName.length());
                                 data.put("employeeNo", personName);
-                                String upload = this.upload(pathname);
+                                String upload = cn.hutool.core.codec.Base64.encode(new File(pathname));
                                 data.put("pic", upload);
                                 JSONObject mqttMsg = new JSONObject();
                                 mqttMsg.put("code", 4);
                                 mqttMsg.put("data", data);
-                                this.mqttConnectClient.publish(mqttMsg.toJSONString());
+//                                this.mqttConnectClient.publish(mqttMsg.toJSONString());
+                                //TODO url处理
+                                ThreadUtil.execAsync(() -> HttpUtil.post("http://localhost:4068/hik/api/accessControlEvent", JSONObject.toJSONString(mqttMsg)));
                             }
                         }
                     }

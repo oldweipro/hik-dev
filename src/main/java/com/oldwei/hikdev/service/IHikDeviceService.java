@@ -17,8 +17,8 @@ public interface IHikDeviceService {
 
     /**
      * 清除设备注册
-     * @param ip
+     * @param deviceSn
      * @return
      */
-    boolean clean(String ip);
+    boolean clean(String deviceSn);
 }

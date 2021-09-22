@@ -51,7 +51,7 @@ public class DeviceController {
      */
     @GetMapping("deviceLoginStatus")
     public String deviceStatus(Device device) {
-        return ObjectUtil.isNotEmpty(this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + device.getIp())) ? "已登录" : "未登录";
+        return ObjectUtil.isNotEmpty(this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + device.getDeviceSn())) ? "已登录" : "未登录";
     }
 
     /**
@@ -62,7 +62,7 @@ public class DeviceController {
      */
     @GetMapping("devicePushStatus")
     public String devicePushStatus(Device device) {
-        return ObjectUtil.isNotEmpty(this.dataCache.get(DataCachePrefixConstant.HIK_PUSH_STATUS_IP + device.getIp())) ? "推流中" : "未推流";
+        return ObjectUtil.isNotEmpty(this.dataCache.get(DataCachePrefixConstant.HIK_PUSH_STATUS_IP + device.getDeviceSn())) ? "推流中" : "未推流";
     }
 
     /**
@@ -73,7 +73,7 @@ public class DeviceController {
      */
     @GetMapping("deviceAlarmStatus")
     public String deviceAlarmStatus(Device device) {
-        return ObjectUtil.isNotEmpty(this.dataCache.get(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + device.getIp())) ? "已布防" : "未布防";
+        return ObjectUtil.isNotEmpty(this.dataCache.get(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + device.getDeviceSn())) ? "已布防" : "未布防";
     }
 
     /**
@@ -95,7 +95,7 @@ public class DeviceController {
      */
     @PostMapping("deviceClean")
     public boolean deviceClean(@RequestBody Device device) {
-        return this.hikDeviceService.clean(device.getIp());
+        return this.hikDeviceService.clean(device.getDeviceSn());
     }
 
     /**
@@ -221,10 +221,10 @@ public class DeviceController {
      */
     @PostMapping("existPushStream")
     public JSONObject existPushStream(@RequestBody Device device) {
-        this.hikCameraService.existPushStream(device.getIp());
+        this.hikCameraService.existPushStream(device.getDeviceSn());
         JSONObject result = new JSONObject();
         result.put("code", 0);
-        result.put("msg", "已退出推流:" + device.getIp());
+        result.put("msg", "已退出推流:" + device.getDeviceSn());
         return result;
     }
 
@@ -235,7 +235,7 @@ public class DeviceController {
      */
     @PostMapping("setupAlarm")
     public JSONObject setupAlarm(@RequestBody Device device) {
-        return this.hikAlarmDataService.setupAlarmChan(device.getIp());
+        return this.hikAlarmDataService.setupAlarmChan(device.getDeviceSn());
     }
 
     /**
@@ -245,6 +245,6 @@ public class DeviceController {
      */
     @PostMapping("closeAlarm")
     public JSONObject closeAlarm(@RequestBody Device device) {
-        return this.hikAlarmDataService.closeAlarmChan(device.getIp());
+        return this.hikAlarmDataService.closeAlarmChan(device.getDeviceSn());
     }
 }

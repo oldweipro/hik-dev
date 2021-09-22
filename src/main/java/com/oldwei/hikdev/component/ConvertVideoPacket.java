@@ -63,12 +63,12 @@ public class ConvertVideoPacket {
     /**
      * 设置流抓取器
      *
-     * @param grabber rtsp流地址
-     * @param out     输出地址/推流地址
-     * @param ip      推流设备IP地址/推流ID
+     * @param grabber  rtsp流地址
+     * @param out      输出地址/推流地址
+     * @param deviceSn 推流设备序列号/推流ID
      * @throws IOException 推流失败
      */
-    private void setGrabber(FFmpegFrameGrabber grabber, String out, String ip) throws IOException {
+    private void setGrabber(FFmpegFrameGrabber grabber, String out, String deviceSn) throws IOException {
         // 开始之后ffmpeg会采集视频信息，之后就可以获取音视频信息
         grabber.start();
         //一个opencv视频帧转换器
@@ -141,8 +141,8 @@ public class ConvertVideoPacket {
         //采集或推流导致的错误次数
         long errIndex = 0;
         //连续五次没有采集到帧则认为视频采集结束，程序错误次数超过1次即中断程序
-        log.info("推流 {} 开始 => {}", ip, LocalDateTime.now());
-        this.dataCache.set(DataCachePrefixConstant.HIK_PUSH_STATUS_IP + ip, 1);
+        log.info("推流 {} 开始 => {}", deviceSn, LocalDateTime.now());
+        this.dataCache.set(DataCachePrefixConstant.HIK_PUSH_STATUS_IP + deviceSn, 1);
         for (int noFrameIndex = 0; noFrameIndex < 5 || errIndex > 1; ) {
             try {
                 //没有解码的音视频帧
@@ -156,9 +156,9 @@ public class ConvertVideoPacket {
                 //不需要编码直接把音视频帧推出去
                 errIndex += (record.recordPacket(pkt) ? 0 : 1);
                 av_packet_unref(pkt);
-                Integer pushStatus = this.dataCache.getInteger(DataCachePrefixConstant.HIK_PUSH_STATUS_IP + ip);
+                Integer pushStatus = this.dataCache.getInteger(DataCachePrefixConstant.HIK_PUSH_STATUS_IP + deviceSn);
                 if (null != pushStatus && pushStatus == 0) {
-                    log.info("收到推流结束命令，退出推流：{}", ip);
+                    log.info("收到推流结束命令，退出推流：{}", deviceSn);
                     break;
                 }
             } catch (IOException e) {
@@ -167,6 +167,6 @@ public class ConvertVideoPacket {
                 errIndex++;
             }
         }
-        log.info("推流 {} 结束 => {}", ip, LocalDateTime.now());
+        log.info("推流 {} 结束 => {}", deviceSn, LocalDateTime.now());
     }
 }

@@ -11,18 +11,18 @@ public interface IHikAlarmDataService {
     /**
      * 设置报警 设备布防
      *
-     * @param ip 设备IP
+     * @param deviceSn 设备序列号
      * @return
      */
-    JSONObject setupAlarmChan(String ip);
+    JSONObject setupAlarmChan(String deviceSn);
 
     /**
      * 报警撤防 设备撤防
      *
-     * @param ip 设备IP
+     * @param deviceSn 设备序列号
      * @return
      */
-    JSONObject closeAlarmChan(String ip);
+    JSONObject closeAlarmChan(String deviceSn);
 
     /**
      * 启动监听

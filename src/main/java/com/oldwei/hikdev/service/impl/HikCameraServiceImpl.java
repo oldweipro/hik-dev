@@ -33,7 +33,7 @@ public class HikCameraServiceImpl implements IHikCameraService {
 
     @Override
     @Async("asyncServiceExecutor")
-    public void startPushStream(Integer userId, String ip, String pushUrl) {
+    public void startPushStream(Integer userId, String deviceSn, String pushUrl) {
         //======================管道流代码========================
         PipedInputStream pis = new PipedInputStream(5120);
         PipedOutputStream pos = new PipedOutputStream();
@@ -51,15 +51,15 @@ public class HikCameraServiceImpl implements IHikCameraService {
         int previewSucValue = this.hikDevService.NET_DVR_RealPlay_V30(userId, strClientInfo, hikCameraRealDataCallBack, null, true);
         //预览失败时:
         if (previewSucValue == -1) {
-            log.info(ip + "预览失败，previewSucValue的值：{}", previewSucValue);
+            log.info(deviceSn + "预览失败，previewSucValue的值：{}", previewSucValue);
         } else {
-            log.info(ip + "预览成功，previewSucValue：{}", previewSucValue);
+            log.info(deviceSn + "预览成功，previewSucValue：{}", previewSucValue);
         }
-        this.dataCache.set(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP + ip, previewSucValue);
+        this.dataCache.set(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP + deviceSn, previewSucValue);
         //======================开启设备预览========================
         //======================Javacv推流 pis管道流========================
         try {
-            this.convertVideoPacket.fromPis(pis, pushUrl, ip);
+            this.convertVideoPacket.fromPis(pis, pushUrl, deviceSn);
             pis.close();
             pos.close();
         } catch (IOException e) {
@@ -69,9 +69,9 @@ public class HikCameraServiceImpl implements IHikCameraService {
     }
 
     @Override
-    public void existPushStream(String ip) {
+    public void existPushStream(String deviceSn) {
         //获取sdk预览状态
-        Integer previewView = this.dataCache.getInteger(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP + ip);
+        Integer previewView = this.dataCache.getInteger(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP + deviceSn);
         if (null != previewView && previewView != -1) {
             if (this.hikDevService.NET_DVR_StopRealPlay(previewView)) {
                 log.info("退出SDK预览成功！");
@@ -80,10 +80,10 @@ public class HikCameraServiceImpl implements IHikCameraService {
             }
         }
         //将推流状态设置为0,在推流循环里会判断状态
-        this.dataCache.removeKey(DataCachePrefixConstant.HIK_PUSH_STATUS_IP + ip);
+        this.dataCache.removeKey(DataCachePrefixConstant.HIK_PUSH_STATUS_IP + deviceSn);
         //移除缓存中的拉流地址
-        this.dataCache.removeKey(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP + ip);
-        this.dataCache.removeKey(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP + ip);
+        this.dataCache.removeKey(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP + deviceSn);
+        this.dataCache.removeKey(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP + deviceSn);
     }
 
     @Override

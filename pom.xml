@@ -78,7 +78,7 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
-            <version>5.7.11</version>
+            <version>5.7.12</version>
         </dependency>
 
         <!-- mqtt -->

@@ -8,19 +8,19 @@ public interface IHikCameraService {
     /**
      * 开启sdk推流
      *
-     * @param userId  用户ID
-     * @param ip      开启推流的设备IP地址
-     * @param pushUrl 流媒体服务器推送地址
+     * @param userId   用户ID
+     * @param deviceSn 开启推流的设备序列号
+     * @param pushUrl  流媒体服务器推送地址
      */
-    void startPushStream(Integer userId, String ip, String pushUrl);
+    void startPushStream(Integer userId, String deviceSn, String pushUrl);
 
     /**
      * 退出推流
      *
-     * @param ip 退出推流的设备IP
+     * @param deviceSn 退出推流的设备序列号
      * @return
      */
-    void existPushStream(String ip);
+    void existPushStream(String deviceSn);
 
     /**
      * sdk录像

@@ -1,6 +1,7 @@
-package com.oldwei.hikdev.runner;
+package com.oldwei.hikdev.scheduled;
 
 import cn.hutool.core.util.IdUtil;
+import com.oldwei.hikdev.runner.UdpListener;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -8,7 +9,6 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 /**
  * @author oldwei
@@ -37,8 +37,10 @@ public class ScheduledTask {
     //
     //每天的0点、13点、18点、21点都执行一次：0 0 0,13,18,21 * * ?
 
-    private int i;
-
+    /**
+     * 一分钟执行一次
+     * @throws IOException
+     */
     @Scheduled(cron = "0 */1 * * * ?")
     public void searchHikDevice() throws IOException {
         String uuid = "<Probe><Uuid>" + IdUtil.randomUUID().toUpperCase() + "</Uuid><Types>inquiry</Types></Probe>";
@@ -46,6 +48,5 @@ public class ScheduledTask {
         byte[] data = uuid.getBytes();
         DatagramPacket packet = new DatagramPacket(data, data.length, address, 37020);
         UdpListener.datagramSocket.send(packet);
-        log.info("thread id: {}, searchHikDevice execute times:{}", Thread.currentThread().getId(), ++i);
     }
 }

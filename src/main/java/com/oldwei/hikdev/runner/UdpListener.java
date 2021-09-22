@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
@@ -34,6 +35,10 @@ public class UdpListener implements ServletContextListener {
      * 数据上传地址
      */
     public static String uploadDataUrl;
+
+    public static Integer projectId;
+    public static Integer tenantId;
+
     static {
         // 获取sdk/config文件夹下的配置文件
         String property = System.getProperty("user.dir") + "\\sdk\\config\\config.json";
@@ -42,11 +47,12 @@ public class UdpListener implements ServletContextListener {
         String result = fileReader.readString();
         // 格式化为json对象
         JSONObject jsonObject = JSONObject.parseObject(result);
-        log.info("格式化的json对象：{}", jsonObject);
         // udp监听端口
         updPort = jsonObject.getInteger("updPort");
         // 数据上传的地址
         uploadDataUrl = jsonObject.getString("uploadDataUrl");
+        projectId = jsonObject.getInteger("projectId");
+        tenantId = jsonObject.getInteger("tenantId");
         try {
             datagramSocket = new DatagramSocket(updPort);
         } catch (SocketException e) {
@@ -57,7 +63,6 @@ public class UdpListener implements ServletContextListener {
     @SneakyThrows
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        log.info("=============UDPListener============");
         ThreadUtil.execAsync(() -> {
             DatagramPacket packet;
             while (true) {
@@ -68,8 +73,12 @@ public class UdpListener implements ServletContextListener {
                 byte[] bufferData = packet.getData();
                 String decodeData = new String(bufferData, StandardCharsets.UTF_8).trim();
                 Map<String, Object> map = XmlUtil.xmlToMap(decodeData);
-                HttpUtil.post(uploadDataUrl, JSONObject.toJSONString(map));
-                log.info("=======Process decodeData UTF-8======{}", map);
+                map.put("projectId", projectId);
+                map.put("tenantId", tenantId);
+                ThreadUtil.execAsync(() -> {
+                    HttpUtil.post(uploadDataUrl, JSONObject.toJSONString(map));
+                });
+//                log.info("=======Process decodeData UTF-8======{}", map);
             }
         });
     }
