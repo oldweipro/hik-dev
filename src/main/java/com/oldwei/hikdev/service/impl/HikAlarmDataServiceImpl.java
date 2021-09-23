@@ -7,7 +7,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.oldwei.hikdev.component.AliyunPlatform;
 import com.oldwei.hikdev.constant.HikConstant;
 import com.oldwei.hikdev.constant.DataCachePrefixConstant;
-import com.oldwei.hikdev.mqtt.MqttConnectClient;
 import com.oldwei.hikdev.service.FMSGCallBack_V31;
 import com.oldwei.hikdev.service.IHikAlarmDataService;
 import com.oldwei.hikdev.service.IHikCardService;
@@ -41,8 +40,6 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
     private final FileStream fileStream;
 
     private final AliyunPlatform aliyunPlatform;
-
-    private final MqttConnectClient mqttConnectClient;
 
     private final IHikCardService hikCardService;
 
@@ -287,7 +284,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             map.put("alarmMsg", "移动侦测");
                             result.put("code", 3);
                             result.put("data", map);
-//                            this.mqttConnectClient.publish(result.toJSONString());
+//                            mqtt push
                             //==================写自己的业务代码===========================
                             break;
                         case 4:
@@ -535,7 +532,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                         JSONObject mqttMsg = new JSONObject();
                         mqttMsg.put("code", 4);
                         mqttMsg.put("data", data);
-//                        this.mqttConnectClient.publish(mqttMsg.toJSONString());
+//                        mqtt push
                         //TODO url处理
                         ThreadUtil.execAsync(() -> HttpUtil.post("http://localhost:4068/hik/api/accessControlEvent", JSONObject.toJSONString(mqttMsg)));
 
@@ -556,7 +553,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                                 JSONObject mqttMsg = new JSONObject();
                                 mqttMsg.put("code", 4);
                                 mqttMsg.put("data", data);
-//                                this.mqttConnectClient.publish(mqttMsg.toJSONString());
+//                                mqtt push
                                 //TODO url处理
                                 ThreadUtil.execAsync(() -> HttpUtil.post("http://localhost:4068/hik/api/accessControlEvent", JSONObject.toJSONString(mqttMsg)));
                             }

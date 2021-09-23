@@ -14,7 +14,6 @@ public class Device implements Serializable {
     private String ip;
     private String username;
     private String password;
-    private String deviceSn;
     private Short port;
     private String title;
     private String flv;
@@ -24,4 +23,5 @@ public class Device implements Serializable {
     private Byte type;
     private String rtspUrl;
     private String pushUrl;
+    private String deviceSn;
 }

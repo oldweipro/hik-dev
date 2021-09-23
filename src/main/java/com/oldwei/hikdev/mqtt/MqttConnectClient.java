@@ -2,7 +2,6 @@ package com.oldwei.hikdev.mqtt;
 
 import cn.hutool.core.util.RandomUtil;
 import com.oldwei.hikdev.service.IAccessControlService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
@@ -10,13 +9,14 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 /**
  * @author oldwei
  * @date 2021-5-10 14:47
  */
 @Slf4j
-@RequiredArgsConstructor
+@Component
 public class MqttConnectClient {
 
     @Value("${mqtt.settings.sub-topic}")
@@ -29,7 +29,6 @@ public class MqttConnectClient {
     private String username;
     @Value("${mqtt.settings.broker}")
     private String broker;
-    private final IAccessControlService accessControlService;
 
     private MqttClient mqttClient;
 
@@ -86,17 +85,12 @@ public class MqttConnectClient {
         }
     }
 
-    public void commandMqtt(String command) {
-        String result = this.accessControlService.commandMqtt(command);
-        this.publish(result);
-    }
-
     public void close() {
         try {
             this.mqttClient.disconnect();
-            log.info("Disconnected");
+            log.info("Mqtt Disconnected");
             this.mqttClient.close();
-            System.exit(0);
+            log.info("Mqtt Closed");
         } catch (MqttException me) {
             me.printStackTrace();
         }

@@ -16,14 +16,14 @@ public class HikConfiguration {
 
     @Bean
     public IHikDevService hikDevService() {
-        IHikDevService hikDevService = (IHikDevService) Native.loadLibrary(System.getProperty("user.dir") + "\\sdk\\HCNetSDK.dll", IHikDevService.class);
+        IHikDevService hikDevService = (IHikDevService) Native.loadLibrary(System.getProperty("user.dir") + "\\sdk\\windows\\HCNetSDK.dll", IHikDevService.class);
         hikDevService.NET_DVR_Init();
         return hikDevService;
     }
 
     @Bean
     public IHikPlayCtrlService hikPlayCtrlService() {
-        return (IHikPlayCtrlService) Native.loadLibrary(System.getProperty("user.dir") + "\\sdk\\PlayCtrl.dll", IHikPlayCtrlService.class);
+        return (IHikPlayCtrlService) Native.loadLibrary(System.getProperty("user.dir") + "\\sdk\\windows\\PlayCtrl.dll", IHikPlayCtrlService.class);
     }
 
     @Bean

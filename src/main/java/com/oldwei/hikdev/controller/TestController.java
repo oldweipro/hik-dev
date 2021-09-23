@@ -4,7 +4,6 @@ import cn.hutool.core.util.IdUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.oldwei.hikdev.component.AliyunPlatform;
 import com.oldwei.hikdev.entity.StreamAddress;
-import com.oldwei.hikdev.mqtt.MqttConnectClient;
 import com.oldwei.hikdev.constant.DataCachePrefixConstant;
 import com.oldwei.hikdev.runner.UdpListener;
 import com.oldwei.hikdev.service.IAccessControlService;
@@ -30,21 +29,10 @@ import java.util.*;
 @RequiredArgsConstructor
 @RequestMapping("/test")
 public class TestController {
-    private final MqttConnectClient mqttConnectClient;
     private final DataCache dataCache;
     private final IHikCameraService hikCameraService;
     private final IAccessControlService accessControlService;
     private final AliyunPlatform aliyunPlatform;
-
-    /**
-     * mqtt发送消息
-     *
-     * @param msg
-     */
-    @RequestMapping("sendMsg")
-    public void sendMsg(String msg) {
-        this.mqttConnectClient.publish(msg);
-    }
 
     /**
      * 设置内存信息 key value
@@ -104,6 +92,7 @@ public class TestController {
      */
     @PostMapping("getMemory")
     public Map<String, Object> getMemory() {
+        log.info("httpUtil");
         return this.dataCache.getData();
     }
 

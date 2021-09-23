@@ -49,4 +49,17 @@ public class ScheduledTask {
         DatagramPacket packet = new DatagramPacket(data, data.length, address, 37020);
         UdpListener.datagramSocket.send(packet);
     }
+
+    /**
+     * 获取云端设备列表进行登录
+     * @throws IOException
+     */
+    @Scheduled(cron = "0 */1 * * * ?")
+    public void getHikDeviceAndLogin() {
+        // 根据项目id获取云端设备列表
+
+        // 比对当前登录设备
+
+        // 登录需要登陆的设备
+    }
 }
