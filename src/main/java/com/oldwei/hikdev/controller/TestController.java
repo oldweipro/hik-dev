@@ -1,11 +1,14 @@
 package com.oldwei.hikdev.controller;
 
+import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.setting.Setting;
 import com.alibaba.fastjson.JSONObject;
 import com.oldwei.hikdev.component.AliyunPlatform;
+import com.oldwei.hikdev.entity.ConfigSettingBean;
 import com.oldwei.hikdev.entity.StreamAddress;
 import com.oldwei.hikdev.constant.DataCachePrefixConstant;
-import com.oldwei.hikdev.runner.UdpListener;
+import com.oldwei.hikdev.component.UdpDatagramSocket;
 import com.oldwei.hikdev.service.IAccessControlService;
 import com.oldwei.hikdev.service.IHikCameraService;
 import com.oldwei.hikdev.component.DataCache;
@@ -15,7 +18,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.*;
 
 /**
@@ -33,6 +38,8 @@ public class TestController {
     private final IHikCameraService hikCameraService;
     private final IAccessControlService accessControlService;
     private final AliyunPlatform aliyunPlatform;
+    private final UdpDatagramSocket udpDatagramSocket;
+    private final Setting configSetting;
 
     /**
      * 设置内存信息 key value
@@ -54,18 +61,6 @@ public class TestController {
     @GetMapping("getMsg")
     public String getMsg(String key) {
         return this.dataCache.getString(key);
-    }
-
-    /**
-     * 接收MQTT传输的指令进行相关操作
-     * TODO 将来会进行归档整理，详细指令进入AccessControlServiceImpl.class查看
-     *
-     * @param command
-     * @return
-     */
-    @PostMapping("commandMqtt")
-    public String commandMqtt(@RequestBody JSONObject command) {
-        return this.accessControlService.commandMqtt(command.toJSONString());
     }
 
     /**
@@ -111,7 +106,22 @@ public class TestController {
         String uuid = "<Probe><Uuid>" + IdUtil.randomUUID().toUpperCase() + "</Uuid><Types>inquiry</Types></Probe>";
         InetAddress address = InetAddress.getByName("239.255.255.250");
         byte[] data = uuid.getBytes();
-        DatagramPacket packet = new DatagramPacket(data, data.length, address, 37020);
-        UdpListener.datagramSocket.send(packet);
+        ConfigSettingBean configSettingBean = new ConfigSettingBean();
+        this.configSetting.toBean(configSettingBean);
+        DatagramPacket packet = new DatagramPacket(data, data.length, address, configSettingBean.getUdpPort());
+        DatagramSocket datagramSocket = this.udpDatagramSocket.getDatagramSocket();
+        LinkedHashSet<String> strings = NetUtil.localIpv4s();
+        for (String ip : strings) {
+            InetSocketAddress inetSocketAddress = new InetSocketAddress(ip, configSettingBean.getUdpPort());
+            datagramSocket.bind(inetSocketAddress);
+            datagramSocket.send(packet);
+        }
+    }
+
+    @GetMapping("getConfigSettingBean")
+    public ConfigSettingBean getConfigSettingBean() {
+        ConfigSettingBean configSettingBean = new ConfigSettingBean();
+        this.configSetting.toBean(configSettingBean);
+        return configSettingBean;
     }
 }

@@ -1,7 +1,9 @@
 package com.oldwei.hikdev.scheduled;
 
 import cn.hutool.core.util.IdUtil;
-import com.oldwei.hikdev.runner.UdpListener;
+import cn.hutool.setting.Setting;
+import com.oldwei.hikdev.component.UdpDatagramSocket;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -16,7 +18,10 @@ import java.net.InetAddress;
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class ScheduledTask {
+    private final UdpDatagramSocket udpDatagramSocket;
+    private final Setting configSetting;
     // Cron表达式范例：
     //
     //每隔5秒执行一次：*/5 * * * * ?
@@ -47,7 +52,7 @@ public class ScheduledTask {
         InetAddress address = InetAddress.getByName("239.255.255.250");
         byte[] data = uuid.getBytes();
         DatagramPacket packet = new DatagramPacket(data, data.length, address, 37020);
-        UdpListener.datagramSocket.send(packet);
+        this.udpDatagramSocket.getDatagramSocket().send(packet);
     }
 
     /**
