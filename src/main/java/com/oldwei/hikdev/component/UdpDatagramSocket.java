@@ -42,7 +42,7 @@ public class UdpDatagramSocket {
             e.printStackTrace();
         }
     }
-
+    @SuppressWarnings("InfiniteLoopStatement")
     private void setUdpListener() {
         ThreadUtil.execAsync(() -> {
             DatagramPacket packet;

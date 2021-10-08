@@ -13,7 +13,8 @@ import java.util.List;
 @Data
 public class AccessPeople implements Serializable {
     private static final long serialVersionUID = 6585020083695187516L;
-    private String employeeNo;
+    private String deviceSn;
+    private Integer employeeNo;
     @JSONField(name = "name", serialize = false)
     private String realName;
     @JSONField(deserialize = false)
@@ -36,6 +37,8 @@ public class AccessPeople implements Serializable {
     private Boolean openDelayEnabled = false;
     private Boolean checkUser = false;
     private List<RightPlan> rightPlan;
+    @JSONField(name = "PersonInfoExtends")
     private List<PersonInfoExtends> personInfoExtends;
+    @JSONField(name = "Valid")
     private Valid valid;
 }

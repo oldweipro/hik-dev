@@ -26,7 +26,7 @@ public class FileStream {
      * @return 文件绝对路径
      */
     public String touchJpg() {
-        return this.touchFile(".jpg");
+        return this.touchSuffixFile(".jpg");
     }
 
     /**
@@ -35,16 +35,25 @@ public class FileStream {
      * @return 文件绝对路径
      */
     public String touchJson() {
-        return this.touchFile(".json");
+        return this.touchSuffixFile(".json");
+    }
+
+    /**
+     * 创建json文件
+     *
+     * @return 文件绝对路径
+     */
+    public String touchPdf() {
+        return this.touchSuffixFile(".pdf");
     }
 
     /**
      * 创建文件
      *
-     * @param suffix 后缀名
+     * @param suffix 后缀名:.json/.pdf/.jpg/...
      * @return 文件绝对路径
      */
-    public String touchFile(String suffix) {
+    public String touchSuffixFile(String suffix) {
         String filename = RandomUtil.randomString(32) + suffix;
         String path = System.getProperty("user.dir") + "/" + outputDir + "/" + DateUtil.thisYear() + "/" + DateUtil.thisMonth() + "/" + DateUtil.thisDayOfMonth() + "/" + filename;
         FileUtil.touch(path);

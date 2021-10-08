@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 /**
+ * 门禁 以卡为中心
  * @author oldwei
  * @date 2021-7-7 16:55
  */
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/access/card")
+@Deprecated
 public class AccessCardController {
     private final IHikCardService hikCardService;
 
@@ -21,6 +23,7 @@ public class AccessCardController {
      * 设置
      */
     @GetMapping("setCartTemplate")
+    @Deprecated
     public void setCartTemplate(Integer planTemplateNumber, String ip) {
         this.hikCardService.setCartTemplate(planTemplateNumber, ip);
     }
@@ -31,6 +34,7 @@ public class AccessCardController {
      * @param ip
      * @return
      */
+    @Deprecated
     @GetMapping("selectCardInfoByDeviceIp")
     public JSONObject selectCardInfoByDeviceIp(String ip) {
         return this.hikCardService.selectCardInfoByDeviceIp(ip);
@@ -42,6 +46,7 @@ public class AccessCardController {
      * @param jsonObject 卡信息
      * @return
      */
+    @Deprecated
     @PostMapping("distributeMultiCard")
     public JSONObject distributeMultiCard(@RequestBody JSONObject jsonObject) {
         return this.hikCardService.distributeMultiCard(jsonObject);
@@ -53,6 +58,7 @@ public class AccessCardController {
      * @param jsonObject 人脸信息
      * @return
      */
+    @Deprecated
     @PostMapping("distributeMultiFace")
     public JSONObject distributeMultiFace(@RequestBody JSONObject jsonObject) {
         return this.hikCardService.distributeMultiFace(jsonObject);
@@ -64,6 +70,7 @@ public class AccessCardController {
      * @param jsonObject
      * @return
      */
+    @Deprecated
     @PostMapping("deleteFaceByCardNo")
     public JSONObject deleteFaceByCardNo(@RequestBody JSONObject jsonObject) {
         return this.hikCardService.deleteFaceByCardNo(jsonObject);
@@ -75,6 +82,7 @@ public class AccessCardController {
      * @param jsonObject
      * @return
      */
+    @Deprecated
     @PostMapping("deleteCardByCardNo")
     public JSONObject deleteCardByCardNo(@RequestBody JSONObject jsonObject) {
         return this.hikCardService.deleteCardByCardNo(jsonObject);

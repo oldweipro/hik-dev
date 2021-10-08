@@ -64,7 +64,7 @@ public class GoController {
         Integer code = obj.getInteger("code");
         switch (code) {
             case 1000:
-                this.hikDeviceService.deviceLogin(obj.getObject("data", Device.class));
+                this.hikDeviceService.login(obj.getObject("data", Device.class));
                 break;
             case 1001:
                 this.hikDeviceService.clean(obj.getJSONObject("data").getString("deviceSn"));

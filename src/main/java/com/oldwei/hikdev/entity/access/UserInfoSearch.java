@@ -1,5 +1,6 @@
 package com.oldwei.hikdev.entity.access;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -12,9 +13,16 @@ import java.util.List;
 @Data
 public class UserInfoSearch implements Serializable {
     private static final long serialVersionUID = -2921813780729268051L;
-    private String responseStatusStrg;
-    private String searchID;
-    private Integer numOfMatches;
-    private Integer totalMatches;
+
+    @JSONField(name = "responseStatusStrg")
+    private String responseStatus;
+    @JSONField(name = "searchID")
+    private String searchId;
+    private Integer pageNum;
+    @JSONField(name = "numOfMatches")
+    private Integer pageSize;
+    @JSONField(name = "totalMatches")
+    private Integer totals;
+    @JSONField(name = "UserInfo")
     private List<AccessPeople> userInfo;
 }

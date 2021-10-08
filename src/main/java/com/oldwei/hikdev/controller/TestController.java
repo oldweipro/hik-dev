@@ -71,7 +71,7 @@ public class TestController {
      */
     @PostMapping("saveCameraData")
     public String saveCameraData(@RequestBody JSONObject jsonObject) {
-        Integer previewSucValue = this.dataCache.getInteger(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP + jsonObject.getString("ip"));
+        Integer previewSucValue = this.dataCache.getInteger(DataCachePrefixConstant.HIK_PREVIEW_VIEW + jsonObject.getString("deviceSn"));
         if (null == previewSucValue || previewSucValue == -1) {
             log.error("设备未开启预览");
             return "设备未开启预览";

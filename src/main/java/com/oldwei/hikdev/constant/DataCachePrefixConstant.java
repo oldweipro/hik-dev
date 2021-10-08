@@ -8,29 +8,29 @@ public interface DataCachePrefixConstant {
     /**
      * 设备注册
      */
-    String HIK_REG_USERID_IP = "hik:reg:userid:ip:";
+    String HIK_REG_USERID = "hik:reg:userid:sn:";
     /**
      * 设备预览
      */
-    String HIK_PREVIEW_VIEW_IP = "hik:preview:view:ip:";
+    String HIK_PREVIEW_VIEW = "hik:preview:view:sn:";
     /**
      * 设备推流0：关闭 1：开启
      */
-    String HIK_PUSH_STATUS_IP = "hik:push:status:ip:";
+    String HIK_PUSH_STATUS = "hik:push:status:sn:";
     /**
      * 设备布防
      */
-    String HIK_ALARM_HANDLE_IP = "hik:alarm:handle:ip:";
+    String HIK_ALARM_HANDLE = "hik:alarm:handle:sn:";
     /**
      * 设备监听
      */
-    String HIK_ALARM_LISTEN_IP = "hik:alarm:listen:ip:";
+    String HIK_ALARM_LISTEN = "hik:alarm:listen:sn:";
     /**
      * 设备编码
      */
-    String HIK_REG_CHAR_ENCODE_TYPE_IP = "hik:reg:char:encode:type:ip:";
+    String HIK_REG_CHAR_ENCODE_TYPE = "hik:reg:char:encode:type:sn:";
     /**
      * 设备拉流地址
      */
-    String HIK_PUSH_PULL_STREAM_ADDRESS_IP = "hik:push:pull:stream:address:ip:";
+    String HIK_PUSH_PULL_STREAM_ADDRESS = "hik:push:pull:stream:address:sn:";
 }

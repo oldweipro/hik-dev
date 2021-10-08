@@ -230,7 +230,7 @@ public class HikUserServiceImpl implements IHikUserService {
         //字符串拷贝到数组中
         BYTE_ARRAY ptrByteArray = new BYTE_ARRAY(1024);
 
-        String employeeNo = people.getEmployeeNo();
+        Integer employeeNo = people.getEmployeeNo();
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("faceLibType", "blackFD");
         jsonObject.put("FDID", "1");
@@ -343,7 +343,7 @@ public class HikUserServiceImpl implements IHikUserService {
 
     private Integer startRemoteConfig(String ip, String urlInBuffer, int dwCommand) {
         // 获取用户句柄
-        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + ip);
+        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + ip);
         if (null != longUserId && longUserId != -1) {
             //  数组
             BYTE_ARRAY ptrByteArray = new BYTE_ARRAY(1024);
@@ -381,12 +381,7 @@ public class HikUserServiceImpl implements IHikUserService {
 
         JSONObject result = new JSONObject();
         // 获取用户句柄
-        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + ip);
-        if (null == longUserId) {
-            result.put("code", -1);
-            result.put("msg", "设备状态未注册！");
-            return result;
-        }
+        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + ip);
 
         NET_DVR_XML_CONFIG_INPUT strXMLInput = new NET_DVR_XML_CONFIG_INPUT();
         strXMLInput.read();

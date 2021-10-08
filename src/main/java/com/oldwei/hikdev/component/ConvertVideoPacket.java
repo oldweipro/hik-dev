@@ -142,7 +142,7 @@ public class ConvertVideoPacket {
         long errIndex = 0;
         //连续五次没有采集到帧则认为视频采集结束，程序错误次数超过1次即中断程序
         log.info("推流 {} 开始 => {}", deviceSn, LocalDateTime.now());
-        this.dataCache.set(DataCachePrefixConstant.HIK_PUSH_STATUS_IP + deviceSn, 1);
+        this.dataCache.set(DataCachePrefixConstant.HIK_PUSH_STATUS + deviceSn, 1);
         for (int noFrameIndex = 0; noFrameIndex < 5 || errIndex > 1; ) {
             try {
                 //没有解码的音视频帧
@@ -156,7 +156,7 @@ public class ConvertVideoPacket {
                 //不需要编码直接把音视频帧推出去
                 errIndex += (record.recordPacket(pkt) ? 0 : 1);
                 av_packet_unref(pkt);
-                Integer pushStatus = this.dataCache.getInteger(DataCachePrefixConstant.HIK_PUSH_STATUS_IP + deviceSn);
+                Integer pushStatus = this.dataCache.getInteger(DataCachePrefixConstant.HIK_PUSH_STATUS + deviceSn);
                 if (null != pushStatus && pushStatus == 0) {
                     log.info("收到推流结束命令，退出推流：{}", deviceSn);
                     break;

@@ -1,6 +1,7 @@
 package com.oldwei.hikdev.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.oldwei.hikdev.entity.HikDevResponse;
 
 /**
  * @author oldwei
@@ -14,7 +15,7 @@ public interface IHikAlarmDataService {
      * @param deviceSn 设备序列号
      * @return
      */
-    JSONObject setupAlarmChan(String deviceSn);
+    HikDevResponse setupAlarmChan(String deviceSn);
 
     /**
      * 报警撤防 设备撤防
@@ -22,7 +23,7 @@ public interface IHikAlarmDataService {
      * @param deviceSn 设备序列号
      * @return
      */
-    JSONObject closeAlarmChan(String deviceSn);
+    HikDevResponse closeAlarmChan(String deviceSn);
 
     /**
      * 启动监听

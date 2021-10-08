@@ -55,7 +55,7 @@ public class HikCameraServiceImpl implements IHikCameraService {
         } else {
             log.info(deviceSn + "预览成功，previewSucValue：{}", previewSucValue);
         }
-        this.dataCache.set(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP + deviceSn, previewSucValue);
+        this.dataCache.set(DataCachePrefixConstant.HIK_PREVIEW_VIEW + deviceSn, previewSucValue);
         //======================开启设备预览========================
         //======================Javacv推流 pis管道流========================
         try {
@@ -71,7 +71,7 @@ public class HikCameraServiceImpl implements IHikCameraService {
     @Override
     public void existPushStream(String deviceSn) {
         //获取sdk预览状态
-        Integer previewView = this.dataCache.getInteger(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP + deviceSn);
+        Integer previewView = this.dataCache.getInteger(DataCachePrefixConstant.HIK_PREVIEW_VIEW + deviceSn);
         if (null != previewView && previewView != -1) {
             if (this.hikDevService.NET_DVR_StopRealPlay(previewView)) {
                 log.info("退出SDK预览成功！");
@@ -80,10 +80,10 @@ public class HikCameraServiceImpl implements IHikCameraService {
             }
         }
         //将推流状态设置为0,在推流循环里会判断状态
-        this.dataCache.removeKey(DataCachePrefixConstant.HIK_PUSH_STATUS_IP + deviceSn);
+        this.dataCache.removeKey(DataCachePrefixConstant.HIK_PUSH_STATUS + deviceSn);
         //移除缓存中的拉流地址
-        this.dataCache.removeKey(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP + deviceSn);
-        this.dataCache.removeKey(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP + deviceSn);
+        this.dataCache.removeKey(DataCachePrefixConstant.HIK_PREVIEW_VIEW + deviceSn);
+        this.dataCache.removeKey(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS + deviceSn);
     }
 
     @Override

@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.oldwei.hikdev.component.AliyunPlatform;
 import com.oldwei.hikdev.constant.HikConstant;
 import com.oldwei.hikdev.constant.DataCachePrefixConstant;
+import com.oldwei.hikdev.entity.HikDevResponse;
 import com.oldwei.hikdev.service.FMSGCallBack_V31;
 import com.oldwei.hikdev.service.IHikAlarmDataService;
 import com.oldwei.hikdev.service.IHikCardService;
@@ -50,8 +51,8 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
     }
 
     @Override
-    public JSONObject setupAlarmChan(String deviceSn) {
-        JSONObject result = new JSONObject();
+    public HikDevResponse setupAlarmChan(String deviceSn) {
+        HikDevResponse result = new HikDevResponse();
         NET_DVR_LOCAL_GENERAL_CFG struGeneralCfg = new NET_DVR_LOCAL_GENERAL_CFG();
         // 控制JSON透传报警数据和图片是否分离，0-不分离，1-分离（分离后走COMM_ISAPI_ALARM回调返回）
         struGeneralCfg.byAlarmJsonPictureSeparate = 1;
@@ -59,11 +60,9 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
 
         if (!this.hikDevService.NET_DVR_SetSDKLocalCfg(17, struGeneralCfg.getPointer())) {
             log.info("NET_DVR_SetSDKLocalCfg失败");
-            result.put("code", -1);
-            result.put("msg", "NET_DVR_StopRemoteConfig接口调用失败，错误码：" + this.hikDevService.NET_DVR_GetLastError());
-            return result;
+            return result.err("NET_DVR_StopRemoteConfig接口调用失败，错误码：" + this.hikDevService.NET_DVR_GetLastError());
         }
-        Integer longAlarmHandle = this.dataCache.getInteger(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + deviceSn);
+        Integer longAlarmHandle = this.dataCache.getInteger(DataCachePrefixConstant.HIK_ALARM_HANDLE + deviceSn);
         if (null == longAlarmHandle || longAlarmHandle < 0) {
             //尚未布防,需要布防
             Pointer pUser = null;
@@ -80,44 +79,34 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
             //布防类型(仅针对门禁主机、人证设备)：0-客户端布防(会断网续传)，1-实时布防(只上传实时数据)
             mStrAlarmInfo.byDeployType = 0;
             mStrAlarmInfo.write();
-            Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + deviceSn);
-            if (null == longUserId) {
-                result.put("code", -1);
-                result.put("msg", "设备状态未注册！");
-                return result;
-            }
+            Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + deviceSn);
             longAlarmHandle = this.hikDevService.NET_DVR_SetupAlarmChan_V41(longUserId, mStrAlarmInfo);
             if (longAlarmHandle == -1) {
                 log.info("布防失败，错误号:{}", this.hikDevService.NET_DVR_GetLastError());
-                result.put("code", -1);
-                result.put("msg", "布防失败，错误号:" + this.hikDevService.NET_DVR_GetLastError());
+                result.err("布防失败，错误号:" + this.hikDevService.NET_DVR_GetLastError());
             } else {
                 log.info("布防成功");
-                this.dataCache.set(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + deviceSn, longAlarmHandle);
-                result.put("code", 0);
-                result.put("msg", "布防成功！");
+                this.dataCache.set(DataCachePrefixConstant.HIK_ALARM_HANDLE + deviceSn, longAlarmHandle);
+                result.ok("布防成功！");
             }
         }
         return result;
     }
 
     @Override
-    public JSONObject closeAlarmChan(String ip) {
-        JSONObject result = new JSONObject();
+    public HikDevResponse closeAlarmChan(String ip) {
+        HikDevResponse result = new HikDevResponse();
         //报警撤防
-        Integer longAlarmHandle = this.dataCache.getInteger(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + ip);
+        Integer longAlarmHandle = this.dataCache.getInteger(DataCachePrefixConstant.HIK_ALARM_HANDLE + ip);
         if (null != longAlarmHandle && longAlarmHandle > -1) {
             if (this.hikDevService.NET_DVR_CloseAlarmChan_V30(longAlarmHandle)) {
-                this.dataCache.removeKey(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + ip);
-                result.put("code", 0);
-                result.put("msg", "撤防成功");
+                this.dataCache.removeKey(DataCachePrefixConstant.HIK_ALARM_HANDLE + ip);
+                result.ok("撤防成功");
             } else {
-                result.put("code", -1);
-                result.put("msg", "撤防失败");
+                result.err("撤防失败");
             }
         } else {
-            result.put("code", -1);
-            result.put("msg", "未布防，无须撤防");
+            result.err("未布防，无须撤防");
         }
         return result;
     }
@@ -131,7 +120,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
         // TODO something... fMSFCallBack = new FMSGCallBack(); let me try FMSGCallBack_V31
         Pointer pUser = null;
         int startListenV30 = this.hikDevService.NET_DVR_StartListen_V30(ip, port, null, pUser);
-        this.dataCache.set(DataCachePrefixConstant.HIK_ALARM_LISTEN_IP + ip, startListenV30);
+        this.dataCache.set(DataCachePrefixConstant.HIK_ALARM_LISTEN + ip, startListenV30);
         if (startListenV30 < 0) {
             log.info("启动监听失败，错误号:{}", this.hikDevService.NET_DVR_GetLastError());
             result.put("code", -1);
@@ -148,7 +137,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
     public JSONObject stopAlarmListen(JSONObject jsonObject) {
         JSONObject result = new JSONObject();
         String ip = jsonObject.getString("ip");
-        Integer startListenV30 = this.dataCache.getInteger(DataCachePrefixConstant.HIK_ALARM_LISTEN_IP + ip);
+        Integer startListenV30 = this.dataCache.getInteger(DataCachePrefixConstant.HIK_ALARM_LISTEN + ip);
         if (null == startListenV30 || startListenV30 < 0) {
             result.put("code", 0);
             result.put("msg", "停止监听成功");

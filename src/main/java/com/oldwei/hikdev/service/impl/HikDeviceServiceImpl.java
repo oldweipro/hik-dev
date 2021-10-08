@@ -26,10 +26,10 @@ public class HikDeviceServiceImpl implements IHikDeviceService {
 
     @Override
     public boolean clean(String deviceSn) {
-        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + deviceSn);
+        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + deviceSn);
         //退出的时候注销\释放SDK资源
         if (null != longUserId && longUserId != -1) {
-            this.dataCache.removeKey(DataCachePrefixConstant.HIK_REG_USERID_IP + deviceSn);
+            this.dataCache.removeKey(DataCachePrefixConstant.HIK_REG_USERID + deviceSn);
             return hikDevService.NET_DVR_Logout(longUserId);
         }
         return true;
@@ -44,7 +44,7 @@ public class HikDeviceServiceImpl implements IHikDeviceService {
      * @return
      */
     @Override
-    public boolean deviceLogin(Device device) {
+    public boolean login(Device device) {
         // 初始化设备登录信息
         NET_DVR_USER_LOGIN_INFO netDvrUserLoginInfo = new NET_DVR_USER_LOGIN_INFO();
         //设备ip地址
@@ -67,10 +67,10 @@ public class HikDeviceServiceImpl implements IHikDeviceService {
             log.info("登录失败，错误码为:" + hikDevService.NET_DVR_GetLastError());
             return false;
         } else {
-            this.dataCache.set(DataCachePrefixConstant.HIK_REG_USERID_IP + device.getDeviceSn(), longUserId);
+            this.dataCache.set(DataCachePrefixConstant.HIK_REG_USERID + device.getDeviceSn(), longUserId);
             //设备字符集
             int iCharEncodeType = netDvrDeviceInfoV40.byCharEncodeType;
-            this.dataCache.set(DataCachePrefixConstant.HIK_REG_CHAR_ENCODE_TYPE_IP + device.getDeviceSn(), iCharEncodeType);
+            this.dataCache.set(DataCachePrefixConstant.HIK_REG_CHAR_ENCODE_TYPE + device.getDeviceSn(), iCharEncodeType);
             return true;
         }
     }

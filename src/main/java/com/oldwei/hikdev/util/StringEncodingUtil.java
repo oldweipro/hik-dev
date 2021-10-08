@@ -1,5 +1,6 @@
 package com.oldwei.hikdev.util;
 
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.mozilla.universalchardet.UniversalDetector;
@@ -26,7 +27,7 @@ public class StringEncodingUtil {
         String encoding = detector.getDetectedCharset();
         detector.reset();
         String strName = "";
-        if (StrUtil.isNotBlank(encoding) && StrUtil.equals("UTF-8", encoding)) {
+        if (StrUtil.isNotBlank(encoding) && StrUtil.equals(CharsetUtil.UTF_8, encoding)) {
             strName = new String(bytes, StandardCharsets.UTF_8).trim();
         } else {
             try {

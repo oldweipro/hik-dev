@@ -21,6 +21,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/access/people")
+@Deprecated
 public class AccessPeopleController {
 
     private final IHikUserService hikUserService;
@@ -34,6 +35,7 @@ public class AccessPeopleController {
      * @param queryRequest 分页数据
      * @return
      */
+    @Deprecated
     @GetMapping("searchPeoples/{ip}")
     public JSONObject searchPeoples(@PathVariable String ip, String employeeNos, QueryRequest queryRequest) {
         String[] ids = {};
@@ -50,6 +52,7 @@ public class AccessPeopleController {
      * @param people employeeNo
      * @return
      */
+    @Deprecated
     @GetMapping("searchPeopleFace/{ip}")
     public JSONObject searchPeopleFace(@PathVariable String ip, AccessPeople people) {
         return this.hikUserService.searchFaceInfo(ip, people);
@@ -62,6 +65,7 @@ public class AccessPeopleController {
      * @param people 工号和真实姓名
      * @return
      */
+    @Deprecated
     @PostMapping("addPeople/{ip}")
     public JSONObject addPeople(@PathVariable String ip, @RequestBody AccessPeople people) {
         return this.hikUserService.addUserInfo(ip, people);
@@ -74,6 +78,7 @@ public class AccessPeopleController {
      * @param people 工号和真实姓名
      * @return
      */
+    @Deprecated
     @PostMapping("modifyPeople/{ip}")
     public JSONObject modifyPeople(@PathVariable String ip, @RequestBody AccessPeople people) {
         return this.hikUserService.modifyUserInfo(ip, people);
@@ -86,6 +91,7 @@ public class AccessPeopleController {
      * @param peopleList 用户列表
      * @return
      */
+    @Deprecated
     @PostMapping("addMultiPeople/{ip}")
     public JSONObject addMultiPeople(@PathVariable String ip, @RequestBody List<AccessPeople> peopleList) {
         return this.hikUserService.addMultiUserInfo(ip, peopleList);
@@ -98,6 +104,7 @@ public class AccessPeopleController {
      * @param people 用户列表
      * @return
      */
+    @Deprecated
     @PostMapping("addPeopleFace/{ip}")
     public JSONObject addPeopleFace(@PathVariable String ip, @RequestBody AccessPeople people) {
         return this.hikUserService.addPeopleFace(ip, people);
@@ -110,6 +117,7 @@ public class AccessPeopleController {
      * @param peopleList 用户列表
      * @return
      */
+    @Deprecated
     @PostMapping("addMultiPeopleFace/{ip}")
     public JSONObject addMultiPeopleFace(@PathVariable String ip, @RequestBody List<AccessPeople> peopleList) {
         return this.hikUserService.addMultiFace(ip, peopleList);
@@ -122,6 +130,7 @@ public class AccessPeopleController {
      * @param employeeIds 用户ID列表 employeeIds
      * @return
      */
+    @Deprecated
     @PostMapping("delMultiPeopleFace/{ip}")
     public JSONObject delMultiPeopleFace(@PathVariable String ip, @RequestParam String employeeIds) {
         String[] ids = employeeIds.split(",");
@@ -135,6 +144,7 @@ public class AccessPeopleController {
      * @param employeeIds 用户ID列表
      * @return
      */
+    @Deprecated
     @PostMapping("delMultiPeople/{ip}")
     public JSONObject delMultiPeople(@PathVariable String ip, @RequestParam String employeeIds) {
         String[] ids = employeeIds.split(",");

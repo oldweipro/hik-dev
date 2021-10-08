@@ -13,7 +13,7 @@ public interface IHikDeviceService {
      * @param device
      * @return
      */
-    boolean deviceLogin(Device device);
+    boolean login(Device device);
 
     /**
      * 清除设备注册

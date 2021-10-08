@@ -57,7 +57,7 @@ public class AccessControlServiceImpl implements IAccessControlService {
             case "HIK_DEVICE_LOGIN":
                 //设备登录 Done.
                 Device device = data.toJavaObject(Device.class);
-                boolean b = this.hikDeviceService.deviceLogin(device);
+                boolean b = this.hikDeviceService.login(device);
                 if (b) {
                     result.put("code", 0);
                     result.put("event", data.getString("event"));

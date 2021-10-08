@@ -4,10 +4,13 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.oldwei.hikdev.annotation.CheckDeviceLogin;
 import com.oldwei.hikdev.component.AliyunPlatform;
 import com.oldwei.hikdev.constant.DataCachePrefixConstant;
 import com.oldwei.hikdev.entity.Device;
+import com.oldwei.hikdev.entity.HikDevResponse;
 import com.oldwei.hikdev.entity.StreamAddress;
+import com.oldwei.hikdev.entity.param.DeviceSn;
 import com.oldwei.hikdev.service.IHikAlarmDataService;
 import com.oldwei.hikdev.service.IHikCameraService;
 import com.oldwei.hikdev.service.IHikDeviceService;
@@ -43,16 +46,87 @@ public class DeviceController {
 
     private final AliyunPlatform aliyunPlatform;
 
+
     /**
-     * 设备注册登录状态
+     * 设备注册登录
      *
      * @param device 设备基本信息IP、username、password、port
      * @return 登录结果 true/false
      */
-    @GetMapping("deviceLoginStatus")
-    public String deviceStatus(Device device) {
-        return ObjectUtil.isNotEmpty(this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID_IP + device.getDeviceSn())) ? "已登录" : "未登录";
+    @PostMapping("login")
+    public HikDevResponse login(@RequestBody Device device) {
+        return this.hikDeviceService.login(device) ? new HikDevResponse().ok() : new HikDevResponse().err();
     }
+
+    /**
+     * 设备注册登录状态
+     *
+     * @param deviceSn 设备序列号
+     * @return 登录结果 true/false
+     */
+    @GetMapping("loginStatus")
+    public HikDevResponse loginStatus(String deviceSn) {
+        return ObjectUtil.isNotEmpty(this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID + deviceSn)) ? new HikDevResponse().ok("已登录") : new HikDevResponse().err("未登录");
+    }
+
+    /**
+     * 设备注销退出
+     *
+     * @param deviceSn 设备序列号deviceSn
+     * @return 注销结果 true/false
+     */
+    @CheckDeviceLogin
+    @PostMapping("clean")
+    public HikDevResponse clean(@RequestBody DeviceSn deviceSn) {
+        return this.hikDeviceService.clean(deviceSn.getDeviceSn()) ? new HikDevResponse().ok() : new HikDevResponse().err();
+    }
+
+    /**
+     * 设备布防
+     *
+     * @param deviceSn 设备序列号deviceSn
+     */
+    @CheckDeviceLogin
+    @PostMapping("setupAlarm")
+    public HikDevResponse setupAlarm(@RequestBody DeviceSn deviceSn) {
+        return this.hikAlarmDataService.setupAlarmChan(deviceSn.getDeviceSn());
+    }
+
+    /**
+     * 设备布防状态
+     *
+     * @param deviceSn 设备序列号
+     * @return 登录结果 true/false
+     */
+    @CheckDeviceLogin
+    @GetMapping("alarmStatus")
+    public HikDevResponse alarmStatus(String deviceSn) {
+        return ObjectUtil.isNotEmpty(this.dataCache.get(DataCachePrefixConstant.HIK_ALARM_HANDLE + deviceSn)) ? new HikDevResponse().ok("已布防") : new HikDevResponse().err("未布防");
+    }
+
+    /**
+     * 设备撤防
+     *
+     * @param deviceSn 设备序列号deviceSn
+     */
+    @CheckDeviceLogin
+    @PostMapping("closeAlarm")
+    public HikDevResponse closeAlarm(@RequestBody DeviceSn deviceSn) {
+        return this.hikAlarmDataService.closeAlarmChan(deviceSn.getDeviceSn());
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * 设备推流状态
@@ -62,40 +136,7 @@ public class DeviceController {
      */
     @GetMapping("devicePushStatus")
     public String devicePushStatus(Device device) {
-        return ObjectUtil.isNotEmpty(this.dataCache.get(DataCachePrefixConstant.HIK_PUSH_STATUS_IP + device.getDeviceSn())) ? "推流中" : "未推流";
-    }
-
-    /**
-     * 设备布防状态
-     *
-     * @param device 设备基本信息IP、username、password、port
-     * @return 登录结果 true/false
-     */
-    @GetMapping("deviceAlarmStatus")
-    public String deviceAlarmStatus(Device device) {
-        return ObjectUtil.isNotEmpty(this.dataCache.get(DataCachePrefixConstant.HIK_ALARM_HANDLE_IP + device.getDeviceSn())) ? "已布防" : "未布防";
-    }
-
-    /**
-     * 设备注册登录
-     *
-     * @param device 设备基本信息IP、username、password、port
-     * @return 登录结果 true/false
-     */
-    @PostMapping("deviceLogin")
-    public boolean deviceLogin(@RequestBody Device device) {
-        return this.hikDeviceService.deviceLogin(device);
-    }
-
-    /**
-     * 设备注销退出
-     *
-     * @param device 设备IP
-     * @return 注销结果 true/false
-     */
-    @PostMapping("deviceClean")
-    public boolean deviceClean(@RequestBody Device device) {
-        return this.hikDeviceService.clean(device.getDeviceSn());
+        return ObjectUtil.isNotEmpty(this.dataCache.get(DataCachePrefixConstant.HIK_PUSH_STATUS + device.getDeviceSn())) ? "推流中" : "未推流";
     }
 
     /**
@@ -108,13 +149,8 @@ public class DeviceController {
     @PostMapping("startPushStream/{ip}")
     public JSONObject startPushStream(@PathVariable String ip) {
         JSONObject result = new JSONObject();
-        Integer userId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID_IP + ip);
-        if (null == userId || userId < 0) {
-            result.put("code", -1);
-            result.put("msg", "设备注册异常，可能是没注册，也可能是设备有问题，设备状态userId：" + userId);
-            return result;
-        }
-        Integer getPreviewSucValue = this.dataCache.getInteger(DataCachePrefixConstant.HIK_PREVIEW_VIEW_IP + ip);
+        Integer userId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + ip);
+        Integer getPreviewSucValue = this.dataCache.getInteger(DataCachePrefixConstant.HIK_PREVIEW_VIEW + ip);
         if (null != getPreviewSucValue && getPreviewSucValue != -1) {
             result.put("code", -1);
             result.put("msg", "设备已经在预览状态了，请勿重复开启，设备状态userId：" + userId);
@@ -124,7 +160,7 @@ public class DeviceController {
         String pushStreamDomain = this.aliyunPlatform.getPushStreamDomain(stream);
         StreamAddress pullStreamDomain = this.aliyunPlatform.getPullStreamDomain(stream);
         this.hikCameraService.startPushStream(userId, ip, pushStreamDomain);
-        this.dataCache.set(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP + ip, pullStreamDomain);
+        this.dataCache.set(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS + ip, pullStreamDomain);
         result.put("code", 0);
         result.put("data", pullStreamDomain);
         return result;
@@ -139,7 +175,7 @@ public class DeviceController {
     @GetMapping("streamList/{ip}")
     public JSONObject getStreamList(@PathVariable String ip) {
         JSONObject result = new JSONObject();
-        StreamAddress streamAddress = (StreamAddress) this.dataCache.get(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP + ip);
+        StreamAddress streamAddress = (StreamAddress) this.dataCache.get(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS + ip);
         result.put("code", 0);
         result.put("data", streamAddress);
         return result;
@@ -154,7 +190,7 @@ public class DeviceController {
     public JSONObject streamList() {
         JSONObject result = new JSONObject();
         Map<String, Object> streamAddress = this.dataCache.getData().entrySet().stream()
-                .filter(map -> map.getKey().contains(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP))
+                .filter(map -> map.getKey().contains(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         List<Map<String, Object>> mapList = new ArrayList<>();
         streamAddress.forEach((key, value) -> {
@@ -198,7 +234,7 @@ public class DeviceController {
         String stream = RandomUtil.randomString(32);
         String pushStreamDomain = this.aliyunPlatform.getPushStreamDomain(stream);
         StreamAddress pullStreamDomain = this.aliyunPlatform.getPullStreamDomain(stream);
-        this.dataCache.set(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP + name, pullStreamDomain);
+        this.dataCache.set(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS + name, pullStreamDomain);
         JSONObject result = new JSONObject();
         result.put("code", 0);
         result.put("data", pullStreamDomain);
@@ -208,7 +244,7 @@ public class DeviceController {
 
     @GetMapping("shanchuwurenji")
     public JSONObject shanchuwurenji(String name) {
-        this.dataCache.removeKey(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS_IP + name);
+        this.dataCache.removeKey(DataCachePrefixConstant.HIK_PUSH_PULL_STREAM_ADDRESS + name);
         JSONObject result = new JSONObject();
         result.put("code", 0);
         return result;
@@ -226,25 +262,5 @@ public class DeviceController {
         result.put("code", 0);
         result.put("msg", "已退出推流:" + device.getDeviceSn());
         return result;
-    }
-
-    /**
-     * 设备布防
-     *
-     * @param device 设备IP
-     */
-    @PostMapping("setupAlarm")
-    public JSONObject setupAlarm(@RequestBody Device device) {
-        return this.hikAlarmDataService.setupAlarmChan(device.getDeviceSn());
-    }
-
-    /**
-     * 设备撤防
-     *
-     * @param device 设备IP
-     */
-    @PostMapping("closeAlarm")
-    public JSONObject closeAlarm(@RequestBody Device device) {
-        return this.hikAlarmDataService.closeAlarmChan(device.getDeviceSn());
     }
 }
