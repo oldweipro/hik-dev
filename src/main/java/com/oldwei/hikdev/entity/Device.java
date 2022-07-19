@@ -2,6 +2,7 @@ package com.oldwei.hikdev.entity;
 
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 /**
@@ -23,5 +24,6 @@ public class Device implements Serializable {
     private Byte type;
     private String rtspUrl;
     private String pushUrl;
+    @NotBlank(message = "设备序列号不能为空")
     private String deviceSn;
 }

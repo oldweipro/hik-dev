@@ -15,7 +15,7 @@ async:
         prefix: async-service-
 mqtt:
   # 是否开启mqtt
-  enable: true
+  enable: false
   # mqtt相关配置
   settings:
     # 订阅
