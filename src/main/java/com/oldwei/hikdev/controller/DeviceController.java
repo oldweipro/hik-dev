@@ -17,8 +17,10 @@ import com.oldwei.hikdev.service.IHikDeviceService;
 import com.oldwei.hikdev.component.DataCache;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +33,7 @@ import java.util.stream.Collectors;
  * @date 2021-7-7 14:37
  */
 @Slf4j
+@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/device")
@@ -50,11 +53,11 @@ public class DeviceController {
     /**
      * 设备注册登录
      *
-     * @param device 设备基本信息IP、username、password、port
+     * @param device 设备基本信息IP、username、password、port、设备序列号deviceSn
      * @return 登录结果 true/false
      */
     @PostMapping("login")
-    public HikDevResponse login(@RequestBody Device device) {
+    public HikDevResponse login(@Valid @RequestBody Device device) {
         return this.hikDeviceService.login(device) ? new HikDevResponse().ok() : new HikDevResponse().err();
     }
 
