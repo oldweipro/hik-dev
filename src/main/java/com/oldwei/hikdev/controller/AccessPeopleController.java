@@ -1,7 +1,7 @@
 package com.oldwei.hikdev.controller;
 
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import com.oldwei.hikdev.entity.access.AccessPeople;
 import com.oldwei.hikdev.entity.QueryRequest;
 import com.oldwei.hikdev.service.IHikUserService;

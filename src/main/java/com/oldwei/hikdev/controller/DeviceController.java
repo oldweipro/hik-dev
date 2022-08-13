@@ -3,7 +3,7 @@ package com.oldwei.hikdev.controller;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import com.oldwei.hikdev.annotation.CheckDeviceLogin;
 import com.oldwei.hikdev.component.AliyunPlatform;
 import com.oldwei.hikdev.constant.DataCachePrefixConstant;

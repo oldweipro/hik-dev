@@ -1,8 +1,5 @@
 package com.oldwei.hikdev.config;
 
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.setting.Setting;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import com.oldwei.hikdev.service.IHikDevService;
@@ -12,6 +9,11 @@ import com.sun.jna.Native;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.MulticastSocket;
+import java.net.SocketException;
+
 /**
  * @author oldwei
  * @date 2021-5-13 15:06
@@ -19,6 +21,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class HikConfiguration {
 
+    /**
+     * 根据当前操作系统初始化海康sdk
+     * @return
+     */
     @Bean
     public IHikDevService hikDevService() {
         OsInfo osInfo = SystemUtil.getOsInfo();
@@ -33,6 +39,10 @@ public class HikConfiguration {
         return hikDevService;
     }
 
+    /**
+     * 初始化播放插件sdk
+     * @return
+     */
     @Bean
     public IHikPlayCtrlService hikPlayCtrlService() {
         return (IHikPlayCtrlService) Native.loadLibrary(System.getProperty("user.dir") + "\\sdk\\windows\\PlayCtrl.dll", IHikPlayCtrlService.class);
@@ -41,14 +51,6 @@ public class HikConfiguration {
     @Bean
     public DataCache hikMemory() {
         return new DataCache();
-    }
-
-    @Bean
-    public Setting configSetting() {
-        String property = System.getProperty("user.dir") + "\\sdk\\config\\config.setting";
-        Setting setting = new Setting(FileUtil.touch(property), CharsetUtil.CHARSET_UTF_8, false);
-        setting.autoLoad(true);
-        return setting;
     }
 
 }

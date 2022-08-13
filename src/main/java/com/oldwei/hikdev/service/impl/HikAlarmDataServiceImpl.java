@@ -3,7 +3,7 @@ package com.oldwei.hikdev.service.impl;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import com.oldwei.hikdev.component.AliyunPlatform;
 import com.oldwei.hikdev.constant.HikConstant;
 import com.oldwei.hikdev.constant.DataCachePrefixConstant;

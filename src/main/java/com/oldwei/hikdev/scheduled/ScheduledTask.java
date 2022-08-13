@@ -1,8 +1,6 @@
 package com.oldwei.hikdev.scheduled;
 
 import cn.hutool.core.util.IdUtil;
-import cn.hutool.setting.Setting;
-import com.oldwei.hikdev.component.UdpDatagramSocket;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,6 +9,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.net.MulticastSocket;
 
 /**
  * @author oldwei
@@ -18,10 +17,7 @@ import java.net.InetAddress;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class ScheduledTask {
-    private final UdpDatagramSocket udpDatagramSocket;
-    private final Setting configSetting;
     // Cron表达式范例：
     //
     //每隔5秒执行一次：*/5 * * * * ?
@@ -44,27 +40,17 @@ public class ScheduledTask {
 
     /**
      * 一分钟执行一次
-     * @throws IOException
      */
     @Scheduled(cron = "0 */1 * * * ?")
-    public void searchHikDevice() throws IOException {
-        String uuid = "<Probe><Uuid>" + IdUtil.randomUUID().toUpperCase() + "</Uuid><Types>inquiry</Types></Probe>";
-        InetAddress address = InetAddress.getByName("239.255.255.250");
-        byte[] data = uuid.getBytes();
-        DatagramPacket packet = new DatagramPacket(data, data.length, address, 37020);
-        this.udpDatagramSocket.getDatagramSocket().send(packet);
-    }
-
-    /**
-     * 获取云端设备列表进行登录
-     * @throws IOException
-     */
-    @Scheduled(cron = "0 */1 * * * ?")
-    public void getHikDeviceAndLogin() {
-        // 根据项目id获取云端设备列表
-
-        // 比对当前登录设备
-
-        // 登录需要登陆的设备
+    public void searchHikDevice() {
+        // 发送
+        try (MulticastSocket multicastSocket = new MulticastSocket()) {
+            byte[] data = ("<Probe><Uuid>" + IdUtil.randomUUID().toUpperCase() + "</Uuid><Types>inquiry</Types></Probe>").getBytes();
+            InetAddress address = InetAddress.getByName("239.255.255.250");
+            DatagramPacket packet = new DatagramPacket(data, data.length, address, 37020);
+            multicastSocket.send(packet);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

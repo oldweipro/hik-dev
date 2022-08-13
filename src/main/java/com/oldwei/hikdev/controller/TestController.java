@@ -1,14 +1,10 @@
 package com.oldwei.hikdev.controller;
 
-import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.util.IdUtil;
-import cn.hutool.setting.Setting;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import com.oldwei.hikdev.component.AliyunPlatform;
-import com.oldwei.hikdev.entity.ConfigSettingBean;
 import com.oldwei.hikdev.entity.StreamAddress;
 import com.oldwei.hikdev.constant.DataCachePrefixConstant;
-import com.oldwei.hikdev.component.UdpDatagramSocket;
 import com.oldwei.hikdev.service.IAccessControlService;
 import com.oldwei.hikdev.service.IHikCameraService;
 import com.oldwei.hikdev.component.DataCache;
@@ -17,10 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
+import java.net.*;
 import java.util.*;
 
 /**
@@ -36,10 +29,7 @@ import java.util.*;
 public class TestController {
     private final DataCache dataCache;
     private final IHikCameraService hikCameraService;
-    private final IAccessControlService accessControlService;
     private final AliyunPlatform aliyunPlatform;
-    private final UdpDatagramSocket udpDatagramSocket;
-    private final Setting configSetting;
 
     /**
      * 设置内存信息 key value
@@ -101,27 +91,16 @@ public class TestController {
         return this.aliyunPlatform.getPullStreamDomain(stream);
     }
 
-    @GetMapping("udpClient")
-    public void udpClient() throws IOException {
-        String uuid = "<Probe><Uuid>" + IdUtil.randomUUID().toUpperCase() + "</Uuid><Types>inquiry</Types></Probe>";
-        InetAddress address = InetAddress.getByName("239.255.255.250");
-        byte[] data = uuid.getBytes();
-        ConfigSettingBean configSettingBean = new ConfigSettingBean();
-        this.configSetting.toBean(configSettingBean);
-        DatagramPacket packet = new DatagramPacket(data, data.length, address, configSettingBean.getUdpPort());
-        DatagramSocket datagramSocket = this.udpDatagramSocket.getDatagramSocket();
-        LinkedHashSet<String> strings = NetUtil.localIpv4s();
-        for (String ip : strings) {
-            InetSocketAddress inetSocketAddress = new InetSocketAddress(ip, configSettingBean.getUdpPort());
-            datagramSocket.bind(inetSocketAddress);
-            datagramSocket.send(packet);
+    @GetMapping("searchDevice")
+    public void searchDevice() {
+        // 发送
+        try (MulticastSocket multicastSocket = new MulticastSocket()) {
+            byte[] data = ("<Probe><Uuid>" + IdUtil.randomUUID().toUpperCase() + "</Uuid><Types>inquiry</Types></Probe>").getBytes();
+            InetAddress address = InetAddress.getByName("239.255.255.250");
+            DatagramPacket packet = new DatagramPacket(data, data.length, address, 37020);
+            multicastSocket.send(packet);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-    }
-
-    @GetMapping("getConfigSettingBean")
-    public ConfigSettingBean getConfigSettingBean() {
-        ConfigSettingBean configSettingBean = new ConfigSettingBean();
-        this.configSetting.toBean(configSettingBean);
-        return configSettingBean;
     }
 }

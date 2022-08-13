@@ -1,7 +1,7 @@
 package com.oldwei.hikdev.service;
 
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import com.oldwei.hikdev.entity.access.AccessPeople;
 import com.oldwei.hikdev.entity.QueryRequest;
 
