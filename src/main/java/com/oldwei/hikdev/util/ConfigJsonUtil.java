@@ -1,5 +1,6 @@
 package com.oldwei.hikdev.util;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.io.file.FileWriter;
 import cn.hutool.core.util.ObjectUtil;
@@ -11,19 +12,27 @@ import com.alibaba.fastjson2.JSONObject;
  * @date 2022/8/12 23:44
  */
 public class ConfigJsonUtil {
+    static final String configPath = System.getProperty("user.dir") + "/sdk/config/config.json";
+
     public static JSONObject readConfigJson() {
-        String filePath = System.getProperty("user.dir") + "/sdk/config/config.json";
-        FileReader fileReader = new FileReader(filePath);
-        JSONObject jsonObject = JSON.parseObject(fileReader.readString());
-        if (ObjectUtil.isNull(jsonObject)) {
-            jsonObject = new JSONObject();
+        boolean exist = FileUtil.exist(configPath);
+        JSONObject jsonObject = new JSONObject();
+        if (exist) {
+            FileReader fileReader = new FileReader(configPath);
+            jsonObject = JSON.parseObject(fileReader.readString());
+            if (ObjectUtil.isNull(jsonObject)) {
+                jsonObject = new JSONObject();
+            }
         }
         return jsonObject;
     }
 
     public static boolean writeConfigJson(String json) {
-        String filePath = System.getProperty("user.dir") + "/sdk//config/config.json";
-        FileWriter writer = new FileWriter(filePath);
+        boolean exist = FileUtil.exist(configPath);
+        if (!exist) {
+            FileUtil.touch(configPath);
+        }
+        FileWriter writer = new FileWriter(configPath);
         try {
             writer.write(json);
         } catch (Exception e) {
