@@ -1,8 +1,5 @@
 package com.oldwei.hikdev.mqtt;
 
-import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,15 +31,8 @@ public class OnMessageCallback implements MqttCallback {
             String payload = new String(message.getPayload());
             //防止消息内容不是json字符串，json转换异常导致程序崩溃
             JSONObject obj = JSONObject.parseObject(payload);
-            String uri = obj.getString("uri");
-            JSONObject parameter = obj.getJSONObject("parameter");
-            if (ObjectUtil.isAllNotEmpty(uri, parameter)) {
-                // 根据消息业务进行业务分配
-                ThreadUtil.execAsync(() -> {
-                    //传入资源定位URI和参数parameter，直接访问当前项目的HTTP接口，为了方便调用，接口方法统一使用POST
-                    HttpUtil.post("127.0.0.1:8923/" + uri, parameter.toJSONString());
-                });
-            }
+            log.info("收到mqtt订阅消息: {}", obj);
+            // TODO 在这里继续写业务
         } catch (Exception ignored) {
         }
     }
