@@ -1,7 +1,7 @@
 package com.oldwei.hikdev.controller;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.oldwei.hikdev.entity.Device;
+import com.oldwei.hikdev.entity.device.DeviceLogin;
 import com.oldwei.hikdev.service.IHikAlarmDataService;
 import com.oldwei.hikdev.service.IHikDeviceService;
 import lombok.RequiredArgsConstructor;
@@ -64,7 +64,7 @@ public class GoController {
         Integer code = obj.getInteger("code");
         switch (code) {
             case 1000:
-                this.hikDeviceService.login(obj.getObject("data", Device.class));
+                this.hikDeviceService.login(obj.getObject("data", DeviceLogin.class));
                 break;
             case 1001:
                 this.hikDeviceService.clean(obj.getJSONObject("data").getString("deviceSn"));

@@ -156,24 +156,25 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
         JSONObject result = this.userInfo(deviceSn, urlInBuffer, ptrInBuff.getPointer(), strInBuff.length(), 2550, 1024 * 10);
 
         //因为name是字节数组，所以需要自己转一下
-        UserInfoSearch userInfoSearch = result.getJSONObject("data").getJSONObject("UserInfoSearch").toJavaObject(UserInfoSearch.class);
-        if (null != userInfoSearch.getUserInfo() && userInfoSearch.getUserInfo().size() > 0) {
-            userInfoSearch.getUserInfo().forEach(people -> {
-                try {
-                    //这里必须加上双引号反序列化，因为在序列化的时候是json带双引号
-                    String nameByte = "\"" + people.getRealName() + "\"";
-                    //如果realName是json序列化的字符串，那么需要反序列化
-                    byte[] bytes = JSON.parseObject(nameByte, byte[].class);
-                    String realName = new String(bytes).trim();
-                    people.setRealName(realName);
-                } catch (ArrayIndexOutOfBoundsException ignored) {
-                    // 汉字是越界异常超出256，不加上引号是expect '[', but error, pos 1, line 1, column 2
-                    // 已经是汉字的名字，也就是说他们的名字是从设备上直接录制的，并没有走sdk，
-                    // 这时候就会反序列化错误，那么我们就直接忽略这些错误，把realName原样输出
-                }
-
-            });
-        }
+        UserInfoSearch userInfoSearch = result.getJSONObject("data").getJSONObject("UserInfoSearch").to(UserInfoSearch.class);
+//        log.info("{}", userInfoSearch);
+//        if (null != userInfoSearch.getUserInfo() && userInfoSearch.getUserInfo().size() > 0) {
+//            userInfoSearch.getUserInfo().forEach(people -> {
+//                try {
+//                    //这里必须加上双引号反序列化，因为在序列化的时候是json带双引号
+//                    String nameByte = "\"" + people.getRealName() + "\"";
+//                    //如果realName是json序列化的字符串，那么需要反序列化
+//                    byte[] bytes = JSON.parseObject(nameByte, byte[].class);
+//                    String realName = new String(bytes).trim();
+//                    people.setRealName(realName);
+//                } catch (ArrayIndexOutOfBoundsException ignored) {
+//                    // 汉字是越界异常超出256，不加上引号是expect '[', but error, pos 1, line 1, column 2
+//                    // 已经是汉字的名字，也就是说他们的名字是从设备上直接录制的，并没有走sdk，
+//                    // 这时候就会反序列化错误，那么我们就直接忽略这些错误，把realName原样输出
+//                }
+//
+//            });
+//        }
         userInfoSearch.setPageNum(queryRequest.getPageNum());
         return new HikDevResponse().ok(result.getString("msg"), userInfoSearch);
     }

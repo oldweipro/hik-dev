@@ -3247,7 +3247,7 @@ public static class NET_DVR_MATRIX_TRAN_CHAN_INFO extends Structure {
 	 */
 	public byte	byRemoteSerialDevice;			/* Remote output serial device */
 	public byte	res1;							/* 保留 */
-	public byte[]	sRemoteDevIP= new byte[16];				/* Remote Device IP */
+	public byte[]	sRemoteDevIP= new byte[16];				/* Remote DeviceLogin IP */
 	public short	wRemoteDevPort;				/* Remote Net Communication Port */
 	public byte[]	res2= new byte[2];						/* 保留 */
 	public TTY_CONFIG RemoteSerialDevCfg;

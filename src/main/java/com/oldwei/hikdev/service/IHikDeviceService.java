@@ -1,6 +1,9 @@
 package com.oldwei.hikdev.service;
 
-import com.oldwei.hikdev.entity.Device;
+import com.oldwei.hikdev.entity.device.DeviceLogin;
+import com.oldwei.hikdev.entity.device.DeviceSearchInfoVo;
+
+import java.util.List;
 
 /**
  * @author oldwei
@@ -10,15 +13,31 @@ public interface IHikDeviceService {
     /**
      * 设备注册
      *
-     * @param device
+     * @param deviceLogin
      * @return
      */
-    boolean login(Device device);
+    boolean login(DeviceLogin deviceLogin);
 
     /**
      * 清除设备注册
-     * @param deviceSn
+     *
+     * @param ip
      * @return
      */
-    boolean clean(String deviceSn);
+    boolean clean(String ip);
+
+    /**
+     * 获取设备列表
+     *
+     * @param deviceSearchInfoVo
+     * @return
+     */
+    List<DeviceSearchInfoVo> getDeviceList(DeviceSearchInfoVo deviceSearchInfoVo);
+
+    /**
+     * 获取登陆状态
+     * @param ip
+     * @return
+     */
+    DeviceLogin loginStatus(String ip);
 }

@@ -8,6 +8,7 @@ public interface DataCachePrefixConstant {
     /**
      * 设备注册
      */
+    @Deprecated
     String HIK_REG_USERID = "hik:reg:userid:sn:";
     /**
      * 设备预览
@@ -28,6 +29,7 @@ public interface DataCachePrefixConstant {
     /**
      * 设备编码
      */
+    @Deprecated
     String HIK_REG_CHAR_ENCODE_TYPE = "hik:reg:char:encode:type:sn:";
     /**
      * 设备拉流地址

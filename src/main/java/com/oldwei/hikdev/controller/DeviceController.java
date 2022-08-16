@@ -7,9 +7,10 @@ import com.alibaba.fastjson2.JSONObject;
 import com.oldwei.hikdev.annotation.CheckDeviceLogin;
 import com.oldwei.hikdev.component.AliyunPlatform;
 import com.oldwei.hikdev.constant.DataCachePrefixConstant;
-import com.oldwei.hikdev.entity.Device;
+import com.oldwei.hikdev.entity.device.DeviceLogin;
 import com.oldwei.hikdev.entity.HikDevResponse;
 import com.oldwei.hikdev.entity.StreamAddress;
+import com.oldwei.hikdev.entity.device.DeviceSearchInfoVo;
 import com.oldwei.hikdev.entity.param.DeviceSn;
 import com.oldwei.hikdev.service.IHikAlarmDataService;
 import com.oldwei.hikdev.service.IHikCameraService;
@@ -53,35 +54,41 @@ public class DeviceController {
     /**
      * 设备注册登录
      *
-     * @param device 设备基本信息IP、username、password、port、设备序列号deviceSn
+     * @param deviceLogin 设备基本信息IP、username、password、port、设备序列号deviceSn
      * @return 登录结果 true/false
      */
     @PostMapping("login")
-    public HikDevResponse login(@Valid @RequestBody Device device) {
-        return this.hikDeviceService.login(device) ? new HikDevResponse().ok() : new HikDevResponse().err();
+    public HikDevResponse login(@Valid @RequestBody DeviceLogin deviceLogin) {
+        return this.hikDeviceService.login(deviceLogin) ? new HikDevResponse().ok() : new HikDevResponse().err();
     }
 
     /**
      * 设备注册登录状态
      *
-     * @param deviceSn 设备序列号
+     * @param ip 设备ip
      * @return 登录结果 true/false
      */
     @GetMapping("loginStatus")
-    public HikDevResponse loginStatus(String deviceSn) {
-        return ObjectUtil.isNotEmpty(this.dataCache.get(DataCachePrefixConstant.HIK_REG_USERID + deviceSn)) ? new HikDevResponse().ok("已登录") : new HikDevResponse().err("未登录");
+    public HikDevResponse loginStatus(String ip) {
+        DeviceLogin deviceLogin = this.hikDeviceService.loginStatus(ip);
+        return new HikDevResponse().ok().data(deviceLogin);
     }
 
     /**
      * 设备注销退出
      *
-     * @param deviceSn 设备序列号deviceSn
+     * @param ip 设备ip
      * @return 注销结果 true/false
      */
     @CheckDeviceLogin
     @PostMapping("clean")
-    public HikDevResponse clean(@RequestBody DeviceSn deviceSn) {
-        return this.hikDeviceService.clean(deviceSn.getDeviceSn()) ? new HikDevResponse().ok() : new HikDevResponse().err();
+    public HikDevResponse clean(@RequestBody String ip) {
+        return this.hikDeviceService.clean(ip) ? new HikDevResponse().ok() : new HikDevResponse().err();
+    }
+
+    @GetMapping("getDeviceList")
+    public HikDevResponse getDeviceList(DeviceSearchInfoVo deviceSearchInfoVo) {
+        return new HikDevResponse().ok().data(this.hikDeviceService.getDeviceList(deviceSearchInfoVo));
     }
 
     /**
@@ -134,12 +141,12 @@ public class DeviceController {
     /**
      * 设备推流状态
      *
-     * @param device 设备基本信息IP、username、password、port
+     * @param deviceLogin 设备基本信息IP、username、password、port
      * @return 登录结果 true/false
      */
     @GetMapping("devicePushStatus")
-    public String devicePushStatus(Device device) {
-        return ObjectUtil.isNotEmpty(this.dataCache.get(DataCachePrefixConstant.HIK_PUSH_STATUS + device.getDeviceSn())) ? "推流中" : "未推流";
+    public String devicePushStatus(DeviceLogin deviceLogin) {
+        return ObjectUtil.isNotEmpty(this.dataCache.get(DataCachePrefixConstant.HIK_PUSH_STATUS + deviceLogin.getIp())) ? "推流中" : "未推流";
     }
 
     /**
@@ -256,14 +263,14 @@ public class DeviceController {
     /**
      * 退出推流
      *
-     * @param device 退出推流的设备IP
+     * @param deviceLogin 退出推流的设备IP
      */
     @PostMapping("existPushStream")
-    public JSONObject existPushStream(@RequestBody Device device) {
-        this.hikCameraService.existPushStream(device.getDeviceSn());
+    public JSONObject existPushStream(@RequestBody DeviceLogin deviceLogin) {
+        this.hikCameraService.existPushStream(deviceLogin.getIp());
         JSONObject result = new JSONObject();
         result.put("code", 0);
-        result.put("msg", "已退出推流:" + device.getDeviceSn());
+        result.put("msg", "已退出推流:" + deviceLogin.getIp());
         return result;
     }
 }

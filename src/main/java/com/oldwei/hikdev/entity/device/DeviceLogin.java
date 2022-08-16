@@ -1,8 +1,7 @@
-package com.oldwei.hikdev.entity;
+package com.oldwei.hikdev.entity.device;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 /**
@@ -10,7 +9,7 @@ import java.io.Serializable;
  * @date 2021-7-7 14:42
  */
 @Data
-public class Device implements Serializable {
+public class DeviceLogin implements Serializable {
     private static final long serialVersionUID = 7342965103728984523L;
     private String ip;
     private String username;
@@ -24,6 +23,10 @@ public class Device implements Serializable {
     private Byte type;
     private String rtspUrl;
     private String pushUrl;
-    @NotBlank(message = "设备序列号不能为空")
-    private String deviceSn;
+    private Integer charEncodeType;
+    /**
+     * 登陆状态，海康设备返回的登陆id
+     */
+    private Integer loginId;
+
 }
