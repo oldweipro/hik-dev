@@ -7,6 +7,8 @@ import com.oldwei.hikdev.entity.QueryRequest;
 import com.oldwei.hikdev.entity.access.AccessPeople;
 import com.oldwei.hikdev.entity.param.AccessControlUser;
 import com.oldwei.hikdev.service.IHikAccessControlService;
+import com.oldwei.hikdev.service.IHikDevService;
+import com.oldwei.hikdev.util.ConfigJsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -24,12 +26,14 @@ import java.util.List;
 public class AccessControlController {
     private final IHikAccessControlService hikAccessControlService;
 
+    private final IHikDevService hikDevService;
+
 
     /**
      * 【卡】根据设备序列号deviceSn查询所有卡信息
      *
      * @param deviceSn 设备序列号
-     * @return
+     * @return HikDevResponse
      */
     @CheckDeviceLogin
     @GetMapping("getAllCardInfo")
@@ -43,7 +47,7 @@ public class AccessControlController {
      * @param ip     设备IP
      * @param employeeNos  用户id
      * @param queryRequest 分页参数: pageNum, pageSize
-     * @return
+     * @return HikDevResponse
      */
     @CheckDeviceLogin
     @GetMapping("getAllUserInfo")
@@ -59,7 +63,7 @@ public class AccessControlController {
      * 【用户】下发
      *
      * @param accessControlUser 门禁用户: deviceSn, realName, int:employeeNo
-     * @return
+     * @return HikDevResponse
      */
     @CheckDeviceLogin
     @PostMapping("addUser")
@@ -71,7 +75,7 @@ public class AccessControlController {
      * 【用户】修改
      *
      * @param accessPeople 门禁用户: deviceSn, realName, int:employeeNo
-     * @return
+     * @return HikDevResponse
      */
     @CheckDeviceLogin
     @PutMapping("modifyUser")
@@ -83,7 +87,7 @@ public class AccessControlController {
      * 【用户】批量下发
      *
      * @param accessControlUserList 门禁用户列表: deviceSn, realName, int:employeeNo
-     * @return
+     * @return HikDevResponse
      */
     @CheckDeviceLogin
     @PostMapping("addMultiUser/{deviceSn}")
@@ -95,7 +99,7 @@ public class AccessControlController {
      * 【用户】下发人脸
      *
      * @param accessControlUser 门禁用户: deviceSn, employeeNo, base64Pic
-     * @return
+     * @return HikDevResponse
      */
     @CheckDeviceLogin
     @PutMapping("addUserFace")
@@ -107,7 +111,7 @@ public class AccessControlController {
      * 【用户】批量下发人脸
      *
      * @param accessControlUserList 门禁用户列表: deviceSn, employeeNo, base64Pic
-     * @return
+     * @return HikDevResponse
      */
     @CheckDeviceLogin
     @PutMapping("addMultiUserFace/{deviceSn}")
@@ -120,7 +124,7 @@ public class AccessControlController {
      *
      * @param deviceSn    设备序列号
      * @param employeeIds 多个用户工号，用逗号隔开
-     * @return
+     * @return HikDevResponse
      */
     @CheckDeviceLogin
     @DeleteMapping("delMultiUserFace")
@@ -134,7 +138,7 @@ public class AccessControlController {
      *
      * @param deviceSn    设备序列号
      * @param employeeIds 多个用户工号，用逗号隔开
-     * @return
+     * @return HikDevResponse
      */
     @CheckDeviceLogin
     @DeleteMapping("delMultiUser")
@@ -147,7 +151,7 @@ public class AccessControlController {
      * 【卡】批量下发
      *
      * @param accessControlUserList 门禁用户列表: deviceSn, realName, int:employeeNo
-     * @return
+     * @return HikDevResponse
      */
     @CheckDeviceLogin
     @PostMapping("addMultiCard/{deviceSn}")
@@ -159,7 +163,7 @@ public class AccessControlController {
      * 【卡】批量下发人脸
      *
      * @param accessControlUserList 门禁用户列表: deviceSn, realName, int:employeeNo
-     * @return
+     * @return HikDevResponse
      */
     @CheckDeviceLogin
     @PutMapping("addMultiCardFace/{deviceSn}")
@@ -172,7 +176,7 @@ public class AccessControlController {
      *
      * @param deviceSn  设备被序列号
      * @param cardNoIds 将要被删除人脸的卡号数组
-     * @return
+     * @return HikDevResponse
      */
     @CheckDeviceLogin
     @DeleteMapping("delMultiCardFace")
@@ -186,7 +190,7 @@ public class AccessControlController {
      *
      * @param deviceSn  设备被序列号
      * @param cardNoIds 将要被删除人脸的卡号数组
-     * @return
+     * @return HikDevResponse
      */
     @CheckDeviceLogin
     @DeleteMapping("delMultiCard")
@@ -200,11 +204,26 @@ public class AccessControlController {
      *
      * @param deviceSn  设备被序列号
      * @param planTemplateNumber 将要被删除人脸的卡号数组
-     * @return
+     * @return HikDevResponse
      */
     @CheckDeviceLogin
     @PostMapping("setCartTemplate")
     public HikDevResponse setCartTemplate(String deviceSn, Integer planTemplateNumber) {
         return this.hikAccessControlService.setCartTemplate(deviceSn, planTemplateNumber);
+    }
+
+    /**
+     * 开门
+     * @param ip 设备ip
+     * @return HikDevResponse
+     */
+    @GetMapping("openTheDoor")
+    public HikDevResponse openTheDoor(String ip) {
+        Integer loginId = ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getLoginId();
+        boolean b = this.hikDevService.NET_DVR_ControlGateway(loginId, -1, 1);
+        if (b) {
+            return new HikDevResponse().ok();
+        }
+        return new HikDevResponse().err("开门失败");
     }
 }

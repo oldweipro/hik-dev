@@ -1,9 +1,7 @@
 package com.oldwei.hikdev.service.impl;
 
 import cn.hutool.core.codec.Base64;
-import cn.hutool.core.text.StrBuilder;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.oldwei.hikdev.component.DataCache;
@@ -46,13 +44,16 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
     private final IHikDevService hikDevService;
 
     @Override
-    public HikDevResponse getAllCardInfo(String deviceSn) {
+    public HikDevResponse getAllCardInfo(String ip) {
         HikDevResponse result = new HikDevResponse();
-        if (StrUtil.isBlank(deviceSn)) {
+        if (StrUtil.isBlank(ip)) {
             result.err("缺少必要参数字段：ip");
             return result;
         }
-        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + deviceSn);
+        Integer longUserId = ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getLoginId();
+        if (longUserId < 0) {
+            return result.err("设备未注册");
+        }
         NET_DVR_CARD_COND strCardCond = new NET_DVR_CARD_COND();
         strCardCond.read();
         strCardCond.dwSize = strCardCond.size();
@@ -74,10 +75,7 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
         struCardRecord.write();
 
         IntByReference pInt = new IntByReference(0);
-        Integer iCharEncodeType = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_CHAR_ENCODE_TYPE + deviceSn);
-        if (null == iCharEncodeType) {
-            iCharEncodeType = 6;
-        }
+        int iCharEncodeType = Integer.parseInt(ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getCharEncodeType());
         List<Map<String, Object>> list = new ArrayList<>();
         while (true) {
             //下发卡数据状态

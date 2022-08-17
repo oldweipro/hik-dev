@@ -1,7 +1,6 @@
 package com.oldwei.hikdev.mqtt;
 
 import cn.hutool.core.util.RandomUtil;
-import com.oldwei.hikdev.service.IAccessControlService;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;

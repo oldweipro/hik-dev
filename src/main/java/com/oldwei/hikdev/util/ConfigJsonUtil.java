@@ -1,6 +1,5 @@
 package com.oldwei.hikdev.util;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.io.file.FileWriter;
@@ -55,23 +54,6 @@ public class ConfigJsonUtil {
         }
         return true;
     }
-
-//    public static List<DeviceLoginDTO> getDeviceLoginList() {
-//        JSONObject configJson = readConfigJson();
-//        List<DeviceLoginDTO> deviceLogin = new ArrayList<>();
-//        if (configJson.containsKey(ConfigJsonUtil.deviceLogin)) {
-//            deviceLogin = configJson.getJSONArray(ConfigJsonUtil.deviceLogin).toList(DeviceLoginDTO.class);
-//        }
-//        return deviceLogin;
-//    }
-
-//    public static DeviceLoginDTO getDeviceLoginByIp(String ip) {
-//        List<DeviceLoginDTO> collect = getDeviceLoginList().stream().filter(d -> StrUtil.equals(d.getIPv4Address(), ip)).collect(Collectors.toList());
-//        if (collect.size() > 0) {
-//            return collect.get(0);
-//        }
-//        return null;
-//    }
 
     public static boolean saveOrUpdateDeviceLogin(DeviceLoginDTO deviceLogin) {
         // 判断json文件中是否有deviceLogin数据 && 判断这个数据是否存在
@@ -131,7 +113,7 @@ public class ConfigJsonUtil {
         if (collect.size() > 0) {
             return collect.get(0);
         }
-        return null;
+        return new DeviceSearchInfo();
     }
 
     /**

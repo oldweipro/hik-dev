@@ -44,8 +44,8 @@ public class DeviceSearchInfo implements Serializable {
     private String ehomeVer;
     private String ipv4Gateway;
     private String supportEzvizUnbind;
-    private String charEncodeType;
-    private Integer loginId;
+    private String charEncodeType = "6";
+    private Integer loginId = -1;
     private String username;
     private String password;
     private String title;

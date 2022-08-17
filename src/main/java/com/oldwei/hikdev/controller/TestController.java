@@ -1,19 +1,15 @@
 package com.oldwei.hikdev.controller;
 
-import cn.hutool.core.util.IdUtil;
 import com.alibaba.fastjson2.JSONObject;
 import com.oldwei.hikdev.component.AliyunPlatform;
 import com.oldwei.hikdev.entity.StreamAddress;
 import com.oldwei.hikdev.constant.DataCachePrefixConstant;
-import com.oldwei.hikdev.service.IAccessControlService;
 import com.oldwei.hikdev.service.IHikCameraService;
 import com.oldwei.hikdev.component.DataCache;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.net.*;
 import java.util.*;
 
 /**

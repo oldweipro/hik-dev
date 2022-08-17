@@ -59,4 +59,6 @@ public interface IHikDevService extends StdCallLibrary {
 
     boolean NET_DVR_GetDeviceConfig(int lUserID, int dwCommand, int dwCount, Pointer lpInBuffer, int dwInBufferSize, Pointer lpStatusList, Pointer lpOutBuffer, int dwOutBufferSize);
 
+    boolean NET_DVR_ControlGateway(int lUserID, int lGatewayIndex, int dwStaic);
+
 }

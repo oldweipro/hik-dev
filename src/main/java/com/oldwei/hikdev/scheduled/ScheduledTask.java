@@ -1,15 +1,9 @@
 package com.oldwei.hikdev.scheduled;
 
-import cn.hutool.core.util.IdUtil;
 import com.oldwei.hikdev.util.ConfigJsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
 
 /**
  * @author oldwei
