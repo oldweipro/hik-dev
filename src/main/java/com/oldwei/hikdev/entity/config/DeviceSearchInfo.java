@@ -45,11 +45,18 @@ public class DeviceSearchInfo implements Serializable {
     private String ipv4Gateway;
     private String supportEzvizUnbind;
     private String charEncodeType = "6";
+    /**
+     * 登录状态
+     */
     private Integer loginId = -1;
     private String username;
     private String password;
     private String title;
     private Boolean useAsync = false;
+    /**
+     * 布防状态
+     */
+    private Integer alarmHandleId = -1;
 
     public void setDeviceSearchInfoDTO(DeviceSearchInfoDTO deviceSearchInfoDTO) {
         this.types = deviceSearchInfoDTO.getTypes();
@@ -94,6 +101,10 @@ public class DeviceSearchInfo implements Serializable {
         this.commandPort = deviceLoginDTO.getCommandPort();
     }
 
+    public void setDeviceAlarmHandleDTO(DeviceAlarmHandleDTO deviceAlarmHandleDTO) {
+        this.alarmHandleId = deviceAlarmHandleDTO.getAlarmHandleId();
+        this.ipv4Address = deviceAlarmHandleDTO.getIpv4Address();
+    }
     /**
      * 这里的命名不能写get，否则，在json序列化时会序列化出多余字段，所以以find命名
      * @return

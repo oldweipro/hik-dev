@@ -46,7 +46,7 @@ public class StartedUpRunner implements ApplicationRunner {
             this.mqttConnectClient.mqttConnect();
         }
         ThreadUtil.execAsync(() -> {
-            // 应该把已存在的设备登录
+            // 项目启动后应该把已存在的设备进行登录、 TODO 布防
             List<DeviceSearchInfo> deviceSearchInfoList = ConfigJsonUtil.getDeviceSearchInfoList();
             deviceSearchInfoList.forEach(d -> {
                 if (StrUtil.isNotBlank(d.getUsername()) && StrUtil.isNotBlank(d.getPassword())) {

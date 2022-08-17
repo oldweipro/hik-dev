@@ -37,6 +37,7 @@ public class ScheduledTask {
      */
     @Scheduled(cron = "0 */1 * * * ?")
     public void searchHikDevice() {
+        // 每隔一分钟扫描一次设备
         ConfigJsonUtil.searchHikDevice();
     }
 

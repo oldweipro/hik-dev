@@ -65,13 +65,15 @@ public class DeviceController {
     }
 
     /**
-     * 设备注册登录状态
+     * 根据设备IP获取设备详细信息
+     * 登录状态
+     * 布防状态
      *
      * @param ip 设备ip
      * @return 登录结果 true/false
      */
-    @GetMapping("loginStatus")
-    public HikDevResponse loginStatus(String ip) {
+    @GetMapping("getDeviceInfoByIp")
+    public HikDevResponse getDeviceInfoByIp(String ip) {
         DeviceSearchInfo deviceLogin = this.hikDeviceService.loginStatus(ip);
         return new HikDevResponse().ok().data(deviceLogin);
     }
@@ -90,7 +92,6 @@ public class DeviceController {
 
     @GetMapping("getDeviceList")
     public HikDevResponse getDeviceList(DeviceSearchInfoVO deviceSearchInfoVo) {
-        // TODO 获取所有的设备，及登录状态
         return new HikDevResponse().ok().data(this.hikDeviceService.getDeviceList(deviceSearchInfoVo));
     }
 
@@ -112,18 +113,6 @@ public class DeviceController {
     @PostMapping("setupAlarm")
     public HikDevResponse setupAlarm(@RequestBody DeviceSn deviceSn) {
         return this.hikAlarmDataService.setupAlarmChan(deviceSn.getDeviceSn());
-    }
-
-    /**
-     * 设备布防状态
-     *
-     * @param deviceSn 设备序列号
-     * @return 登录结果 true/false
-     */
-    @CheckDeviceLogin
-    @GetMapping("alarmStatus")
-    public HikDevResponse alarmStatus(String deviceSn) {
-        return ObjectUtil.isNotEmpty(this.dataCache.get(DataCachePrefixConstant.HIK_ALARM_HANDLE + deviceSn)) ? new HikDevResponse().ok("已布防") : new HikDevResponse().err("未布防");
     }
 
     /**

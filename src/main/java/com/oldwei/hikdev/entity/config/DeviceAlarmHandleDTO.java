@@ -9,8 +9,8 @@ import java.io.Serializable;
  * @date 2022/8/17 13:29
  */
 @Data
-public class ConfigJson implements Serializable {
+public class DeviceAlarmHandleDTO implements Serializable {
     private static final long serialVersionUID = 273135886148788073L;
-    private DeviceLoginDTO deviceLogin;
-    private DeviceSearchInfo deviceSearchInfo;
+    private String ipv4Address;
+    private Integer alarmHandleId;
 }
