@@ -1,4 +1,4 @@
-package com.oldwei.hikdev.entity.device;
+package com.oldwei.hikdev.entity.config;
 
 import lombok.Data;
 
@@ -6,10 +6,11 @@ import java.io.Serializable;
 
 /**
  * @author oldwei
- * @date 2022/8/16 16:16
+ * @date 2022/8/17 13:35
  */
 @Data
-public class DeviceSearchInfo implements Serializable {
+public class DeviceSearchInfoDTO implements Serializable {
+    private static final long serialVersionUID = 1827948841470682264L;
     private String Types;
     private String DeviceDescription;
     private String HCPlatformEnable;

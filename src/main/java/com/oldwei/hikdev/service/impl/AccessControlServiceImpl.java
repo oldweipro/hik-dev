@@ -3,7 +3,7 @@ package com.oldwei.hikdev.service.impl;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.oldwei.hikdev.entity.device.DeviceLogin;
+import com.oldwei.hikdev.entity.config.DeviceLoginDTO;
 import com.oldwei.hikdev.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +56,7 @@ public class AccessControlServiceImpl implements IAccessControlService {
         switch (code) {
             case "HIK_DEVICE_LOGIN":
                 //设备登录 Done.
-                DeviceLogin deviceLogin = data.toJavaObject(DeviceLogin.class);
+                DeviceLoginDTO deviceLogin = data.toJavaObject(DeviceLoginDTO.class);
                 boolean b = this.hikDeviceService.login(deviceLogin);
                 if (b) {
                     result.put("code", 0);

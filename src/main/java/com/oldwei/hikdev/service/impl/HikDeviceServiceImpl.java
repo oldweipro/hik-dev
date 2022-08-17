@@ -1,8 +1,10 @@
 package com.oldwei.hikdev.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.oldwei.hikdev.entity.device.DeviceLogin;
-import com.oldwei.hikdev.entity.device.DeviceSearchInfoVo;
+import com.oldwei.hikdev.entity.config.DeviceLoginDTO;
+import com.oldwei.hikdev.entity.config.DeviceSearchInfo;
+import com.oldwei.hikdev.entity.config.DeviceSearchInfoVO;
 import com.oldwei.hikdev.service.IHikDevService;
 import com.oldwei.hikdev.service.IHikDeviceService;
 import com.oldwei.hikdev.structure.NET_DVR_DEVICEINFO_V40;
@@ -13,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,7 +33,7 @@ public class HikDeviceServiceImpl implements IHikDeviceService {
 
     @Override
     public boolean clean(String ip) {
-        DeviceLogin deviceLoginByIp = ConfigJsonUtil.getDeviceLoginByIp(ip);
+        DeviceSearchInfo deviceLoginByIp = ConfigJsonUtil.getDeviceSearchInfoByIp(ip);
         if (ObjectUtil.isNotNull(deviceLoginByIp)) {
             Integer longUserId = deviceLoginByIp.getLoginId();
             //退出的时候注销\释放SDK资源
@@ -53,17 +56,17 @@ public class HikDeviceServiceImpl implements IHikDeviceService {
      * @return
      */
     @Override
-    public boolean login(DeviceLogin deviceLogin) {
+    public boolean login(DeviceLoginDTO deviceLogin) {
         // 初始化设备登录信息
         NET_DVR_USER_LOGIN_INFO netDvrUserLoginInfo = new NET_DVR_USER_LOGIN_INFO();
         //设备ip地址
-        System.arraycopy(deviceLogin.getIp().getBytes(), 0, netDvrUserLoginInfo.sDeviceAddress, 0, deviceLogin.getIp().length());
+        System.arraycopy(deviceLogin.getIpv4Address().getBytes(), 0, netDvrUserLoginInfo.sDeviceAddress, 0, deviceLogin.getIpv4Address().length());
         //设备用户名
         System.arraycopy(deviceLogin.getUsername().getBytes(), 0, netDvrUserLoginInfo.sUserName, 0, deviceLogin.getUsername().length());
         //设备密码
         System.arraycopy(deviceLogin.getPassword().getBytes(), 0, netDvrUserLoginInfo.sPassword, 0, deviceLogin.getPassword().length());
         //设备端口
-        netDvrUserLoginInfo.wPort = deviceLogin.getPort();
+        netDvrUserLoginInfo.wPort = Short.parseShort(deviceLogin.getCommandPort());
         //是否异步登录：0- 否，1- 是 默认false
         netDvrUserLoginInfo.bUseAsynLogin = deviceLogin.getUseAsync();
         netDvrUserLoginInfo.write();
@@ -79,19 +82,22 @@ public class HikDeviceServiceImpl implements IHikDeviceService {
             deviceLogin.setLoginId(longUserId);
             //设备字符集
             int iCharEncodeType = netDvrDeviceInfoV40.byCharEncodeType;
-            deviceLogin.setCharEncodeType(iCharEncodeType);
+            deviceLogin.setCharEncodeType(String.valueOf(iCharEncodeType));
             return ConfigJsonUtil.saveOrUpdateDeviceLogin(deviceLogin);
         }
     }
 
     @Override
-    public List<DeviceSearchInfoVo> getDeviceList(DeviceSearchInfoVo deviceSearchInfoVo) {
-        return ConfigJsonUtil.readConfigJson().getJSONArray("deviceSearch").toList(DeviceSearchInfoVo.class);
+    public List<DeviceSearchInfoVO> getDeviceList(DeviceSearchInfoVO deviceSearchInfoVo) {
+        List<DeviceSearchInfoVO> deviceSearchInfoVOList = new ArrayList<>();
+        List<DeviceSearchInfo> deviceSearchInfoList = ConfigJsonUtil.getDeviceSearchInfoList();
+        BeanUtil.copyProperties(deviceSearchInfoList, deviceSearchInfoVOList);
+        return deviceSearchInfoVOList;
     }
 
     @Override
-    public DeviceLogin loginStatus(String ip) {
-        return ConfigJsonUtil.getDeviceLoginByIp(ip);
+    public DeviceSearchInfo loginStatus(String ip) {
+        return ConfigJsonUtil.getDeviceSearchInfoByIp(ip);
     }
 
 }

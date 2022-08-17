@@ -19,6 +19,7 @@ import com.oldwei.hikdev.entity.param.AccessControlUser;
 import com.oldwei.hikdev.service.IHikAccessControlService;
 import com.oldwei.hikdev.service.IHikDevService;
 import com.oldwei.hikdev.structure.*;
+import com.oldwei.hikdev.util.ConfigJsonUtil;
 import com.oldwei.hikdev.util.StringEncodingUtil;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
@@ -30,10 +31,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author oldwei
@@ -128,7 +126,7 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
     }
 
     @Override
-    public HikDevResponse getAllUserInfo(String deviceSn, String[] employeeNos, QueryRequest queryRequest) {
+    public HikDevResponse getAllUserInfo(String ip, String[] employeeNos, QueryRequest queryRequest) {
         String urlInBuffer = "POST /ISAPI/AccessControl/UserInfo/Search?format=json";
         //=====================================================================
         //组装查询的JSON报文，这边查询的是所有的卡
@@ -153,7 +151,7 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
         BYTE_ARRAY ptrInBuff = new BYTE_ARRAY(strInBuff.length());
         ptrInBuff.byValue = strInBuff.getBytes(StandardCharsets.UTF_8);
         ptrInBuff.write();
-        JSONObject result = this.userInfo(deviceSn, urlInBuffer, ptrInBuff.getPointer(), strInBuff.length(), 2550, 1024 * 10);
+        JSONObject result = this.userInfo(ip, urlInBuffer, ptrInBuff.getPointer(), strInBuff.length(), 2550, 1024 * 10);
 
         //因为name是字节数组，所以需要自己转一下
         UserInfoSearch userInfoSearch = result.getJSONObject("data").getJSONObject("UserInfoSearch").to(UserInfoSearch.class);
@@ -802,9 +800,9 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
 //        return result;
     }
 
-    private JSONObject userInfo(String deviceSn, String urlInBuffer, Pointer lpInBuff, int dwInBuffSize, int dwCommand, int iOutBuffLen) {
+    private JSONObject userInfo(String ip, String urlInBuffer, Pointer lpInBuff, int dwInBuffSize, int dwCommand, int iOutBuffLen) {
         JSONObject result = new JSONObject();
-        Integer lHandler = this.startRemoteConfig(deviceSn, urlInBuffer, dwCommand);
+        Integer lHandler = this.startRemoteConfig(ip, urlInBuffer, dwCommand);
         if (lHandler < 0) {
             result.put("msg", "NET_DVR_StartRemoteConfig 接口调用失败，错误码：" + this.hikDevService.NET_DVR_GetLastError());
             return result;
@@ -828,9 +826,10 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
         return result;
     }
 
-    private Integer startRemoteConfig(String deviceSn, String urlInBuffer, int dwCommand) {
+    private Integer startRemoteConfig(String ip, String urlInBuffer, int dwCommand) {
         // 获取用户句柄
-        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + deviceSn);
+
+        Integer longUserId = Objects.requireNonNull(ConfigJsonUtil.getDeviceSearchInfoByIp(ip)).getLoginId();
         if (null != longUserId && longUserId != -1) {
             //  数组
             BYTE_ARRAY ptrByteArray = new BYTE_ARRAY(1024);

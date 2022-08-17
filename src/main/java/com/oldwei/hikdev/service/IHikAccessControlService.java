@@ -23,12 +23,12 @@ public interface IHikAccessControlService {
     /**
      * 【用户】根据设备序列号deviceSn获取所有用户信息
      *
-     * @param deviceSn     设备序列号
+     * @param ip     设备IP
      * @param employeeNos  用户id
      * @param queryRequest 分页参数
      * @return
      */
-    HikDevResponse getAllUserInfo(String deviceSn, String[] employeeNos, QueryRequest queryRequest);
+    HikDevResponse getAllUserInfo(String ip, String[] employeeNos, QueryRequest queryRequest);
 
     /**
      * 【用户】下发

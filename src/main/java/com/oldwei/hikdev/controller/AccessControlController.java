@@ -40,19 +40,19 @@ public class AccessControlController {
     /**
      * 【用户】根据设备序列号deviceSn查询所有用户信息
      *
-     * @param deviceSn     设备序列号
+     * @param ip     设备IP
      * @param employeeNos  用户id
      * @param queryRequest 分页参数: pageNum, pageSize
      * @return
      */
     @CheckDeviceLogin
     @GetMapping("getAllUserInfo")
-    public HikDevResponse getAllUserInfo(String deviceSn, String employeeNos, QueryRequest queryRequest) {
+    public HikDevResponse getAllUserInfo(String ip, String employeeNos, QueryRequest queryRequest) {
         String[] ids = {};
         if (StrUtil.isNotBlank(employeeNos)) {
             ids = employeeNos.split(",");
         }
-        return this.hikAccessControlService.getAllUserInfo(deviceSn, ids, queryRequest);
+        return this.hikAccessControlService.getAllUserInfo(ip, ids, queryRequest);
     }
 
     /**

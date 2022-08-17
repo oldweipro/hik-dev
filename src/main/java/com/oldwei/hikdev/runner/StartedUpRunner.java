@@ -2,9 +2,13 @@ package com.oldwei.hikdev.runner;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.XmlUtil;
-import com.oldwei.hikdev.entity.device.DeviceSearchInfo;
+import com.oldwei.hikdev.entity.config.DeviceLoginDTO;
+import com.oldwei.hikdev.entity.config.DeviceSearchInfo;
+import com.oldwei.hikdev.entity.config.DeviceSearchInfoDTO;
 import com.oldwei.hikdev.mqtt.MqttConnectClient;
+import com.oldwei.hikdev.service.IHikDeviceService;
 import com.oldwei.hikdev.util.ConfigJsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +34,8 @@ import java.util.*;
 public class StartedUpRunner implements ApplicationRunner {
     private final MqttConnectClient mqttConnectClient;
 
+    private final IHikDeviceService hikDeviceService;
+
     @Value("${mqtt.enable}")
     private boolean mqttEnable;
 
@@ -41,13 +47,22 @@ public class StartedUpRunner implements ApplicationRunner {
             this.mqttConnectClient.mqttConnect();
         }
         ThreadUtil.execAsync(() -> {
+            // 应该把已存在的设备登录
+            List<DeviceSearchInfo> deviceSearchInfoList = ConfigJsonUtil.getDeviceSearchInfoList();
+            deviceSearchInfoList.forEach(d -> {
+                if (StrUtil.isNotBlank(d.getUsername()) && StrUtil.isNotBlank(d.getPassword())) {
+                    this.hikDeviceService.login(d.findDeviceLoginDTO());
+                }
+            });
+        });
+        ThreadUtil.execAsync(() -> {
             try (MulticastSocket multicastSocket = new MulticastSocket(37020)) {
                 InetAddress inetAddress = InetAddress.getByName("239.255.255.250");
                 DatagramPacket datagramPacket = new DatagramPacket(new byte[4096], 4096);
 
                 // 遍历查找IPv4的网卡
                 NetworkInterface.networkInterfaces().forEach(networkInterface -> {
-                    int port = 38888;
+                    int port = 20220;
                     Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
                     while (inetAddresses.hasMoreElements()) {
                         InetAddress inetAddressElement = inetAddresses.nextElement();
@@ -72,8 +87,8 @@ public class StartedUpRunner implements ApplicationRunner {
                         Map<String, Object> stringObjectMap = XmlUtil.xmlToMap(decodeData);
                         // 过滤无效数据
                         if (stringObjectMap.containsKey("IPv4Address")) {
-                            DeviceSearchInfo deviceSearchInfo = BeanUtil.toBean(stringObjectMap, DeviceSearchInfo.class);
-                            ConfigJsonUtil.saveOrUpdateDeviceSearch(deviceSearchInfo);
+                            DeviceSearchInfoDTO deviceSearchInfoDTO = BeanUtil.toBean(stringObjectMap, DeviceSearchInfoDTO.class);
+                            ConfigJsonUtil.saveOrUpdateDeviceSearch(deviceSearchInfoDTO);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();

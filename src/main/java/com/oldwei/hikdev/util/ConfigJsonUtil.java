@@ -8,8 +8,9 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.oldwei.hikdev.entity.device.DeviceLogin;
-import com.oldwei.hikdev.entity.device.DeviceSearchInfo;
+import com.oldwei.hikdev.entity.config.DeviceLoginDTO;
+import com.oldwei.hikdev.entity.config.DeviceSearchInfo;
+import com.oldwei.hikdev.entity.config.DeviceSearchInfoDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,6 @@ import java.util.stream.Collectors;
  */
 public class ConfigJsonUtil {
     static final String configPath = System.getProperty("user.dir") + "/sdk/config/config.json";
-    static final String deviceLogin = "deviceLogin";
     static final String deviceSearchInfo = "deviceSearchInfo";
 
     public static JSONObject readConfigJson() {
@@ -51,51 +51,63 @@ public class ConfigJsonUtil {
         return true;
     }
 
-    public static List<DeviceLogin> getDeviceLoginList() {
-        JSONObject configJson = readConfigJson();
-        List<DeviceLogin> deviceLogin = new ArrayList<>();
-        if (configJson.containsKey(ConfigJsonUtil.deviceLogin)) {
-            deviceLogin = configJson.getJSONArray(ConfigJsonUtil.deviceLogin).toList(DeviceLogin.class);
-        }
-        return deviceLogin;
-    }
+//    public static List<DeviceLoginDTO> getDeviceLoginList() {
+//        JSONObject configJson = readConfigJson();
+//        List<DeviceLoginDTO> deviceLogin = new ArrayList<>();
+//        if (configJson.containsKey(ConfigJsonUtil.deviceLogin)) {
+//            deviceLogin = configJson.getJSONArray(ConfigJsonUtil.deviceLogin).toList(DeviceLoginDTO.class);
+//        }
+//        return deviceLogin;
+//    }
 
-    public static DeviceLogin getDeviceLoginByIp(String ip) {
-        List<DeviceLogin> collect = getDeviceLoginList().stream().filter(d -> StrUtil.equals(d.getIp(), ip)).collect(Collectors.toList());
-        if (collect.size() > 0) {
-            return collect.get(0);
-        }
-        return null;
-    }
+//    public static DeviceLoginDTO getDeviceLoginByIp(String ip) {
+//        List<DeviceLoginDTO> collect = getDeviceLoginList().stream().filter(d -> StrUtil.equals(d.getIPv4Address(), ip)).collect(Collectors.toList());
+//        if (collect.size() > 0) {
+//            return collect.get(0);
+//        }
+//        return null;
+//    }
 
-    public static boolean saveOrUpdateDeviceLogin(DeviceLogin deviceLogin) {
+    public static boolean saveOrUpdateDeviceLogin(DeviceLoginDTO deviceLogin) {
         // 判断json文件中是否有deviceLogin数据 && 判断这个数据是否存在
-        List<DeviceLogin> deviceLoginLoginList = getDeviceLoginList();
-        if (deviceLoginLoginList.size() > 0 && ObjectUtil.isNotNull(getDeviceLoginByIp(deviceLogin.getIp()))) {
+        List<DeviceSearchInfo> deviceLoginLoginList = getDeviceSearchInfoList();
+        if (deviceLoginLoginList.size() > 0 && ObjectUtil.isNotNull(getDeviceSearchInfoByIp(deviceLogin.getIpv4Address()))) {
             deviceLoginLoginList.forEach(d -> {
-                if (StrUtil.equals(d.getIp(), deviceLogin.getIp())) {
-                    BeanUtil.copyProperties(deviceLogin, d);
+                if (StrUtil.equals(d.getIPv4Address(), deviceLogin.getIpv4Address())) {
+//                    BeanUtil.copyProperties(deviceLogin, d);
+                    d.setDeviceLoginDTO(deviceLogin);
                 }
             });
         } else {
-            deviceLoginLoginList.add(deviceLogin);
+            DeviceSearchInfo deviceSearchInfo = new DeviceSearchInfo();
+            deviceSearchInfo.setDeviceLoginDTO(deviceLogin);
+            deviceLoginLoginList.add(deviceSearchInfo);
         }
         JSONObject configJson = readConfigJson();
-        configJson.put(ConfigJsonUtil.deviceLogin, deviceLoginLoginList);
+        configJson.put(ConfigJsonUtil.deviceSearchInfo, deviceLoginLoginList);
         ConfigJsonUtil.writeConfigJson(configJson.toJSONString());
         return true;
     }
 
+    /**
+     * 将设备登录状态重置为-1：表示未注册（未登录）
+     * @param ip
+     * @return
+     */
     public static boolean removeDeviceLogin(String ip) {
         // 判断json文件中是否有deviceLogin数据 && 判断这个数据是否存在
-        List<DeviceLogin> deviceLoginLoginList = getDeviceLoginList();
-        if (deviceLoginLoginList.size() > 0 && ObjectUtil.isNotNull(getDeviceLoginByIp(ip))) {
-            deviceLoginLoginList = deviceLoginLoginList.stream().filter(d -> !StrUtil.equals(d.getIp(), ip)).collect(Collectors.toList());
+        List<DeviceSearchInfo> deviceLoginLoginList = getDeviceSearchInfoList();
+        if (deviceLoginLoginList.size() > 0 && ObjectUtil.isNotNull(getDeviceSearchInfoByIp(ip))) {
+            deviceLoginLoginList.forEach(d -> {
+                if (StrUtil.equals(d.getIPv4Address(), ip)) {
+                    d.setLoginId(-1);
+                }
+            });
         } else {
             return false;
         }
         JSONObject configJson = readConfigJson();
-        configJson.put(ConfigJsonUtil.deviceLogin, deviceLoginLoginList);
+        configJson.put(ConfigJsonUtil.deviceSearchInfo, deviceLoginLoginList);
         ConfigJsonUtil.writeConfigJson(configJson.toJSONString());
         return true;
     }
@@ -117,7 +129,12 @@ public class ConfigJsonUtil {
         return null;
     }
 
-    public static boolean saveOrUpdateDeviceSearch(DeviceSearchInfo xmlToMap) {
+    /**
+     * 同步（扫描）局域网内的海康设备，存储到config.json文件中
+     * @param xmlToMap
+     * @return
+     */
+    public static boolean saveOrUpdateDeviceSearch(DeviceSearchInfoDTO xmlToMap) {
         // 判断json文件中是否有deviceLogin数据 && 判断这个数据是否存在
         // 这会有一个并行问题，如果同时打开文件，第一个人修改之后保存为A，第二个人修改之后保存为B，这个内容最终会覆盖A，显示为B内容，目前的业务一般不会出现
         // 判断当前json文件中是否记录改序列号ip
@@ -127,11 +144,14 @@ public class ConfigJsonUtil {
             // 说明已存在，需要进行更新
             deviceSearchList.forEach(d -> {
                 if (StrUtil.equals(d.getIPv4Address(), xmlToMap.getIPv4Address())) {
-                    BeanUtil.copyProperties(xmlToMap, d);
+                    // BeanUtil.copyProperties(xmlToMap, d);
+                    d.setDeviceSearchInfoDTO(xmlToMap);
                 }
             });
         } else {
-            deviceSearchList.add(xmlToMap);
+            DeviceSearchInfo deviceSearchInfo = new DeviceSearchInfo();
+            deviceSearchInfo.setDeviceSearchInfoDTO(xmlToMap);
+            deviceSearchList.add(deviceSearchInfo);
         }
         JSONObject configJson = readConfigJson();
         configJson.put(deviceSearchInfo, deviceSearchList);

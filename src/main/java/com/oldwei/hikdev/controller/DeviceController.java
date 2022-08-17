@@ -7,10 +7,11 @@ import com.alibaba.fastjson2.JSONObject;
 import com.oldwei.hikdev.annotation.CheckDeviceLogin;
 import com.oldwei.hikdev.component.AliyunPlatform;
 import com.oldwei.hikdev.constant.DataCachePrefixConstant;
-import com.oldwei.hikdev.entity.device.DeviceLogin;
+import com.oldwei.hikdev.entity.config.DeviceLoginDTO;
 import com.oldwei.hikdev.entity.HikDevResponse;
 import com.oldwei.hikdev.entity.StreamAddress;
-import com.oldwei.hikdev.entity.device.DeviceSearchInfoVo;
+import com.oldwei.hikdev.entity.config.DeviceSearchInfo;
+import com.oldwei.hikdev.entity.config.DeviceSearchInfoVO;
 import com.oldwei.hikdev.entity.param.DeviceSn;
 import com.oldwei.hikdev.service.IHikAlarmDataService;
 import com.oldwei.hikdev.service.IHikCameraService;
@@ -58,7 +59,7 @@ public class DeviceController {
      * @return 登录结果 true/false
      */
     @PostMapping("login")
-    public HikDevResponse login(@Valid @RequestBody DeviceLogin deviceLogin) {
+    public HikDevResponse login(@Valid @RequestBody DeviceLoginDTO deviceLogin) {
         return this.hikDeviceService.login(deviceLogin) ? new HikDevResponse().ok() : new HikDevResponse().err();
     }
 
@@ -70,7 +71,7 @@ public class DeviceController {
      */
     @GetMapping("loginStatus")
     public HikDevResponse loginStatus(String ip) {
-        DeviceLogin deviceLogin = this.hikDeviceService.loginStatus(ip);
+        DeviceSearchInfo deviceLogin = this.hikDeviceService.loginStatus(ip);
         return new HikDevResponse().ok().data(deviceLogin);
     }
 
@@ -87,7 +88,8 @@ public class DeviceController {
     }
 
     @GetMapping("getDeviceList")
-    public HikDevResponse getDeviceList(DeviceSearchInfoVo deviceSearchInfoVo) {
+    public HikDevResponse getDeviceList(DeviceSearchInfoVO deviceSearchInfoVo) {
+        // TODO 获取所有的设备，及登录状态
         return new HikDevResponse().ok().data(this.hikDeviceService.getDeviceList(deviceSearchInfoVo));
     }
 
@@ -145,8 +147,8 @@ public class DeviceController {
      * @return 登录结果 true/false
      */
     @GetMapping("devicePushStatus")
-    public String devicePushStatus(DeviceLogin deviceLogin) {
-        return ObjectUtil.isNotEmpty(this.dataCache.get(DataCachePrefixConstant.HIK_PUSH_STATUS + deviceLogin.getIp())) ? "推流中" : "未推流";
+    public String devicePushStatus(DeviceLoginDTO deviceLogin) {
+        return ObjectUtil.isNotEmpty(this.dataCache.get(DataCachePrefixConstant.HIK_PUSH_STATUS + deviceLogin.getIpv4Address())) ? "推流中" : "未推流";
     }
 
     /**
@@ -266,11 +268,11 @@ public class DeviceController {
      * @param deviceLogin 退出推流的设备IP
      */
     @PostMapping("existPushStream")
-    public JSONObject existPushStream(@RequestBody DeviceLogin deviceLogin) {
-        this.hikCameraService.existPushStream(deviceLogin.getIp());
+    public JSONObject existPushStream(@RequestBody DeviceLoginDTO deviceLogin) {
+        this.hikCameraService.existPushStream(deviceLogin.getIpv4Address());
         JSONObject result = new JSONObject();
         result.put("code", 0);
-        result.put("msg", "已退出推流:" + deviceLogin.getIp());
+        result.put("msg", "已退出推流:" + deviceLogin.getIpv4Address());
         return result;
     }
 }
