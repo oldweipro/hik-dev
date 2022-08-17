@@ -42,9 +42,9 @@ public class AccessControlController {
     }
 
     /**
-     * 【用户】根据设备序列号deviceSn查询所有用户信息
+     * 【用户】根据设备ip查询所有用户信息
      *
-     * @param ip     设备IP
+     * @param ip           设备IP
      * @param employeeNos  用户id
      * @param queryRequest 分页参数: pageNum, pageSize
      * @return HikDevResponse
@@ -62,19 +62,19 @@ public class AccessControlController {
     /**
      * 【用户】下发
      *
-     * @param accessControlUser 门禁用户: deviceSn, realName, int:employeeNo
+     * @param accessControlUser 门禁用户: ip, realName, int:employeeNo
      * @return HikDevResponse
      */
     @CheckDeviceLogin
     @PostMapping("addUser")
     public HikDevResponse addUser(@RequestBody AccessControlUser accessControlUser) {
-        return this.hikAccessControlService.addUser(accessControlUser.getDeviceSn(), accessControlUser);
+        return this.hikAccessControlService.addUser(accessControlUser.getIp(), accessControlUser);
     }
 
     /**
      * 【用户】修改
      *
-     * @param accessPeople 门禁用户: deviceSn, realName, int:employeeNo
+     * @param accessPeople 门禁用户: ip, realName, int:employeeNo
      * @return HikDevResponse
      */
     @CheckDeviceLogin
@@ -86,134 +86,135 @@ public class AccessControlController {
     /**
      * 【用户】批量下发
      *
-     * @param accessControlUserList 门禁用户列表: deviceSn, realName, int:employeeNo
+     * @param accessControlUserList 门禁用户列表: ip, realName, int:employeeNo
      * @return HikDevResponse
      */
     @CheckDeviceLogin
-    @PostMapping("addMultiUser/{deviceSn}")
-    public HikDevResponse addMultiUser(@PathVariable String deviceSn, @RequestBody List<AccessControlUser> accessControlUserList) {
-        return this.hikAccessControlService.addMultiUser(deviceSn, accessControlUserList);
+    @PostMapping("addMultiUser/{ip}")
+    public HikDevResponse addMultiUser(@PathVariable String ip, @RequestBody List<AccessControlUser> accessControlUserList) {
+        return this.hikAccessControlService.addMultiUser(ip, accessControlUserList);
     }
 
     /**
      * 【用户】下发人脸
      *
-     * @param accessControlUser 门禁用户: deviceSn, employeeNo, base64Pic
+     * @param accessControlUser 门禁用户: ip, employeeNo, base64Pic
      * @return HikDevResponse
      */
     @CheckDeviceLogin
     @PutMapping("addUserFace")
     public HikDevResponse addUserFace(@RequestBody AccessControlUser accessControlUser) {
-        return this.hikAccessControlService.addUserFace(accessControlUser.getDeviceSn(), accessControlUser);
+        return this.hikAccessControlService.addUserFace(accessControlUser.getIp(), accessControlUser);
     }
 
     /**
      * 【用户】批量下发人脸
      *
-     * @param accessControlUserList 门禁用户列表: deviceSn, employeeNo, base64Pic
+     * @param accessControlUserList 门禁用户列表: ip, employeeNo, base64Pic
      * @return HikDevResponse
      */
     @CheckDeviceLogin
-    @PutMapping("addMultiUserFace/{deviceSn}")
-    public HikDevResponse addMultiUserFace(@PathVariable String deviceSn, @RequestBody List<AccessControlUser> accessControlUserList) {
-        return this.hikAccessControlService.addMultiUserFace(deviceSn, accessControlUserList);
+    @PutMapping("addMultiUserFace/{ip}")
+    public HikDevResponse addMultiUserFace(@PathVariable String ip, @RequestBody List<AccessControlUser> accessControlUserList) {
+        return this.hikAccessControlService.addMultiUserFace(ip, accessControlUserList);
     }
 
     /**
      * 【用户】批量删除人脸
      *
-     * @param deviceSn    设备序列号
+     * @param ip          设备ip
      * @param employeeIds 多个用户工号，用逗号隔开
      * @return HikDevResponse
      */
     @CheckDeviceLogin
     @DeleteMapping("delMultiUserFace")
-    public HikDevResponse delMultiUserFace(String deviceSn, String employeeIds) {
+    public HikDevResponse delMultiUserFace(String ip, String employeeIds) {
         String[] ids = employeeIds.split(",");
-        return this.hikAccessControlService.delMultiUserFace(deviceSn, ids);
+        return this.hikAccessControlService.delMultiUserFace(ip, ids);
     }
 
     /**
      * 【用户】批量删除用户
      *
-     * @param deviceSn    设备序列号
+     * @param ip          设备ip
      * @param employeeIds 多个用户工号，用逗号隔开
      * @return HikDevResponse
      */
     @CheckDeviceLogin
     @DeleteMapping("delMultiUser")
-    public HikDevResponse delMultiUser(String deviceSn, String employeeIds) {
+    public HikDevResponse delMultiUser(String ip, String employeeIds) {
         String[] ids = employeeIds.split(",");
-        return this.hikAccessControlService.delMultiUser(deviceSn, ids);
+        return this.hikAccessControlService.delMultiUser(ip, ids);
     }
 
     /**
      * 【卡】批量下发
      *
-     * @param accessControlUserList 门禁用户列表: deviceSn, realName, int:employeeNo
+     * @param accessControlUserList 门禁用户列表: ip, realName, int:employeeNo
      * @return HikDevResponse
      */
     @CheckDeviceLogin
-    @PostMapping("addMultiCard/{deviceSn}")
-    public HikDevResponse addMultiCard(@PathVariable String deviceSn, @RequestBody List<AccessControlUser> accessControlUserList) {
-        return this.hikAccessControlService.addMultiCard(deviceSn, accessControlUserList);
+    @PostMapping("addMultiCard/{ip}")
+    public HikDevResponse addMultiCard(@PathVariable String ip, @RequestBody List<AccessControlUser> accessControlUserList) {
+        return this.hikAccessControlService.addMultiCard(ip, accessControlUserList);
     }
 
     /**
      * 【卡】批量下发人脸
      *
-     * @param accessControlUserList 门禁用户列表: deviceSn, realName, int:employeeNo
+     * @param accessControlUserList 门禁用户列表: ip, realName, int:employeeNo
      * @return HikDevResponse
      */
     @CheckDeviceLogin
-    @PutMapping("addMultiCardFace/{deviceSn}")
-    public HikDevResponse addMultiCardFace(@PathVariable String deviceSn, @RequestBody List<AccessControlUser> accessControlUserList) {
-        return this.hikAccessControlService.addMultiCardFace(deviceSn, accessControlUserList);
+    @PutMapping("addMultiCardFace/{ip}")
+    public HikDevResponse addMultiCardFace(@PathVariable String ip, @RequestBody List<AccessControlUser> accessControlUserList) {
+        return this.hikAccessControlService.addMultiCardFace(ip, accessControlUserList);
     }
 
     /**
      * 【卡】批量删除人脸
      *
-     * @param deviceSn  设备被序列号
+     * @param ip        设备ip
      * @param cardNoIds 将要被删除人脸的卡号数组
      * @return HikDevResponse
      */
     @CheckDeviceLogin
     @DeleteMapping("delMultiCardFace")
-    public HikDevResponse delMultiCardFace(String deviceSn, String cardNoIds) {
+    public HikDevResponse delMultiCardFace(String ip, String cardNoIds) {
         String[] ids = cardNoIds.split(",");
-        return this.hikAccessControlService.delMultiCardFace(deviceSn, ids);
+        return this.hikAccessControlService.delMultiCardFace(ip, ids);
     }
 
     /**
      * 【卡】批量删除卡
      *
-     * @param deviceSn  设备被序列号
+     * @param ip        设备ip
      * @param cardNoIds 将要被删除人脸的卡号数组
      * @return HikDevResponse
      */
     @CheckDeviceLogin
     @DeleteMapping("delMultiCard")
-    public HikDevResponse delMultiCard(String deviceSn, String cardNoIds) {
+    public HikDevResponse delMultiCard(String ip, String cardNoIds) {
         String[] ids = cardNoIds.split(",");
-        return this.hikAccessControlService.delMultiCard(deviceSn, ids);
+        return this.hikAccessControlService.delMultiCard(ip, ids);
     }
 
     /**
      * 【卡】设置计划模板
      *
-     * @param deviceSn  设备被序列号
+     * @param ip                 设备ip
      * @param planTemplateNumber 将要被删除人脸的卡号数组
      * @return HikDevResponse
      */
     @CheckDeviceLogin
     @PostMapping("setCartTemplate")
-    public HikDevResponse setCartTemplate(String deviceSn, Integer planTemplateNumber) {
-        return this.hikAccessControlService.setCartTemplate(deviceSn, planTemplateNumber);
+    public HikDevResponse setCartTemplate(String ip, Integer planTemplateNumber) {
+        return this.hikAccessControlService.setCartTemplate(ip, planTemplateNumber);
     }
 
     /**
      * 开门
+     *
      * @param ip 设备ip
      * @return HikDevResponse
      */

@@ -12,9 +12,9 @@ import java.io.Serializable;
 public class AccessControlUser implements Serializable {
     private static final long serialVersionUID = 6771194369306848896L;
     /**
-     * 设备序列号 唯一标识
+     * 设备ip
      */
-    private String deviceSn;
+    private String ip;
     /**
      * 姓名
      */

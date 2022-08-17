@@ -4,8 +4,6 @@ import cn.hutool.core.codec.Base64;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import com.oldwei.hikdev.component.DataCache;
-import com.oldwei.hikdev.constant.DataCachePrefixConstant;
 import com.oldwei.hikdev.constant.HikConstant;
 import com.oldwei.hikdev.entity.HikDevResponse;
 import com.oldwei.hikdev.entity.QueryRequest;
@@ -39,8 +37,6 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class HikAccessControlServiceImpl implements IHikAccessControlService {
-
-    private final DataCache dataCache;
     private final IHikDevService hikDevService;
 
     @Override
@@ -174,6 +170,7 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
         userInfoSearch.setPageNum(queryRequest.getPageNum());
         return new HikDevResponse().ok(result.getString("msg"), userInfoSearch);
     }
+
     private List<Map<String, Object>> packageUserNos(String[] employeeNos) {
         List<Map<String, Object>> employeeNoList = new ArrayList<>();
         for (String no : employeeNos) {
@@ -186,35 +183,35 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
     }
 
     @Override
-    public HikDevResponse addUser(String deviceSn, AccessControlUser accessControlUser) {
+    public HikDevResponse addUser(String ip, AccessControlUser accessControlUser) {
         String urlInBuffer = "POST /ISAPI/AccessControl/UserInfo/Record?format=json";
         AccessPeople accessPeople = new AccessPeople();
         accessPeople.setRealName(accessControlUser.getRealName());
         accessPeople.setEmployeeNo(accessControlUser.getEmployeeNo());
-        JSONObject result = this.aboutUserInfo(deviceSn, accessPeople, urlInBuffer);
+        JSONObject result = this.aboutUserInfo(ip, accessPeople, urlInBuffer);
         return new HikDevResponse().ok(result.getString("msg"));
     }
 
     @Override
     public HikDevResponse modifyUser(AccessPeople accessPeople) {
         String urlInBuffer = "PUT /ISAPI/AccessControl/UserInfo/Modify?format=json";
-        JSONObject result = this.aboutUserInfo(accessPeople.getDeviceSn(), accessPeople, urlInBuffer);
+        JSONObject result = this.aboutUserInfo(accessPeople.getIp(), accessPeople, urlInBuffer);
         return new HikDevResponse().ok(result.getString("msg"));
     }
 
     @Override
-    public HikDevResponse addMultiUser(String deviceSn, List<AccessControlUser> accessControlUserList) {
+    public HikDevResponse addMultiUser(String ip, List<AccessControlUser> accessControlUserList) {
         for (AccessControlUser user : accessControlUserList) {
-            this.addUser(deviceSn, user);
+            this.addUser(ip, user);
         }
         return new HikDevResponse().ok("批量下发用户完成");
     }
 
     @Override
-    public HikDevResponse addUserFace(String deviceSn, AccessControlUser accessControlUser) {
+    public HikDevResponse addUserFace(String ip, AccessControlUser accessControlUser) {
         String urlInBuffer = "POST /ISAPI/Intelligent/FDLib/FaceDataRecord?format=json";
         HikDevResponse result = new HikDevResponse();
-        Integer lHandler = this.startRemoteConfig(deviceSn, urlInBuffer, 2551);
+        Integer lHandler = this.startRemoteConfig(ip, urlInBuffer, 2551);
         if (lHandler < 0) {
             return result.err("NET_DVR_StartRemoteConfig 接口调用失败，错误码：" + this.hikDevService.NET_DVR_GetLastError());
         }
@@ -273,7 +270,7 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
         result.put("data", jsonResult);
         if (dwState != HikConstant.NET_SDK_CONFIG_STATUS_SUCCESS) {
             //返回NET_SDK_CONFIG_STATUS_SUCCESS代表流程走通了，但并不代表下发成功，比如有些设备可能因为人员已存在等原因下发失败，所以需要解析Json报文 如果statusCode=1无异常情况,否则就是有异常情况
-            result.err( "NET_DVR_SendWithRecvRemoteConfig接口调用失败，错误码：" + this.hikDevService.NET_DVR_GetLastError());
+            result.err("NET_DVR_SendWithRecvRemoteConfig接口调用失败，错误码：" + this.hikDevService.NET_DVR_GetLastError());
         }
         // TODO 下发人员时：dwState其实不会走到这里，因为设备不知道我们会下发多少个人，所以长连接需要我们主动关闭
         if (!this.hikDevService.NET_DVR_StopRemoteConfig(lHandler)) {
@@ -283,15 +280,15 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
     }
 
     @Override
-    public HikDevResponse addMultiUserFace(String deviceSn, List<AccessControlUser> accessControlUserList) {
+    public HikDevResponse addMultiUserFace(String ip, List<AccessControlUser> accessControlUserList) {
         for (AccessControlUser user : accessControlUserList) {
-            this.addUserFace(deviceSn, user);
+            this.addUserFace(ip, user);
         }
         return new HikDevResponse().ok("批量下发人脸完成");
     }
 
     @Override
-    public HikDevResponse delMultiUserFace(String deviceSn, String[] employeeIds) {
+    public HikDevResponse delMultiUserFace(String ip, String[] employeeIds) {
         String urlInBuffer = "PUT /ISAPI/Intelligent/FDLib/FDSearch/Delete?format=json&FDID=1&faceLibType=blackFD";
         JSONArray array = new JSONArray();
         //================
@@ -304,11 +301,11 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
         fpid.put("FPID", array);
         String strInBuffer = fpid.toJSONString();
         //=============
-        return deleteOperation(deviceSn, urlInBuffer, strInBuffer);
+        return deleteOperation(ip, urlInBuffer, strInBuffer);
     }
 
     @Override
-    public HikDevResponse delMultiUser(String deviceSn, String[] employeeIds) {
+    public HikDevResponse delMultiUser(String ip, String[] employeeIds) {
         String urlInBuffer = "PUT /ISAPI/AccessControl/UserInfo/Delete?format=json";
         JSONArray array = new JSONArray();
         //=====================
@@ -323,11 +320,11 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
         userInfoDelCond.put("UserInfoDelCond", employeeNoList);
         String strInBuffer = userInfoDelCond.toJSONString();
         //======================
-        return deleteOperation(deviceSn, urlInBuffer, strInBuffer);
+        return deleteOperation(ip, urlInBuffer, strInBuffer);
     }
 
     @Override
-    public HikDevResponse addMultiCard(String deviceSn, List<AccessControlUser> accessControlUserList) {
+    public HikDevResponse addMultiCard(String ip, List<AccessControlUser> accessControlUserList) {
         HikDevResponse result = new HikDevResponse();
         //下发多少张卡
         int cardNum = accessControlUserList.size();
@@ -338,7 +335,7 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
         struCardCond.dwCardNum = cardNum;
         struCardCond.write();
         Pointer ptrStrCond = struCardCond.getPointer();
-        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + deviceSn);
+        Integer longUserId = ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getLoginId();
         int setCardConfigHandle = this.hikDevService.NET_DVR_StartRemoteConfig(longUserId, HikConstant.NET_DVR_SET_CARD, ptrStrCond, struCardCond.size(), null, null);
         if (setCardConfigHandle == -1) {
             return result.err("建立下发卡长连接失败，错误码为" + this.hikDevService.NET_DVR_GetLastError());
@@ -431,7 +428,7 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
     }
 
     @Override
-    public HikDevResponse addMultiCardFace(String deviceSn, List<AccessControlUser> accessControlUserList) {
+    public HikDevResponse addMultiCardFace(String ip, List<AccessControlUser> accessControlUserList) {
         HikDevResponse result = new HikDevResponse();
         //下发多少张脸
         int faceNum = accessControlUserList.size();
@@ -446,7 +443,7 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
         struFaceCond.dwEnableReaderNo = 1;
         struFaceCond.write();
         Pointer ptrStruFaceCond = struFaceCond.getPointer();
-        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + deviceSn);
+        Integer longUserId = ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getLoginId();
         int m_lSetFaceCfgHandle = this.hikDevService.NET_DVR_StartRemoteConfig(longUserId, HikConstant.NET_DVR_SET_FACE, ptrStruFaceCond, struFaceCond.size(), null, null);
         if (m_lSetFaceCfgHandle == -1) {
             return result.err("建立下发人脸长连接失败，错误码为" + this.hikDevService.NET_DVR_GetLastError());
@@ -528,18 +525,18 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
         }
 
         if (!this.hikDevService.NET_DVR_StopRemoteConfig(m_lSetFaceCfgHandle)) {
-            return result.err( "NET_DVR_StopRemoteConfig接口调用失败，错误码：" + this.hikDevService.NET_DVR_GetLastError());
+            return result.err("NET_DVR_StopRemoteConfig接口调用失败，错误码：" + this.hikDevService.NET_DVR_GetLastError());
         }
         return result.ok("NET_DVR_StopRemoteConfig接口成功");
     }
 
     @Override
-    public HikDevResponse delMultiCardFace(String deviceSn, String[] cardNoIds) {
+    public HikDevResponse delMultiCardFace(String ip, String[] cardNoIds) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("以下卡号操作失败：");
         for (String cardNo :
                 cardNoIds) {
-            boolean b = this.delCardFace(deviceSn, cardNo);
+            boolean b = this.delCardFace(ip, cardNo);
             if (!b) {
                 stringBuilder.append(cardNo).append(";");
             }
@@ -548,12 +545,12 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
     }
 
     @Override
-    public HikDevResponse delMultiCard(String deviceSn, String[] cardNoIds) {
+    public HikDevResponse delMultiCard(String ip, String[] cardNoIds) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("以下卡号操作失败：");
         for (String cardNo :
                 cardNoIds) {
-            boolean b = this.delCard(deviceSn, cardNo);
+            boolean b = this.delCard(ip, cardNo);
             if (!b) {
                 stringBuilder.append(cardNo).append(";");
             }
@@ -562,7 +559,7 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
     }
 
     @Override
-    public HikDevResponse setCartTemplate(String deviceSn, Integer planTemplateNumber) {
+    public HikDevResponse setCartTemplate(String ip, Integer planTemplateNumber) {
         int iErr = 0;
         HikDevResponse result = new HikDevResponse();
 
@@ -575,7 +572,7 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
 
         NET_DVR_PLAN_TEMPLATE struPlanTemCfg = new NET_DVR_PLAN_TEMPLATE();
         struPlanTemCfg.dwSize = struPlanTemCfg.size();
-        struPlanTemCfg.byEnable =1; //是否使能：0- 否，1- 是
+        struPlanTemCfg.byEnable = 1; //是否使能：0- 否，1- 是
         struPlanTemCfg.dwWeekPlanNo = 1;//周计划编号，0表示无效
         struPlanTemCfg.dwHolidayGroupNo[0] = 0;//假日组编号，按值表示，采用紧凑型排列，中间遇到0则后续无效
 
@@ -583,8 +580,7 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
         try {
             byTemplateName = "全天计划模板".getBytes("GBK");
             //计划模板名称
-            for (int i = 0; i < HikConstant.NAME_LEN; i++)
-            {
+            for (int i = 0; i < HikConstant.NAME_LEN; i++) {
                 struPlanTemCfg.byTemplateName[i] = 0;
             }
             System.arraycopy(byTemplateName, 0, struPlanTemCfg.byTemplateName, 0, byTemplateName.length);
@@ -597,7 +593,7 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
 
         IntByReference pInt = new IntByReference(0);
         Pointer lpStatusList = pInt.getPointer();
-        Integer lUserID = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + deviceSn);
+        Integer lUserID = ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getLoginId();
         if (!this.hikDevService.NET_DVR_SetDeviceConfig(lUserID, HikConstant.NET_DVR_SET_CARD_RIGHT_PLAN_TEMPLATE_V50, 1, struPlanCond.getPointer(), struPlanCond.size(), lpStatusList, struPlanTemCfg.getPointer(), struPlanTemCfg.size())) {
             iErr = this.hikDevService.NET_DVR_GetLastError();
             log.info("NET_DVR_SET_CARD_RIGHT_PLAN_TEMPLATE_V50失败，错误号：" + iErr);
@@ -608,7 +604,7 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
         //获取卡权限周计划参数
         NET_DVR_WEEK_PLAN_COND struWeekPlanCond = new NET_DVR_WEEK_PLAN_COND();
         struWeekPlanCond.dwSize = struWeekPlanCond.size();
-        struWeekPlanCond.dwWeekPlanNumber  = 1;
+        struWeekPlanCond.dwWeekPlanNumber = 1;
         struWeekPlanCond.wLocalControllerID = 0;
 
         NET_DVR_WEEK_PLAN_CFG struWeekPlanCfg = new NET_DVR_WEEK_PLAN_CFG();
@@ -619,8 +615,7 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
         Pointer lpCond = struWeekPlanCond.getPointer();
         Pointer lpInbuferCfg = struWeekPlanCfg.getPointer();
 
-        if (!this.hikDevService.NET_DVR_GetDeviceConfig(lUserID, HikConstant.NET_DVR_GET_CARD_RIGHT_WEEK_PLAN_V50, 1, lpCond, struWeekPlanCond.size(), lpStatusList, lpInbuferCfg, struWeekPlanCfg.size()))
-        {
+        if (!this.hikDevService.NET_DVR_GetDeviceConfig(lUserID, HikConstant.NET_DVR_GET_CARD_RIGHT_WEEK_PLAN_V50, 1, lpCond, struWeekPlanCond.size(), lpStatusList, lpInbuferCfg, struWeekPlanCfg.size())) {
             iErr = this.hikDevService.NET_DVR_GetLastError();
             log.info("NET_DVR_GET_CARD_RIGHT_WEEK_PLAN_V50失败，错误号：" + iErr);
             return result.err("NET_DVR_GET_CARD_RIGHT_WEEK_PLAN_V50失败，错误号：" + iErr);
@@ -630,10 +625,8 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
         struWeekPlanCfg.byEnable = 1; //是否使能：0- 否，1- 是
 
         //避免时间段交叉，先初始化
-        for(int i=0;i<7;i++)
-        {
-            for(int j=0;j<8;j++)
-            {
+        for (int i = 0; i < 7; i++) {
+            for (int j = 0; j < 8; j++) {
                 struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[j].byEnable = 0;
                 struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[j].struTimeSegment.struBeginTime.byHour = 0;
                 struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[j].struTimeSegment.struBeginTime.byMinute = 0;
@@ -645,8 +638,7 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
         }
 
         //一周7天，全天24小时
-        for(int i=0;i<7;i++)
-        {
+        for (int i = 0; i < 7; i++) {
             struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[0].byEnable = 1;
             struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[0].struTimeSegment.struBeginTime.byHour = 0;
             struWeekPlanCfg.struPlanCfg[i].struPlanCfgDay[0].struTimeSegment.struBeginTime.byMinute = 0;
@@ -687,14 +679,14 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
         return result.ok("全天计划模板成功!");
     }
 
-    private boolean delCard(String deviceSn, String cardNo) {
+    private boolean delCard(String ip, String cardNo) {
         NET_DVR_CARD_COND struCardCond = new NET_DVR_CARD_COND();
         struCardCond.read();
         struCardCond.dwSize = struCardCond.size();
         struCardCond.dwCardNum = 1;  //下发一张
         struCardCond.write();
         Pointer ptrStruCond = struCardCond.getPointer();
-        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + deviceSn);
+        Integer longUserId = ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getLoginId();
         int m_lSetCardCfgHandle = this.hikDevService.NET_DVR_StartRemoteConfig(longUserId, HikConstant.NET_DVR_DEL_CARD, ptrStruCond, struCardCond.size(), null, null);
         if (m_lSetCardCfgHandle == -1) {
             log.info("建立删除卡长连接失败，错误码为" + this.hikDevService.NET_DVR_GetLastError());
@@ -763,7 +755,7 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
         return true;
     }
 
-    private boolean delCardFace(String deviceSn, String cardNo) {
+    private boolean delCardFace(String ip, String cardNo) {
 //        HikDevResponse result = new HikDevResponse();
         NET_DVR_FACE_PARAM_CTRL struFaceDelCond = new NET_DVR_FACE_PARAM_CTRL();
         struFaceDelCond.dwSize = struFaceDelCond.size();
@@ -784,7 +776,7 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
         struFaceDelCond.write();
 
         Pointer ptrFaceDelCond = struFaceDelCond.getPointer();
-        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + deviceSn);
+        Integer longUserId = ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getLoginId();
         boolean bRet = this.hikDevService.NET_DVR_RemoteControl(longUserId, HikConstant.NET_DVR_DEL_FACE_PARAM_CFG, ptrFaceDelCond, struFaceDelCond.size());
         if (!bRet) {
             log.info("删除人脸失败，错误码为" + this.hikDevService.NET_DVR_GetLastError());
@@ -839,7 +831,7 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
         return -1;
     }
 
-    private JSONObject aboutUserInfo(String deviceSn, AccessPeople people, String urlInBuffer) {
+    private JSONObject aboutUserInfo(String ip, AccessPeople people, String urlInBuffer) {
         //name需要转为字节数组 将中文字符编码之后用数组拷贝的方式，避免因为编码导致的长度问题
 //        people.setName(people.getRealName().getBytes(StandardCharsets.UTF_8));
         people.setName(people.getRealName());
@@ -853,10 +845,10 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
         BYTE_ARRAY ptrInBuff = new BYTE_ARRAY(userInfoBuffString.length());
         ptrInBuff.byValue = userInfoBuffString.getBytes(StandardCharsets.UTF_8);
         ptrInBuff.write();
-        return this.userInfo(deviceSn, urlInBuffer, ptrInBuff.getPointer(), userInfoBuffString.length(), 2550, 1024);
+        return this.userInfo(ip, urlInBuffer, ptrInBuff.getPointer(), userInfoBuffString.length(), 2550, 1024);
     }
 
-    private HikDevResponse deleteOperation(String deviceSn, String urlInBuffer, String strInBuffer) {
+    private HikDevResponse deleteOperation(String ip, String urlInBuffer, String strInBuffer) {
         BYTE_ARRAY ptrUrl = new BYTE_ARRAY(HikConstant.BYTE_ARRAY_LEN);
         ptrUrl.byValue = urlInBuffer.getBytes(StandardCharsets.UTF_8);
         ptrUrl.write();
@@ -869,7 +861,7 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
         ptrInBuffer.write();
 
         // 获取用户句柄
-        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + deviceSn);
+        Integer longUserId = ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getLoginId();
 
         NET_DVR_XML_CONFIG_INPUT strXMLInput = new NET_DVR_XML_CONFIG_INPUT();
         strXMLInput.read();

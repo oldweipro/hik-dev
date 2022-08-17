@@ -13,17 +13,17 @@ import java.util.List;
  */
 public interface IHikAccessControlService {
     /**
-     * 【卡】根据设备序列号deviceSn获取所有卡信息
+     * 【卡】根据设备ip获取所有卡信息
      *
-     * @param deviceSn 设备序列号
+     * @param ip 设备ip
      * @return
      */
-    HikDevResponse getAllCardInfo(String deviceSn);
+    HikDevResponse getAllCardInfo(String ip);
 
     /**
-     * 【用户】根据设备序列号deviceSn获取所有用户信息
+     * 【用户】根据设备序列号ip获取所有用户信息
      *
-     * @param ip     设备IP
+     * @param ip           设备IP
      * @param employeeNos  用户id
      * @param queryRequest 分页参数
      * @return
@@ -33,15 +33,15 @@ public interface IHikAccessControlService {
     /**
      * 【用户】下发
      *
-     * @param accessControlUser 门禁用户: deviceSn, realName, int:employeeNo
+     * @param accessControlUser 门禁用户: ip, realName, int:employeeNo
      * @return
      */
-    HikDevResponse addUser(String deviceSn, AccessControlUser accessControlUser);
+    HikDevResponse addUser(String ip, AccessControlUser accessControlUser);
 
     /**
      * 【用户】修改
      *
-     * @param accessPeople 门禁用户: deviceSn, realName, int:employeeNo
+     * @param accessPeople 门禁用户: ip, realName, int:employeeNo
      * @return
      */
     HikDevResponse modifyUser(AccessPeople accessPeople);
@@ -49,89 +49,89 @@ public interface IHikAccessControlService {
     /**
      * 【用户】批量下发
      *
-     * @param accessControlUserList 门禁用户列表: deviceSn, realName, int:employeeNo
+     * @param accessControlUserList 门禁用户列表: ip, realName, int:employeeNo
      * @return
      */
-    HikDevResponse addMultiUser(String deviceSn, List<AccessControlUser> accessControlUserList);
+    HikDevResponse addMultiUser(String ip, List<AccessControlUser> accessControlUserList);
 
     /**
      * 【用户】下发人脸
      *
-     * @param deviceSn          门禁序列号
+     * @param ip                门禁ip
      * @param accessControlUser 门禁用户: employeeNo, base64Pic
      * @return
      */
-    HikDevResponse addUserFace(String deviceSn, AccessControlUser accessControlUser);
+    HikDevResponse addUserFace(String ip, AccessControlUser accessControlUser);
 
     /**
      * 【用户】批量下发人脸
      *
-     * @param deviceSn              门禁序列号
+     * @param ip                    门禁ip
      * @param accessControlUserList 门禁用户列表: employeeNo, base64Pic
      * @return
      */
-    HikDevResponse addMultiUserFace(String deviceSn, List<AccessControlUser> accessControlUserList);
+    HikDevResponse addMultiUserFace(String ip, List<AccessControlUser> accessControlUserList);
 
     /**
      * 【用户】批量删除人脸
      *
-     * @param deviceSn    设备序列号
+     * @param ip          设备ip
      * @param employeeIds 多个用户工号，用逗号隔开
      * @return
      */
-    HikDevResponse delMultiUserFace(String deviceSn, String[] employeeIds);
+    HikDevResponse delMultiUserFace(String ip, String[] employeeIds);
 
     /**
      * 【用户】批量删除用户
      *
-     * @param deviceSn    设备序列号
+     * @param ip          设备ip
      * @param employeeIds 多个用户工号，用逗号隔开
      * @return
      */
-    HikDevResponse delMultiUser(String deviceSn, String[] employeeIds);
+    HikDevResponse delMultiUser(String ip, String[] employeeIds);
 
     /**
      * 【卡】批量下发
      *
-     * @param deviceSn              设备序列号
+     * @param ip                    设备ip
      * @param accessControlUserList 门禁用户列表: employeeNo, realName, cardNo, planTemplateNumber
      * @return
      */
-    HikDevResponse addMultiCard(String deviceSn, List<AccessControlUser> accessControlUserList);
+    HikDevResponse addMultiCard(String ip, List<AccessControlUser> accessControlUserList);
 
     /**
      * 【卡】批量下发人脸
      *
-     * @param deviceSn              设备序列号
+     * @param ip                    设备ip
      * @param accessControlUserList 门禁用户列表: employeeNo, base64Pic
      * @return
      */
-    HikDevResponse addMultiCardFace(String deviceSn, List<AccessControlUser> accessControlUserList);
+    HikDevResponse addMultiCardFace(String ip, List<AccessControlUser> accessControlUserList);
 
     /**
      * 【卡】批量删除人脸
      *
-     * @param deviceSn  设备被序列号
+     * @param ip        设备ip
      * @param cardNoIds 将要被删除人脸的卡号数组
      * @return
      */
-    HikDevResponse delMultiCardFace(String deviceSn, String[] cardNoIds);
+    HikDevResponse delMultiCardFace(String ip, String[] cardNoIds);
 
     /**
      * 【卡】批量删除卡
      *
-     * @param deviceSn  设备被序列号
+     * @param ip        设备ip
      * @param cardNoIds 将要被删除人脸的卡号数组
      * @return
      */
-    HikDevResponse delMultiCard(String deviceSn, String[] cardNoIds);
+    HikDevResponse delMultiCard(String ip, String[] cardNoIds);
 
     /**
      * 【卡】设置计划模板
      *
-     * @param deviceSn           设备被序列号
+     * @param ip                 设备ip
      * @param planTemplateNumber 计划模板编号
      * @return
      */
-    HikDevResponse setCartTemplate(String deviceSn, Integer planTemplateNumber);
+    HikDevResponse setCartTemplate(String ip, Integer planTemplateNumber);
 }
