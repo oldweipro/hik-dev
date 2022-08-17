@@ -1,6 +1,7 @@
 package com.oldwei.hikdev.scheduled;
 
 import cn.hutool.core.util.IdUtil;
+import com.oldwei.hikdev.util.ConfigJsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -42,14 +43,7 @@ public class ScheduledTask {
      */
     @Scheduled(cron = "0 */1 * * * ?")
     public void searchHikDevice() {
-        // 发送
-        try (MulticastSocket multicastSocket = new MulticastSocket()) {
-            byte[] data = ("<Probe><Uuid>" + IdUtil.randomUUID().toUpperCase() + "</Uuid><Types>inquiry</Types></Probe>").getBytes();
-            InetAddress address = InetAddress.getByName("239.255.255.250");
-            DatagramPacket packet = new DatagramPacket(data, data.length, address, 37020);
-            multicastSocket.send(packet);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        ConfigJsonUtil.searchHikDevice();
     }
+
 }

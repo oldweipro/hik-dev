@@ -1,5 +1,6 @@
 package com.oldwei.hikdev.controller;
 
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
@@ -17,6 +18,7 @@ import com.oldwei.hikdev.service.IHikAlarmDataService;
 import com.oldwei.hikdev.service.IHikCameraService;
 import com.oldwei.hikdev.service.IHikDeviceService;
 import com.oldwei.hikdev.component.DataCache;
+import com.oldwei.hikdev.util.ConfigJsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -24,6 +26,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -91,6 +96,15 @@ public class DeviceController {
     public HikDevResponse getDeviceList(DeviceSearchInfoVO deviceSearchInfoVo) {
         // TODO 获取所有的设备，及登录状态
         return new HikDevResponse().ok().data(this.hikDeviceService.getDeviceList(deviceSearchInfoVo));
+    }
+
+    /**
+     * 主动同步（扫描）局域网设备
+     */
+    @GetMapping("searchHikDevice")
+    public HikDevResponse searchHikDevice() {
+        ConfigJsonUtil.searchHikDevice();
+        return new HikDevResponse().ok();
     }
 
     /**

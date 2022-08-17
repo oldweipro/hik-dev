@@ -90,17 +90,4 @@ public class TestController {
     public StreamAddress getPullStream(String stream) {
         return this.aliyunPlatform.getPullStreamDomain(stream);
     }
-
-    @GetMapping("searchDevice")
-    public void searchDevice() {
-        // 发送
-        try (MulticastSocket multicastSocket = new MulticastSocket()) {
-            byte[] data = ("<Probe><Uuid>" + IdUtil.randomUUID().toUpperCase() + "</Uuid><Types>inquiry</Types></Probe>").getBytes();
-            InetAddress address = InetAddress.getByName("239.255.255.250");
-            DatagramPacket packet = new DatagramPacket(data, data.length, address, 37020);
-            multicastSocket.send(packet);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

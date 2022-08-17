@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.io.file.FileWriter;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
@@ -12,6 +13,10 @@ import com.oldwei.hikdev.entity.config.DeviceLoginDTO;
 import com.oldwei.hikdev.entity.config.DeviceSearchInfo;
 import com.oldwei.hikdev.entity.config.DeviceSearchInfoDTO;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -73,7 +78,7 @@ public class ConfigJsonUtil {
         List<DeviceSearchInfo> deviceLoginLoginList = getDeviceSearchInfoList();
         if (deviceLoginLoginList.size() > 0 && ObjectUtil.isNotNull(getDeviceSearchInfoByIp(deviceLogin.getIpv4Address()))) {
             deviceLoginLoginList.forEach(d -> {
-                if (StrUtil.equals(d.getIPv4Address(), deviceLogin.getIpv4Address())) {
+                if (StrUtil.equals(d.getIpv4Address(), deviceLogin.getIpv4Address())) {
 //                    BeanUtil.copyProperties(deviceLogin, d);
                     d.setDeviceLoginDTO(deviceLogin);
                 }
@@ -99,7 +104,7 @@ public class ConfigJsonUtil {
         List<DeviceSearchInfo> deviceLoginLoginList = getDeviceSearchInfoList();
         if (deviceLoginLoginList.size() > 0 && ObjectUtil.isNotNull(getDeviceSearchInfoByIp(ip))) {
             deviceLoginLoginList.forEach(d -> {
-                if (StrUtil.equals(d.getIPv4Address(), ip)) {
+                if (StrUtil.equals(d.getIpv4Address(), ip)) {
                     d.setLoginId(-1);
                 }
             });
@@ -122,7 +127,7 @@ public class ConfigJsonUtil {
     }
 
     public static DeviceSearchInfo getDeviceSearchInfoByIp(String ip) {
-        List<DeviceSearchInfo> collect = getDeviceSearchInfoList().stream().filter(d -> StrUtil.equals(d.getIPv4Address(), ip)).collect(Collectors.toList());
+        List<DeviceSearchInfo> collect = getDeviceSearchInfoList().stream().filter(d -> StrUtil.equals(d.getIpv4Address(), ip)).collect(Collectors.toList());
         if (collect.size() > 0) {
             return collect.get(0);
         }
@@ -143,7 +148,7 @@ public class ConfigJsonUtil {
         if (deviceSearchList.size() > 0 && ObjectUtil.isNotNull(getDeviceSearchInfoByIp(xmlToMap.getIPv4Address()))) {
             // 说明已存在，需要进行更新
             deviceSearchList.forEach(d -> {
-                if (StrUtil.equals(d.getIPv4Address(), xmlToMap.getIPv4Address())) {
+                if (StrUtil.equals(d.getIpv4Address(), xmlToMap.getIPv4Address())) {
                     // BeanUtil.copyProperties(xmlToMap, d);
                     d.setDeviceSearchInfoDTO(xmlToMap);
                 }
@@ -158,5 +163,15 @@ public class ConfigJsonUtil {
         return ConfigJsonUtil.writeConfigJson(configJson.toJSONString());
     }
 
-
+    public static void searchHikDevice() {
+        // 发送
+        try (MulticastSocket multicastSocket = new MulticastSocket()) {
+            byte[] data = ("<Probe><Uuid>" + IdUtil.randomUUID().toUpperCase() + "</Uuid><Types>inquiry</Types></Probe>").getBytes();
+            InetAddress address = InetAddress.getByName("239.255.255.250");
+            DatagramPacket packet = new DatagramPacket(data, data.length, address, 37020);
+            multicastSocket.send(packet);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
