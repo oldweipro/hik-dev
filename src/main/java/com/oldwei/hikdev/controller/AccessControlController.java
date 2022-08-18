@@ -36,22 +36,22 @@ public class AccessControlController {
      * @return HikDevResponse
      */
     @CheckDeviceLogin
-    @GetMapping("getAllCardInfo")
-    public HikDevResponse getAllCardInfo(String ipv4Address) {
+    @GetMapping("getAllCardInfo/{ipv4Address}")
+    public HikDevResponse getAllCardInfo(@PathVariable String ipv4Address) {
         return this.hikAccessControlService.getAllCardInfo(ipv4Address);
     }
 
     /**
      * 【用户】根据设备ip查询所有用户信息
      *
-     * @param ipv4Address           设备IP
+     * @param ipv4Address  设备IP
      * @param employeeNos  用户id
      * @param queryRequest 分页参数: pageNum, pageSize
      * @return HikDevResponse
      */
     @CheckDeviceLogin
-    @GetMapping("getAllUserInfo")
-    public HikDevResponse getAllUserInfo(String ipv4Address, String employeeNos, QueryRequest queryRequest) {
+    @GetMapping("getAllUserInfo/{ipv4Address}")
+    public HikDevResponse getAllUserInfo(@PathVariable String ipv4Address, String employeeNos, QueryRequest queryRequest) {
         String[] ids = {};
         if (StrUtil.isNotBlank(employeeNos)) {
             ids = employeeNos.split(",");
@@ -62,13 +62,13 @@ public class AccessControlController {
     /**
      * 【用户】下发
      *
-     * @param accessControlUser 门禁用户: ip, realName, int:employeeNo
+     * @param accessControlUser 门禁用户: ipv4Address, realName, int:employeeNo
      * @return HikDevResponse
      */
     @CheckDeviceLogin
-    @PostMapping("addUser")
-    public HikDevResponse addUser(@RequestBody AccessControlUser accessControlUser) {
-        return this.hikAccessControlService.addUser(accessControlUser.getIpv4Address(), accessControlUser);
+    @PostMapping("addUser/{ipv4Address}")
+    public HikDevResponse addUser(@PathVariable String ipv4Address, @RequestBody AccessControlUser accessControlUser) {
+        return this.hikAccessControlService.addUser(ipv4Address, accessControlUser);
     }
 
     /**
@@ -78,9 +78,9 @@ public class AccessControlController {
      * @return HikDevResponse
      */
     @CheckDeviceLogin
-    @PutMapping("modifyUser")
-    public HikDevResponse modifyUser(@RequestBody AccessPeople accessPeople) {
-        return this.hikAccessControlService.modifyUser(accessPeople);
+    @PutMapping("modifyUser/{ipv4Address}")
+    public HikDevResponse modifyUser(@PathVariable String ipv4Address, @RequestBody AccessPeople accessPeople) {
+        return this.hikAccessControlService.modifyUser(ipv4Address, accessPeople);
     }
 
     /**
@@ -102,9 +102,9 @@ public class AccessControlController {
      * @return HikDevResponse
      */
     @CheckDeviceLogin
-    @PutMapping("addUserFace")
-    public HikDevResponse addUserFace(@RequestBody AccessControlUser accessControlUser) {
-        return this.hikAccessControlService.addUserFace(accessControlUser.getIpv4Address(), accessControlUser);
+    @PutMapping("addUserFace/{ipv4Address}")
+    public HikDevResponse addUserFace(@PathVariable String ipv4Address, @RequestBody AccessControlUser accessControlUser) {
+        return this.hikAccessControlService.addUserFace(ipv4Address, accessControlUser);
     }
 
     /**
@@ -122,7 +122,7 @@ public class AccessControlController {
     /**
      * 【用户】批量删除人脸
      *
-     * @param ipv4Address          设备ip
+     * @param ipv4Address 设备ip
      * @param employeeIds 多个用户工号，用逗号隔开
      * @return HikDevResponse
      */
@@ -136,7 +136,7 @@ public class AccessControlController {
     /**
      * 【用户】批量删除用户
      *
-     * @param ipv4Address          设备ip
+     * @param ipv4Address 设备ip
      * @param employeeIds 多个用户工号，用逗号隔开
      * @return HikDevResponse
      */
@@ -174,13 +174,13 @@ public class AccessControlController {
     /**
      * 【卡】批量删除人脸
      *
-     * @param ipv4Address        设备ip
-     * @param cardNoIds 将要被删除人脸的卡号数组
+     * @param ipv4Address 设备ip
+     * @param cardNoIds   将要被删除人脸的卡号数组
      * @return HikDevResponse
      */
     @CheckDeviceLogin
-    @DeleteMapping("delMultiCardFace")
-    public HikDevResponse delMultiCardFace(String ipv4Address, String cardNoIds) {
+    @DeleteMapping("delMultiCardFace/{ipv4Address}")
+    public HikDevResponse delMultiCardFace(@PathVariable String ipv4Address, String cardNoIds) {
         String[] ids = cardNoIds.split(",");
         return this.hikAccessControlService.delMultiCardFace(ipv4Address, ids);
     }
@@ -188,13 +188,13 @@ public class AccessControlController {
     /**
      * 【卡】批量删除卡
      *
-     * @param ipv4Address        设备ip
-     * @param cardNoIds 将要被删除人脸的卡号数组
+     * @param ipv4Address 设备ip
+     * @param cardNoIds   将要被删除人脸的卡号数组
      * @return HikDevResponse
      */
     @CheckDeviceLogin
-    @DeleteMapping("delMultiCard")
-    public HikDevResponse delMultiCard(String ipv4Address, String cardNoIds) {
+    @DeleteMapping("delMultiCard/{ipv4Address}")
+    public HikDevResponse delMultiCard(@PathVariable String ipv4Address, String cardNoIds) {
         String[] ids = cardNoIds.split(",");
         return this.hikAccessControlService.delMultiCard(ipv4Address, ids);
     }
@@ -202,13 +202,13 @@ public class AccessControlController {
     /**
      * 【卡】设置计划模板
      *
-     * @param ipv4Address                 设备ip
+     * @param ipv4Address        设备ip
      * @param planTemplateNumber 将要被删除人脸的卡号数组
      * @return HikDevResponse
      */
     @CheckDeviceLogin
-    @PostMapping("setCartTemplate")
-    public HikDevResponse setCartTemplate(String ipv4Address, Integer planTemplateNumber) {
+    @PostMapping("setCartTemplate/{ipv4Address}")
+    public HikDevResponse setCartTemplate(@PathVariable String ipv4Address, Integer planTemplateNumber) {
         return this.hikAccessControlService.setCartTemplate(ipv4Address, planTemplateNumber);
     }
 
@@ -225,12 +225,12 @@ public class AccessControlController {
      * @return HikDevResponse
      */
     @CheckDeviceLogin
-    @GetMapping("openTheDoor")
-    public HikDevResponse openTheDoor(String ipv4Address) {
+    @GetMapping("openTheDoor/{ipv4Address}")
+    public HikDevResponse openTheDoor(@PathVariable String ipv4Address) {
         Integer loginId = ConfigJsonUtil.getDeviceSearchInfoByIp(ipv4Address).getLoginId();
         boolean b = this.hikDevService.NET_DVR_ControlGateway(loginId, -1, 1);
         if (b) {
-            return new HikDevResponse().ok();
+            return new HikDevResponse().ok("门已打开");
         }
         return new HikDevResponse().err("开门失败");
     }

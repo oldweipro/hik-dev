@@ -7,7 +7,6 @@ import com.oldwei.hikdev.component.FileStream;
 import com.oldwei.hikdev.entity.config.DeviceLoginDTO;
 import com.oldwei.hikdev.entity.HikDevResponse;
 import com.oldwei.hikdev.entity.config.DeviceSearchInfo;
-import com.oldwei.hikdev.entity.config.DeviceSearchInfoVO;
 import com.oldwei.hikdev.service.IHikAlarmDataService;
 import com.oldwei.hikdev.service.IHikCameraService;
 import com.oldwei.hikdev.service.IHikDevService;
@@ -58,8 +57,8 @@ public class DeviceController {
      * @param ipv4Address 设备ip
      * @return 登录结果 true/false
      */
-    @GetMapping("getDeviceInfoByIp")
-    public HikDevResponse getDeviceInfoByIp(String ipv4Address) {
+    @GetMapping("getDeviceInfoByIp/{ipv4Address}")
+    public HikDevResponse getDeviceInfoByIp(@PathVariable String ipv4Address) {
         DeviceSearchInfo deviceLogin = this.hikDeviceService.loginStatus(ipv4Address);
         return new HikDevResponse().ok().data(deviceLogin);
     }
@@ -77,7 +76,7 @@ public class DeviceController {
     }
 
     /**
-     * 获取设备分页
+     * 获取设备列表
      *
      * @param deviceSearchInfo
      * @return
@@ -122,8 +121,8 @@ public class DeviceController {
      * 抓取当前照片到内存
      *
      * @param ipv4Address 设备IP
-     * @param picQuality 照片质量
-     * @param picSize 照片分辨率（尺寸）
+     * @param picQuality  照片质量
+     * @param picSize     照片分辨率（尺寸）
      * @return base64
      */
     @CheckDeviceLogin
@@ -208,18 +207,36 @@ public class DeviceController {
     /**
      * [需要开启预览]使用sdk存储视频录像到本地，每一个小时自动创建新文件
      *
-     * @param ip 设备IP
+     * @param ipv4Address 设备IP
      * @return
      */
-    @PostMapping("saveCameraData")
-    public String saveCameraData(String ip) {
-        Integer previewSucValue = ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getPreviewHandleId();
+    @PostMapping("startCameraRecord/{ipv4Address}")
+    public String saveCameraData(@PathVariable String ipv4Address) {
+        Integer previewSucValue = ConfigJsonUtil.getDeviceSearchInfoByIp(ipv4Address).getPreviewHandleId();
         if (null == previewSucValue || previewSucValue == -1) {
             log.error("设备未开启预览");
             return "设备未开启预览";
         }
         this.hikCameraService.saveCameraData(previewSucValue);
         return "启动成功！";
+    }
+
+    /**
+     * [需要开启预览]停止设备录像
+     *
+     * @param ipv4Address 设备IP
+     * @return
+     */
+    @PostMapping("stopCameraRecord/{ipv4Address}")
+    public String stopCameraData(@PathVariable String ipv4Address) {
+        Integer previewSucValue = ConfigJsonUtil.getDeviceSearchInfoByIp(ipv4Address).getPreviewHandleId();
+        if (null == previewSucValue || previewSucValue == -1) {
+            log.error("设备未开启预览");
+            return "设备未开启预览";
+        }
+        // TODO 停止设备录像
+//        this.hikCameraService.stopCameraData(previewSucValue);
+        return "停止成功！";
     }
 
 }

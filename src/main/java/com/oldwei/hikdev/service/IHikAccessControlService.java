@@ -44,7 +44,7 @@ public interface IHikAccessControlService {
      * @param accessPeople 门禁用户: ip, realName, int:employeeNo
      * @return
      */
-    HikDevResponse modifyUser(AccessPeople accessPeople);
+    HikDevResponse modifyUser(String ip, AccessPeople accessPeople);
 
     /**
      * 【用户】批量下发
