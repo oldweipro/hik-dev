@@ -9,7 +9,6 @@ import com.oldwei.hikdev.service.IHikDevService;
 import com.oldwei.hikdev.service.IHikDeviceService;
 import com.oldwei.hikdev.structure.NET_DVR_DEVICEINFO_V40;
 import com.oldwei.hikdev.structure.NET_DVR_USER_LOGIN_INFO;
-import com.oldwei.hikdev.component.DataCache;
 import com.oldwei.hikdev.util.ConfigJsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,8 +27,6 @@ import java.util.List;
 public class HikDeviceServiceImpl implements IHikDeviceService {
 
     private final IHikDevService hikDevService;
-
-    private final DataCache dataCache;
 
     @Override
     public boolean clean(String ip) {
@@ -82,7 +79,7 @@ public class HikDeviceServiceImpl implements IHikDeviceService {
             deviceLogin.setLoginId(longUserId);
             //设备字符集
             int iCharEncodeType = netDvrDeviceInfoV40.byCharEncodeType;
-            deviceLogin.setCharEncodeType(String.valueOf(iCharEncodeType));
+            deviceLogin.setCharEncodeType(iCharEncodeType);
             return ConfigJsonUtil.saveOrUpdateDeviceLogin(deviceLogin);
         }
     }

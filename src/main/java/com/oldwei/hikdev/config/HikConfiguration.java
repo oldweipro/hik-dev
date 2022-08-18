@@ -4,7 +4,6 @@ import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import com.oldwei.hikdev.service.IHikDevService;
 import com.oldwei.hikdev.service.IHikPlayCtrlService;
-import com.oldwei.hikdev.component.DataCache;
 import com.sun.jna.Native;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,11 +40,6 @@ public class HikConfiguration {
     @Bean
     public IHikPlayCtrlService hikPlayCtrlService() {
         return (IHikPlayCtrlService) Native.loadLibrary(System.getProperty("user.dir") + "\\sdk\\windows\\PlayCtrl.dll", IHikPlayCtrlService.class);
-    }
-
-    @Bean
-    public DataCache hikMemory() {
-        return new DataCache();
     }
 
 }

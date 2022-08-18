@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.oldwei.hikdev.constant.HikConstant;
-import com.oldwei.hikdev.constant.DataCachePrefixConstant;
 import com.oldwei.hikdev.entity.access.AccessPeople;
 import com.oldwei.hikdev.entity.QueryRequest;
 import com.oldwei.hikdev.entity.access.RightPlan;
@@ -17,8 +16,8 @@ import com.oldwei.hikdev.structure.BYTE_ARRAY;
 import com.oldwei.hikdev.structure.NET_DVR_JSON_DATA_CFG;
 import com.oldwei.hikdev.structure.NET_DVR_XML_CONFIG_INPUT;
 import com.oldwei.hikdev.structure.NET_DVR_XML_CONFIG_OUTPUT;
-import com.oldwei.hikdev.component.DataCache;
 import com.oldwei.hikdev.component.FileStream;
+import com.oldwei.hikdev.util.ConfigJsonUtil;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +39,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class HikUserServiceImpl implements IHikUserService {
     private final IHikDevService hikDevService;
-    private final DataCache dataCache;
     private final FileStream fileStream;
 
     @Override
@@ -343,7 +341,7 @@ public class HikUserServiceImpl implements IHikUserService {
 
     private Integer startRemoteConfig(String ip, String urlInBuffer, int dwCommand) {
         // 获取用户句柄
-        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + ip);
+        Integer longUserId = ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getLoginId();
         if (null != longUserId && longUserId != -1) {
             //  数组
             BYTE_ARRAY ptrByteArray = new BYTE_ARRAY(1024);
@@ -381,7 +379,7 @@ public class HikUserServiceImpl implements IHikUserService {
 
         JSONObject result = new JSONObject();
         // 获取用户句柄
-        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + ip);
+        Integer longUserId = ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getLoginId();
 
         NET_DVR_XML_CONFIG_INPUT strXMLInput = new NET_DVR_XML_CONFIG_INPUT();
         strXMLInput.read();

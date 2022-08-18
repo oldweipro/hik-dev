@@ -96,12 +96,6 @@
             <artifactId>juniversalchardet</artifactId>
             <version>1.0.3</version>
         </dependency>
-        <!--javacv处理音视频流-->
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>javacv-platform</artifactId>
-            <version>1.5.7</version>
-        </dependency>
     </dependencies>
 
     <build>

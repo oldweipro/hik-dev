@@ -5,7 +5,6 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.XmlUtil;
 import com.alibaba.fastjson2.JSONObject;
-import com.oldwei.hikdev.entity.HikDevResponse;
 import com.oldwei.hikdev.entity.config.DeviceSearchInfo;
 import com.oldwei.hikdev.entity.config.DeviceSearchInfoDTO;
 import com.oldwei.hikdev.mqtt.MqttConnectClient;

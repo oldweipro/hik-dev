@@ -71,7 +71,7 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
         struCardRecord.write();
 
         IntByReference pInt = new IntByReference(0);
-        int iCharEncodeType = Integer.parseInt(ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getCharEncodeType());
+        int iCharEncodeType = ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getCharEncodeType();
         List<Map<String, Object>> list = new ArrayList<>();
         while (true) {
             //下发卡数据状态

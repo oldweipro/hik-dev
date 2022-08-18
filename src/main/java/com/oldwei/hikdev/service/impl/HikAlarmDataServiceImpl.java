@@ -2,7 +2,6 @@ package com.oldwei.hikdev.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
-import com.oldwei.hikdev.component.AliyunPlatform;
 import com.oldwei.hikdev.constant.HikConstant;
 import com.oldwei.hikdev.entity.HikDevResponse;
 import com.oldwei.hikdev.entity.config.DeviceAlarmHandleDTO;
@@ -35,8 +34,6 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
     private final IHikDevService hikDevService;
 
     private final FileStream fileStream;
-
-    private final AliyunPlatform aliyunPlatform;
 
     private final IHikCardService hikCardService;
 
@@ -128,7 +125,6 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
         // TODO something... fMSFCallBack = new FMSGCallBack(); let me try FMSGCallBack_V31
         Pointer pUser = null;
         int startListenV30 = this.hikDevService.NET_DVR_StartListen_V30(ip, port, null, pUser);
-//        this.dataCache.set(DataCachePrefixConstant.HIK_ALARM_LISTEN + ip, startListenV30);
         if (startListenV30 < 0) {
             log.info("启动监听失败，错误号:{}", this.hikDevService.NET_DVR_GetLastError());
             result.put("code", -1);
@@ -145,7 +141,6 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
     public JSONObject stopAlarmListen(JSONObject jsonObject) {
         JSONObject result = new JSONObject();
         String ip = jsonObject.getString("ip");
-//        Integer startListenV30 = this.dataCache.getInteger(DataCachePrefixConstant.HIK_ALARM_LISTEN + ip);
 //        if (null == startListenV30 || startListenV30 < 0) {
 //            result.put("code", 0);
 //            result.put("msg", "停止监听成功");
@@ -659,11 +654,6 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
         } catch (UnsupportedEncodingException ex) {
             ex.printStackTrace();
         }
-    }
-
-
-    private String upload(String pathname) {
-        return this.aliyunPlatform.uploadFile(new File(pathname));
     }
 
     public JSONObject personInfo(NET_DVR_ACS_ALARM_INFO strACSInfo, NET_DVR_ALARMER pAlarmer) {

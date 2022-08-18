@@ -6,11 +6,10 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.oldwei.hikdev.component.FileStream;
 import com.oldwei.hikdev.constant.HikConstant;
-import com.oldwei.hikdev.constant.DataCachePrefixConstant;
 import com.oldwei.hikdev.service.IHikCardService;
 import com.oldwei.hikdev.service.IHikDevService;
 import com.oldwei.hikdev.structure.*;
-import com.oldwei.hikdev.component.DataCache;
+import com.oldwei.hikdev.util.ConfigJsonUtil;
 import com.oldwei.hikdev.util.StringEncodingUtil;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
@@ -34,13 +33,12 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class HikCardServiceImpl implements IHikCardService {
 
-    private final DataCache dataCache;
     private final IHikDevService hikDevService;
     private final FileStream fileStream;
 
     @Override
     public String selectFaceByCardNo(String strCardNo, String ip) {
-        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + ip);
+        Integer longUserId = ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getLoginId();
         NET_DVR_FACE_COND struFaceCond = new NET_DVR_FACE_COND();
         struFaceCond.read();
         struFaceCond.dwSize = struFaceCond.size();
@@ -93,7 +91,7 @@ public class HikCardServiceImpl implements IHikCardService {
         struCardCond.dwCardNum = 1;
         struCardCond.write();
         Pointer ptrStruCond = struCardCond.getPointer();
-        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + ip);
+        Integer longUserId = ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getLoginId();
         int m_lSetFaceCfgHandle = this.hikDevService.NET_DVR_StartRemoteConfig(longUserId, HikConstant.NET_DVR_GET_CARD, ptrStruCond, struCardCond.size(), null, null);
         if (m_lSetFaceCfgHandle == -1) {
             return "";
@@ -134,7 +132,7 @@ public class HikCardServiceImpl implements IHikCardService {
             result.put("msg", "缺少必要参数字段：ip");
             return result;
         }
-        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + ip);
+        Integer longUserId = ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getLoginId();
         NET_DVR_CARD_COND strCardCond = new NET_DVR_CARD_COND();
         strCardCond.read();
         strCardCond.dwSize = strCardCond.size();
@@ -159,10 +157,7 @@ public class HikCardServiceImpl implements IHikCardService {
         struCardRecord.write();
 
         IntByReference pInt = new IntByReference(0);
-        Integer iCharEncodeType = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_CHAR_ENCODE_TYPE + ip);
-        if (null == iCharEncodeType) {
-            iCharEncodeType = 6;
-        }
+        Integer iCharEncodeType = ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getCharEncodeType();
         List<Map<String, Object>> list = new ArrayList<>();
         while (true) {
             //下发卡数据状态
@@ -239,7 +234,7 @@ public class HikCardServiceImpl implements IHikCardService {
         struFaceCond.dwEnableReaderNo = 1;
         struFaceCond.write();
         Pointer ptrStruFaceCond = struFaceCond.getPointer();
-        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + jsonObject.getString("ip"));
+        Integer longUserId = ConfigJsonUtil.getDeviceSearchInfoByIp(jsonObject.getString("ip")).getLoginId();
         int m_lSetFaceCfgHandle = this.hikDevService.NET_DVR_StartRemoteConfig(longUserId, HikConstant.NET_DVR_SET_FACE, ptrStruFaceCond, struFaceCond.size(), null, null);
         if (m_lSetFaceCfgHandle == -1) {
             System.out.println("建立下发人脸长连接失败，错误码为" + this.hikDevService.NET_DVR_GetLastError());
@@ -364,7 +359,7 @@ public class HikCardServiceImpl implements IHikCardService {
         struCardCond.dwCardNum = cardNum;
         struCardCond.write();
         Pointer ptrStrCond = struCardCond.getPointer();
-        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + jsonObject.getString("ip"));
+        Integer longUserId = ConfigJsonUtil.getDeviceSearchInfoByIp(jsonObject.getString("ip")).getLoginId();
         int setCardConfigHandle = this.hikDevService.NET_DVR_StartRemoteConfig(longUserId, HikConstant.NET_DVR_SET_CARD, ptrStrCond, struCardCond.size(), null, null);
         if (setCardConfigHandle == -1) {
             log.error("建立下发卡长连接失败，错误码为" + this.hikDevService.NET_DVR_GetLastError());
@@ -490,7 +485,7 @@ public class HikCardServiceImpl implements IHikCardService {
         struCardCond.dwCardNum = 1;  //下发一张
         struCardCond.write();
         Pointer ptrStruCond = struCardCond.getPointer();
-        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + jsonObject.getString("ip"));
+        Integer longUserId = ConfigJsonUtil.getDeviceSearchInfoByIp(jsonObject.getString("ip")).getLoginId();
         int m_lSetCardCfgHandle = this.hikDevService.NET_DVR_StartRemoteConfig(longUserId, HikConstant.NET_DVR_DEL_CARD, ptrStruCond, struCardCond.size(), null, null);
         if (m_lSetCardCfgHandle == -1) {
             System.out.println("建立删除卡长连接失败，错误码为" + this.hikDevService.NET_DVR_GetLastError());
@@ -596,7 +591,7 @@ public class HikCardServiceImpl implements IHikCardService {
         struFaceDelCond.write();
 
         Pointer ptrFaceDelCond = struFaceDelCond.getPointer();
-        Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + jsonObject.getString("ip"));
+        Integer longUserId = ConfigJsonUtil.getDeviceSearchInfoByIp(jsonObject.getString("ip")).getLoginId();
         boolean bRet = this.hikDevService.NET_DVR_RemoteControl(longUserId, HikConstant.NET_DVR_DEL_FACE_PARAM_CFG, ptrFaceDelCond, struFaceDelCond.size());
         if (!bRet) {
             System.out.println("删除人脸失败，错误码为" + this.hikDevService.NET_DVR_GetLastError());
@@ -645,7 +640,7 @@ public class HikCardServiceImpl implements IHikCardService {
 
         IntByReference pInt = new IntByReference(0);
         Pointer lpStatusList = pInt.getPointer();
-        Integer lUserID = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + ip);
+        Integer lUserID = ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getLoginId();
         if (!this.hikDevService.NET_DVR_SetDeviceConfig(lUserID, HikConstant.NET_DVR_SET_CARD_RIGHT_PLAN_TEMPLATE_V50, 1, struPlanCond.getPointer(), struPlanCond.size(), lpStatusList, struPlanTemCfg.getPointer(), struPlanTemCfg.size())) {
             iErr = this.hikDevService.NET_DVR_GetLastError();
             System.out.println("NET_DVR_SET_CARD_RIGHT_PLAN_TEMPLATE_V50失败，错误号：" + iErr);

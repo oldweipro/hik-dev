@@ -21,14 +21,8 @@ public class DeviceLoginDTO implements Serializable {
     @NotBlank(message = "[commandPort]端口不能为空")
     private String commandPort;
     private String title;
-//    private String flv;
-//    private String hls;
-//    private String rtmp;
     private Boolean useAsync = false;
-//    private Byte type;
-//    private String rtspUrl;
-//    private String pushUrl;
-    private String charEncodeType;
+    private Integer charEncodeType;
     /**
      * 登陆状态，海康设备返回的登陆id
      */
