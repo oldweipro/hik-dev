@@ -1,7 +1,6 @@
 package com.oldwei.hikdev.controller;
 
 import cn.hutool.core.codec.Base64;
-import cn.hutool.core.util.ByteUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
@@ -15,16 +14,13 @@ import com.oldwei.hikdev.entity.HikDevResponse;
 import com.oldwei.hikdev.entity.StreamAddress;
 import com.oldwei.hikdev.entity.config.DeviceSearchInfo;
 import com.oldwei.hikdev.entity.config.DeviceSearchInfoVO;
-import com.oldwei.hikdev.entity.param.DeviceIp;
 import com.oldwei.hikdev.service.IHikAlarmDataService;
 import com.oldwei.hikdev.service.IHikCameraService;
 import com.oldwei.hikdev.service.IHikDevService;
 import com.oldwei.hikdev.service.IHikDeviceService;
 import com.oldwei.hikdev.component.DataCache;
-import com.oldwei.hikdev.structure.NET_DVR_CLIENTINFO;
 import com.oldwei.hikdev.structure.NET_DVR_JPEGPARA;
 import com.oldwei.hikdev.util.ConfigJsonUtil;
-import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

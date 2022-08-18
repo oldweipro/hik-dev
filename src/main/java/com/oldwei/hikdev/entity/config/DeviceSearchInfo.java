@@ -1,8 +1,6 @@
 package com.oldwei.hikdev.entity.config;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.Serializable;
 
@@ -10,8 +8,7 @@ import java.io.Serializable;
  * @author oldwei
  * @date 2022/8/16 16:16
  */
-@Setter
-@Getter
+@Data
 public class DeviceSearchInfo implements Serializable {
     private static final long serialVersionUID = 6278149525617953088L;
     private String types;

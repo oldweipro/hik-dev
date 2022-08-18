@@ -26,8 +26,8 @@ import java.util.stream.Collectors;
  * @date 2022/8/12 23:44
  */
 public class ConfigJsonUtil {
-    static final String configPath = System.getProperty("user.dir") + "/sdk/config/config.json";
-    static final String deviceSearchInfo = "deviceSearchInfo";
+    public static final String configPath = System.getProperty("user.dir") + "/sdk/config/config.json";
+    public static final String deviceSearchInfo = "deviceSearchInfo";
 
     public static JSONObject readConfigJson() {
         boolean exist = FileUtil.exist(configPath);

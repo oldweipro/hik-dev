@@ -6,7 +6,6 @@ import com.oldwei.hikdev.entity.HikDevResponse;
 import com.oldwei.hikdev.entity.QueryRequest;
 import com.oldwei.hikdev.entity.access.AccessPeople;
 import com.oldwei.hikdev.entity.param.AccessControlUser;
-import com.oldwei.hikdev.entity.param.DeviceIp;
 import com.oldwei.hikdev.service.IHikAccessControlService;
 import com.oldwei.hikdev.service.IHikDevService;
 import com.oldwei.hikdev.util.ConfigJsonUtil;

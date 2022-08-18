@@ -9,11 +9,6 @@ import com.sun.jna.Native;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.IOException;
-import java.net.DatagramSocket;
-import java.net.MulticastSocket;
-import java.net.SocketException;
-
 /**
  * @author oldwei
  * @date 2021-5-13 15:06

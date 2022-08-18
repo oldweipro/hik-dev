@@ -4,9 +4,12 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.XmlUtil;
+import com.alibaba.fastjson2.JSONObject;
+import com.oldwei.hikdev.entity.HikDevResponse;
 import com.oldwei.hikdev.entity.config.DeviceSearchInfo;
 import com.oldwei.hikdev.entity.config.DeviceSearchInfoDTO;
 import com.oldwei.hikdev.mqtt.MqttConnectClient;
+import com.oldwei.hikdev.service.IHikAlarmDataService;
 import com.oldwei.hikdev.service.IHikDeviceService;
 import com.oldwei.hikdev.util.ConfigJsonUtil;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +37,7 @@ public class StartedUpRunner implements ApplicationRunner {
     private final MqttConnectClient mqttConnectClient;
 
     private final IHikDeviceService hikDeviceService;
+    private final IHikAlarmDataService hikAlarmDataService;
 
     @Value("${mqtt.enable}")
     private boolean mqttEnable;
@@ -46,11 +50,22 @@ public class StartedUpRunner implements ApplicationRunner {
             this.mqttConnectClient.mqttConnect();
         }
         ThreadUtil.execAsync(() -> {
-            // 项目启动后应该把已存在的设备进行登录、 TODO 布防
+            // 项目启动后应该把已存在的设备进行登录、布防
             List<DeviceSearchInfo> deviceSearchInfoList = ConfigJsonUtil.getDeviceSearchInfoList();
             deviceSearchInfoList.forEach(d -> {
+                d.setAlarmHandleId(-1);
+                d.setPreviewHandle(-1);
+                d.setLoginId(-1);
+            });
+            JSONObject configJson = ConfigJsonUtil.readConfigJson();
+            configJson.put(ConfigJsonUtil.deviceSearchInfo, deviceSearchInfoList);
+            ConfigJsonUtil.writeConfigJson(configJson.toJSONString());
+            deviceSearchInfoList.forEach(d -> {
                 if (StrUtil.isNotBlank(d.getUsername()) && StrUtil.isNotBlank(d.getPassword())) {
-                    this.hikDeviceService.login(d.findDeviceLoginDTO());
+                    boolean login = this.hikDeviceService.login(d.findDeviceLoginDTO());
+                    if (login) {
+                        this.hikAlarmDataService.setupAlarmChan(d.getIpv4Address());
+                    }
                 }
             });
         });
