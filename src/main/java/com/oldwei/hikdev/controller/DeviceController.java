@@ -213,7 +213,7 @@ public class DeviceController {
      */
     @PostMapping("saveCameraData")
     public String saveCameraData(String ip) {
-        Integer previewSucValue = ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getPreviewHandle();
+        Integer previewSucValue = ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getPreviewHandleId();
         if (null == previewSucValue || previewSucValue == -1) {
             log.error("设备未开启预览");
             return "设备未开启预览";

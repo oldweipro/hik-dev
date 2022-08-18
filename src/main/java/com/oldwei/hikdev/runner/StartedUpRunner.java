@@ -53,7 +53,7 @@ public class StartedUpRunner implements ApplicationRunner {
             List<DeviceSearchInfo> deviceSearchInfoList = ConfigJsonUtil.getDeviceSearchInfoList();
             deviceSearchInfoList.forEach(d -> {
                 d.setAlarmHandleId(-1);
-                d.setPreviewHandle(-1);
+                d.setPreviewHandleId(-1);
                 d.setLoginId(-1);
             });
             JSONObject configJson = ConfigJsonUtil.readConfigJson();

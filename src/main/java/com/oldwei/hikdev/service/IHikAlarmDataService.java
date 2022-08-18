@@ -1,6 +1,5 @@
 package com.oldwei.hikdev.service;
 
-import com.alibaba.fastjson2.JSONObject;
 import com.oldwei.hikdev.entity.HikDevResponse;
 
 /**
@@ -24,26 +23,4 @@ public interface IHikAlarmDataService {
      * @return
      */
     HikDevResponse closeAlarmChan(String ip);
-
-    /**
-     * 启动监听
-     * 业务逻辑需要重写
-     * 即将在未来版本删除
-     *
-     * @param jsonObject
-     * @return
-     */
-    @Deprecated
-    JSONObject startAlarmListen(JSONObject jsonObject);
-
-    /**
-     * 停止监听
-     * 业务逻辑需要重写
-     * 即将在未来版本删除
-     *
-     * @param jsonObject
-     * @return
-     */
-    @Deprecated
-    JSONObject stopAlarmListen(JSONObject jsonObject);
 }

@@ -8,7 +8,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.oldwei.hikdev.entity.config.DeviceAlarmHandleDTO;
+import com.oldwei.hikdev.entity.config.DeviceHandleDTO;
 import com.oldwei.hikdev.entity.config.DeviceLoginDTO;
 import com.oldwei.hikdev.entity.config.DeviceSearchInfo;
 import com.oldwei.hikdev.entity.config.DeviceSearchInfoDTO;
@@ -76,22 +76,23 @@ public class ConfigJsonUtil {
         return true;
     }
 
-    public static boolean updateDeviceAlarmHandle(DeviceAlarmHandleDTO deviceAlarmHandleDTO) {
+    public static boolean updateDeviceHandle(DeviceHandleDTO deviceHandleDTO) {
         // 获取当前存储的json文件
         List<DeviceSearchInfo> deviceAlarmHandleList = getDeviceSearchInfoList();
         // 判断json文件中是否有AlarmHandle数据 && 判断这个数据是否存在
-        if (deviceAlarmHandleList.size() > 0 && ObjectUtil.isNotNull(getDeviceSearchInfoByIp(deviceAlarmHandleDTO.getIpv4Address()))) {
+        if (deviceAlarmHandleList.size() > 0 && ObjectUtil.isNotNull(getDeviceSearchInfoByIp(deviceHandleDTO.getIpv4Address()))) {
             // 只修改当前ip的alarmHandle
             deviceAlarmHandleList.forEach(d -> {
-                if (StrUtil.equals(d.getIpv4Address(), deviceAlarmHandleDTO.getIpv4Address())) {
-                    d.setDeviceAlarmHandleDTO(deviceAlarmHandleDTO);
+                if (StrUtil.equals(d.getIpv4Address(), deviceHandleDTO.getIpv4Address())) {
+                    if (null != deviceHandleDTO.getAlarmHandleId()) {
+                        d.setAlarmHandleId(deviceHandleDTO.getAlarmHandleId());
+                    }
+                    if (null != deviceHandleDTO.getPreviewHandleId()) {
+                        d.setPreviewHandleId(deviceHandleDTO.getPreviewHandleId());
+                    }
+
                 }
             });
-        } else {
-            // 如果数据不存在，创建一份新的，理论上，永远走不到这一步：因为开启布防的前提条件需要登录loginId
-            DeviceSearchInfo deviceSearchInfo = new DeviceSearchInfo();
-            deviceSearchInfo.setDeviceAlarmHandleDTO(deviceAlarmHandleDTO);
-            deviceAlarmHandleList.add(deviceSearchInfo);
         }
         // 封装数据写入json文件
         JSONObject configJson = readConfigJson();

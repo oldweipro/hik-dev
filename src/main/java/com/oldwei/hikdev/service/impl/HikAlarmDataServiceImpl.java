@@ -4,7 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import com.oldwei.hikdev.constant.HikConstant;
 import com.oldwei.hikdev.entity.HikDevResponse;
-import com.oldwei.hikdev.entity.config.DeviceAlarmHandleDTO;
+import com.oldwei.hikdev.entity.config.DeviceHandleDTO;
 import com.oldwei.hikdev.service.FMSGCallBack_V31;
 import com.oldwei.hikdev.service.IHikAlarmDataService;
 import com.oldwei.hikdev.service.IHikCardService;
@@ -82,10 +82,10 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                 result.err("布防失败，错误号:" + this.hikDevService.NET_DVR_GetLastError());
             } else {
                 log.info("布防成功");
-                DeviceAlarmHandleDTO deviceAlarmHandleDTO = new DeviceAlarmHandleDTO();
-                deviceAlarmHandleDTO.setAlarmHandleId(longAlarmHandle);
-                deviceAlarmHandleDTO.setIpv4Address(ip);
-                ConfigJsonUtil.updateDeviceAlarmHandle(deviceAlarmHandleDTO);
+                DeviceHandleDTO deviceHandleDTO = new DeviceHandleDTO();
+                deviceHandleDTO.setAlarmHandleId(longAlarmHandle);
+                deviceHandleDTO.setIpv4Address(ip);
+                ConfigJsonUtil.updateDeviceHandle(deviceHandleDTO);
                 result.ok("布防成功！");
             }
         } else {
@@ -101,11 +101,11 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
         Integer longAlarmHandle = ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getAlarmHandleId();
         if (null != longAlarmHandle && longAlarmHandle > -1) {
             if (this.hikDevService.NET_DVR_CloseAlarmChan_V30(longAlarmHandle)) {
-                DeviceAlarmHandleDTO deviceAlarmHandleDTO = new DeviceAlarmHandleDTO();
+                DeviceHandleDTO deviceHandleDTO = new DeviceHandleDTO();
                 // 将状态id修改为-1
-                deviceAlarmHandleDTO.setAlarmHandleId(-1);
-                deviceAlarmHandleDTO.setIpv4Address(ip);
-                ConfigJsonUtil.updateDeviceAlarmHandle(deviceAlarmHandleDTO);
+                deviceHandleDTO.setAlarmHandleId(-1);
+                deviceHandleDTO.setIpv4Address(ip);
+                ConfigJsonUtil.updateDeviceHandle(deviceHandleDTO);
                 result.ok("撤防成功");
             } else {
                 result.err("撤防失败");
@@ -113,48 +113,6 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
         } else {
             result.err("未布防，无须撤防");
         }
-        return result;
-    }
-
-    @Override
-    public JSONObject startAlarmListen(JSONObject jsonObject) {
-        JSONObject result = new JSONObject();
-        String ip = jsonObject.getString("ip");
-        Short port = jsonObject.getShort("port");
-        //报警撤防
-        // TODO something... fMSFCallBack = new FMSGCallBack(); let me try FMSGCallBack_V31
-        Pointer pUser = null;
-        int startListenV30 = this.hikDevService.NET_DVR_StartListen_V30(ip, port, null, pUser);
-        if (startListenV30 < 0) {
-            log.info("启动监听失败，错误号:{}", this.hikDevService.NET_DVR_GetLastError());
-            result.put("code", -1);
-            result.put("msg", "启动监听失败");
-        } else {
-            result.put("code", 0);
-            result.put("msg", "启动监听成功");
-            log.info("启动监听成功");
-        }
-        return result;
-    }
-
-    @Override
-    public JSONObject stopAlarmListen(JSONObject jsonObject) {
-        JSONObject result = new JSONObject();
-        String ip = jsonObject.getString("ip");
-//        if (null == startListenV30 || startListenV30 < 0) {
-//            result.put("code", 0);
-//            result.put("msg", "停止监听成功");
-//            return result;
-//        }
-//        if (!this.hikDevService.NET_DVR_StopListen_V30(startListenV30)) {
-//            log.info("停止监听失败");
-//            result.put("code", -1);
-//            result.put("msg", "停止监听失败");
-//        } else {
-//            log.info("停止监听成功");
-//            result.put("code", 0);
-//            result.put("msg", "停止监听成功");
-//        }
         return result;
     }
 

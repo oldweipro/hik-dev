@@ -10,9 +10,6 @@ import com.sun.jna.ptr.NativeLongByReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
-import java.io.PipedOutputStream;
-
 /**
  * @author oldwei
  * @date 2021-5-19 19:43
@@ -21,11 +18,6 @@ import java.io.PipedOutputStream;
 @RequiredArgsConstructor
 public class HikCameraRealDataCallBackImpl implements FRealDataCallBack_V30 {
     private final IHikPlayCtrlService hikPlayCtrlService;
-
-    /**
-     * sdk回调输出管道，用于从sdk回调函数读取视频字节流
-     */
-    private final PipedOutputStream pos;
 
     @Override
     public void invoke(int lRealHandle, int dwDataType, ByteByReference pBuffer, int dwBufSize, Pointer pUser) {
@@ -61,38 +53,14 @@ public class HikCameraRealDataCallBackImpl implements FRealDataCallBack_V30 {
                     //视频流数据
                     byte[] videoStreamData = pBuffer.getPointer().getByteArray(0, dwBufSize);
                     if (videoStreamData.length > 0) {
-//                        writeMediaStream(videoStreamData, 0, dwBufSize, false);
-                    } else {
-                        log.info("怎么回事小老弟！怎么没有数据了！");
+                        // 这里是流数据 videoStreamData，数据大小dwBufSize
                     }
-                    //输入 流数据
+                    //输入流数据
                     if (!this.hikPlayCtrlService.PlayM4_InputData(m_lPort.getValue(), pBuffer, dwBufSize)) {
                         break;
                     }
                 }
             default:
-        }
-    }
-
-    /**
-     * 通过海康/大华sdk回调函数每次回调传输过来的视频字节数组数据写入到管道流
-     *
-     * @param data
-     * @param offset
-     * @param length
-     * @param isAudio
-     */
-    public void writeMediaStream(byte[] data, int offset, int length, boolean isAudio) {
-        try {
-            if (!isAudio) {
-                if (5120 < length) {
-                    log.info("字节数组的大小：{}", length);
-                    log.info("流数据：{}", data);
-                }
-                pos.write(data, offset, length);
-            }
-        } catch (IOException e) {
-            log.error("写入管道流出错:{}", e.getMessage());
         }
     }
 }

@@ -1,17 +1,16 @@
 package com.oldwei.hikdev.service.impl;
 
 import cn.hutool.core.util.RandomUtil;
+import com.oldwei.hikdev.entity.config.DeviceHandleDTO;
 import com.oldwei.hikdev.service.FRealDataCallBack_V30;
 import com.oldwei.hikdev.service.IHikDevService;
 import com.oldwei.hikdev.service.IHikPlayCtrlService;
 import com.oldwei.hikdev.service.IHikCameraService;
 import com.oldwei.hikdev.structure.NET_DVR_CLIENTINFO;
+import com.oldwei.hikdev.util.ConfigJsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
-import java.io.PipedOutputStream;
 
 /**
  * @author oldwei
@@ -25,7 +24,6 @@ public class HikCameraServiceImpl implements IHikCameraService {
     private final IHikPlayCtrlService hikPlayCtrlService;
 
     @Override
-    @Async("asyncServiceExecutor")
     public void saveCameraData(Integer previewSucValue) {
         String randomString = RandomUtil.randomString(32);
         this.hikDevService.NET_DVR_SaveRealData(previewSucValue, randomString + ".mp4");
@@ -33,8 +31,7 @@ public class HikCameraServiceImpl implements IHikCameraService {
 
     @Override
     public void openPreview(Integer loginId, String ipv4Address) {
-        PipedOutputStream pos = new PipedOutputStream();
-        FRealDataCallBack_V30 hikCameraRealDataCallBack = new HikCameraRealDataCallBackImpl(this.hikPlayCtrlService, pos);
+        FRealDataCallBack_V30 hikCameraRealDataCallBack = new HikCameraRealDataCallBackImpl(this.hikPlayCtrlService);
         //======================开启设备预览========================
         NET_DVR_CLIENTINFO strClientInfo = new NET_DVR_CLIENTINFO();
         strClientInfo.lChannel = 1;
@@ -46,7 +43,11 @@ public class HikCameraServiceImpl implements IHikCameraService {
         } else {
             log.info(ipv4Address + "预览成功，previewSucValue：{}", previewSucValue);
         }
-        // TODO 需要将previewSucValue存储到json文件
+        // TEST 需要将previewSucValue存储到json文件
+        DeviceHandleDTO deviceHandleDTO = new DeviceHandleDTO();
+        deviceHandleDTO.setPreviewHandleId(previewSucValue);
+        deviceHandleDTO.setIpv4Address(ipv4Address);
+        ConfigJsonUtil.updateDeviceHandle(deviceHandleDTO);
         //======================开启设备预览========================
     }
 }

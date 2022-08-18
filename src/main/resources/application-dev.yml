@@ -5,14 +5,6 @@ spring:
       max-file-size: 209715200
       # 总上传的数据大小限制500Mb
       max-request-size: 524288000
-async:
-  executor:
-    thread:
-      core-pool-size: 20
-      max-pool-size: 20
-      queue-capacity: 99999
-      name:
-        prefix: async-service-
 mqtt:
   # 是否开启mqtt
   enable: false
