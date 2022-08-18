@@ -11,7 +11,7 @@ import com.sun.jna.Structure;
 public class NET_DVR_ACS_ALARM_INFO extends Structure {
     public int dwSize;
     public int dwMajor; //报警主类型，参考宏定义
-    public int dwMinor; //报警次类型，参考宏定义
+    public int dwMinor; //报警次类型，参考宏定义{1024:防区短路报警,21:门锁打开,22:门锁关闭}
     public NET_DVR_TIME struTime = new NET_DVR_TIME(); //时间
     public byte[] sNetUser = new byte[HikConstant.MAX_NAMELEN] ;//网络操作的用户名
     public NET_DVR_IPADDR struRemoteHostAddr = new NET_DVR_IPADDR();//远程主机地址

@@ -2,10 +2,8 @@ package com.oldwei.hikdev.annotation.aspect;
 
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
-import com.oldwei.hikdev.annotation.CheckDeviceLogin;
-import com.oldwei.hikdev.component.DataCache;
-import com.oldwei.hikdev.constant.DataCachePrefixConstant;
 import com.oldwei.hikdev.entity.HikDevResponse;
+import com.oldwei.hikdev.util.ConfigJsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -13,9 +11,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
-
-import java.lang.reflect.Method;
-import java.util.Arrays;
 
 /**
  * @author oldwei
@@ -26,7 +21,6 @@ import java.util.Arrays;
 @Component
 @RequiredArgsConstructor
 public class CheckDeviceLoginAspect extends BaseAspectSupport {
-    private final DataCache dataCache;
     @Pointcut("execution(* com.oldwei.hikdev.controller.*.*(..)) && @annotation(com.oldwei.hikdev.annotation.CheckDeviceLogin)")
     public void pointcut() {
     }
@@ -34,16 +28,14 @@ public class CheckDeviceLoginAspect extends BaseAspectSupport {
     @Around("pointcut()")
     public Object around(ProceedingJoinPoint point) throws Throwable {
         JSONObject parameter = resolveParameter(point);
-        Method targetMethod = resolveMethod(point);
-        CheckDeviceLogin annotation = targetMethod.getAnnotation(CheckDeviceLogin.class);
-        String operation = annotation.operation();
-        long start = System.currentTimeMillis();
-        String deviceSn = parameter.getString("deviceSn");
-        if (StrUtil.isNotBlank(deviceSn)) {
-            Integer longUserId = this.dataCache.getInteger(DataCachePrefixConstant.HIK_REG_USERID + deviceSn);
-            if (null == longUserId) {
-                return new HikDevResponse().err("设备状态未注册");
+        String ip = parameter.getString("ipv4Address");
+        if (StrUtil.isNotBlank(ip)) {
+            Integer longUserId = ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getLoginId();
+            if (null == longUserId || longUserId < 0) {
+                return new HikDevResponse().err("接口检查: 设备状态未注册");
             }
+        } else {
+            return new HikDevResponse().err("接口检查: 缺少参数 ipv4Address");
         }
         return point.proceed();
     }

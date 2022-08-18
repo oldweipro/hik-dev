@@ -12,18 +12,18 @@ public interface IHikAlarmDataService {
     /**
      * 设置报警 设备布防
      *
-     * @param id 设备IP
+     * @param ip 设备IP
      * @return
      */
-    HikDevResponse setupAlarmChan(String id);
+    HikDevResponse setupAlarmChan(String ip);
 
     /**
      * 报警撤防 设备撤防
      *
-     * @param deviceSn 设备序列号
+     * @param ip 设备ip
      * @return
      */
-    HikDevResponse closeAlarmChan(String deviceSn);
+    HikDevResponse closeAlarmChan(String ip);
 
     /**
      * 启动监听

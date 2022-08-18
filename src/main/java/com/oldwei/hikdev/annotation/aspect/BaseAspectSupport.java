@@ -22,7 +22,7 @@ public abstract class BaseAspectSupport {
         String[] parameterNames = signature.getParameterNames();
         JSONObject parameter = new JSONObject();
         for (int i = 0; i < parameterNames.length; i++) {
-            if(i >= args.length){
+            if (i >= args.length) {
                 break;
             }
             Object value = args[i];
@@ -33,6 +33,7 @@ public abstract class BaseAspectSupport {
         }
         return parameter;
     }
+
     Method resolveMethod(ProceedingJoinPoint point) {
         MethodSignature signature = (MethodSignature) point.getSignature();
         Class<?> targetClass = point.getTarget().getClass();

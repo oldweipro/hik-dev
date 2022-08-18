@@ -15,13 +15,13 @@ public class DeviceSearchInfoDTO implements Serializable {
     private String DeviceDescription;
     private String HCPlatformEnable;
     private String CommandPort;
-    private String DigitalChannelNum;
+    private Integer DigitalChannelNum;
     private String SupportHCPlatform;
     private String DSPVersion;
     private String IPv4Address;
     private String Salt;
     private String Activated;
-    private String AnalogChannelNum;
+    private Integer AnalogChannelNum;
     private String supportIPv6;
     private String PasswordResetAbility;
     private String supportModifyIPv6;

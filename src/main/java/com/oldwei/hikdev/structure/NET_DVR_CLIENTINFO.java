@@ -9,7 +9,7 @@ import com.sun.jna.examples.win32.W32API;
  * @date 2021-5-19 18:13
  */
 public class NET_DVR_CLIENTINFO extends Structure {
-    public int lChannel;
+    public int lChannel = 1;
     public int lLinkMode;
     public W32API.HWND hPlayWnd;
     public String sMultiCastIP;

@@ -18,13 +18,13 @@ public class DeviceSearchInfo implements Serializable {
     private String deviceDescription;
     private String hcPlatformEnable;
     private String commandPort;
-    private String digitalChannelNum;
+    private Integer digitalChannelNum;
     private String supportHcPlatform;
     private String dspVersion;
     private String ipv4Address;
     private String salt;
     private String activated;
-    private String analogChannelNum;
+    private Integer analogChannelNum;
     private String supportIpv6;
     private String passwordResetAbility;
     private String supportModifyIpv6;
@@ -57,6 +57,10 @@ public class DeviceSearchInfo implements Serializable {
      * 布防状态
      */
     private Integer alarmHandleId = -1;
+    /**
+     * 设备开启预览状态
+     */
+    private Integer PreviewHandle = -1;
 
     public void setDeviceSearchInfoDTO(DeviceSearchInfoDTO deviceSearchInfoDTO) {
         this.types = deviceSearchInfoDTO.getTypes();

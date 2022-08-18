@@ -37,4 +37,11 @@ public interface IHikCameraService {
      * @param pushUrl rtmp推流地址
      */
     void pushRtspToRtmp(String ip, String rtspUrl, String pushUrl);
+
+    /**
+     * 开启预览
+     * @param loginId 设备注册id
+     * @param ipv4Address 设备IP
+     */
+    void openPreview(Integer loginId, String ipv4Address);
 }

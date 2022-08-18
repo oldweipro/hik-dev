@@ -61,7 +61,7 @@ public class HikCameraRealDataCallBackImpl implements FRealDataCallBack_V30 {
                     //视频流数据
                     byte[] videoStreamData = pBuffer.getPointer().getByteArray(0, dwBufSize);
                     if (videoStreamData.length > 0) {
-                        writeMediaStream(videoStreamData, 0, dwBufSize, false);
+//                        writeMediaStream(videoStreamData, 0, dwBufSize, false);
                     } else {
                         log.info("怎么回事小老弟！怎么没有数据了！");
                     }

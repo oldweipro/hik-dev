@@ -55,6 +55,7 @@ public class HikCameraServiceImpl implements IHikCameraService {
         } else {
             log.info(deviceSn + "预览成功，previewSucValue：{}", previewSucValue);
         }
+        // TODO 需要将previewSucValue存储到json文件
         this.dataCache.set(DataCachePrefixConstant.HIK_PREVIEW_VIEW + deviceSn, previewSucValue);
         //======================开启设备预览========================
         //======================Javacv推流 pis管道流========================
@@ -101,5 +102,25 @@ public class HikCameraServiceImpl implements IHikCameraService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void openPreview(Integer loginId, String ipv4Address) {
+        PipedOutputStream pos = new PipedOutputStream();
+        FRealDataCallBack_V30 hikCameraRealDataCallBack = new HikCameraRealDataCallBackImpl(this.hikPlayCtrlService, pos);
+        //======================开启设备预览========================
+        NET_DVR_CLIENTINFO strClientInfo = new NET_DVR_CLIENTINFO();
+        strClientInfo.lChannel = 1;
+        strClientInfo.hPlayWnd = null;
+        int previewSucValue = this.hikDevService.NET_DVR_RealPlay_V30(loginId, strClientInfo, hikCameraRealDataCallBack, null, true);
+        //预览失败时:
+        if (previewSucValue == -1) {
+            log.info(ipv4Address + "预览失败，previewSucValue的值：{}", previewSucValue);
+        } else {
+            log.info(ipv4Address + "预览成功，previewSucValue：{}", previewSucValue);
+        }
+        // TODO 需要将previewSucValue存储到json文件
+        this.dataCache.set(DataCachePrefixConstant.HIK_PREVIEW_VIEW + ipv4Address, previewSucValue);
+        //======================开启设备预览========================
     }
 }

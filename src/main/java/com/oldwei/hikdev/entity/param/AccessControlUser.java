@@ -14,7 +14,7 @@ public class AccessControlUser implements Serializable {
     /**
      * 设备ip
      */
-    private String ip;
+    private String ipv4Address;
     /**
      * 姓名
      */

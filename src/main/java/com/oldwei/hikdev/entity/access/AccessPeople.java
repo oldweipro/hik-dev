@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 public class AccessPeople implements Serializable {
     private static final long serialVersionUID = 6585020083695187516L;
-    private String ip;
+    private String ipv4Address;
     private Integer employeeNo;
     @JSONField(name = "name", serialize = false)
     private String realName;

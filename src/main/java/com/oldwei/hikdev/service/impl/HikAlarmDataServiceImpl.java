@@ -523,17 +523,19 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     String eventDatetime = strACSInfo.struTime.toStringTimeDateFormat();
                     if (strACSInfo.dwPicDataLen > 0) {
                         JSONObject data = this.personInfo(strACSInfo, pAlarmer);
+                        // minorAlarmType报警次类型dwMinor 参考宏定义{1024:防区短路报警,21:门锁打开,22:门锁关闭}
                         String pathname = this.fileStream.touchJpg();
-                        this.fileStream.downloadToLocal(pathname, strACSInfo.pPicData.getByteArray(0, strACSInfo.dwPicDataLen));
+                        byte[] picDataByteArray = strACSInfo.pPicData.getByteArray(0, strACSInfo.dwPicDataLen);
+                        this.fileStream.downloadToLocal(pathname, picDataByteArray);
                         log.info("新设备抓取实时照片事件:{} 发生时间：{}", pathname, eventDatetime);
-                        String upload = cn.hutool.core.codec.Base64.encode(new File(pathname));
+                        String upload = cn.hutool.core.codec.Base64.encode(picDataByteArray);
                         data.put("pic", upload);
                         JSONObject mqttMsg = new JSONObject();
                         mqttMsg.put("code", 4);
                         mqttMsg.put("data", data);
 //                        mqtt push
-                        //TODO url处理
-                        ThreadUtil.execAsync(() -> HttpUtil.post("http://localhost:4068/hik/api/accessControlEvent", JSONObject.toJSONString(mqttMsg)));
+                        //TODO 上报布防事件
+//                        ThreadUtil.execAsync(() -> HttpUtil.post("http://localhost:4068/hik/api/accessControlEvent", JSONObject.toJSONString(mqttMsg)));
 
                     } else {
                         JSONObject data = this.personInfo(strACSInfo, pAlarmer);
@@ -553,8 +555,8 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                                 mqttMsg.put("code", 4);
                                 mqttMsg.put("data", data);
 //                                mqtt push
-                                //TODO url处理
-                                ThreadUtil.execAsync(() -> HttpUtil.post("http://localhost:4068/hik/api/accessControlEvent", JSONObject.toJSONString(mqttMsg)));
+                                //TODO 上报布防事件
+//                                ThreadUtil.execAsync(() -> HttpUtil.post("http://localhost:4068/hik/api/accessControlEvent", JSONObject.toJSONString(mqttMsg)));
                             }
                         }
                     }
@@ -594,7 +596,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     //报警类型
                     newRow[2] = sAlarmType.toString();
                     if (struAIOPVideo.dwAIOPDataSize > 0) {
-                        String filename = this.fileStream.touchJson();
+                        String filename = this.fileStream.touchJpg();
                         this.fileStream.downloadToLocal(filename, struAIOPVideo.pBufferAIOPData.getByteArray(0, struAIOPVideo.dwAIOPDataSize));
                     }
                     if (struAIOPVideo.dwPictureSize > 0) {
@@ -616,7 +618,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     //报警类型
                     newRow[2] = sAlarmType.toString();
                     if (struAIOPPic.dwAIOPDataSize > 0) {
-                        String filename = this.fileStream.touchJson();
+                        String filename = this.fileStream.touchJpg();
                         this.fileStream.downloadToLocal(filename, struAIOPPic.pBufferAIOPData.getByteArray(0, struAIOPPic.dwAIOPDataSize));
                     }
                     log.info("设备支持AI开放平台接入，上传图片检测数据：{}", sAlarmType.toString());
@@ -632,7 +634,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     //报警类型
                     newRow[2] = sAlarmType.toString();
                     if (struEventISAPI.dwAlarmDataLen > 0) {
-                        String filename = this.fileStream.touchJson();
+                        String filename = this.fileStream.touchJpg();
                         this.fileStream.downloadToLocal(filename, struEventISAPI.pAlarmData.getByteArray(0, struEventISAPI.dwAlarmDataLen));
                     }
 

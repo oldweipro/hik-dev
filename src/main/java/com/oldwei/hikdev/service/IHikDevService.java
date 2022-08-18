@@ -61,4 +61,58 @@ public interface IHikDevService extends StdCallLibrary {
 
     boolean NET_DVR_ControlGateway(int lUserID, int lGatewayIndex, int dwStaic);
 
+    /**
+     * 单帧数据捕获并保存成JPEG图。
+     * lUserID
+     * [in] NET_DVR_Login_V40等登录接口的返回值
+     * lChannel
+     * [in] 通道号
+     * lpJpegPara
+     * [in] JPEG图像参数
+     * sPicFileName
+     * [in] 保存JPEG图的文件路径（包括文件名）
+     * @param lUserID NET_DVR_Login_V40等登录接口的返回值
+     * @param lChannel 通道号
+     * @param lpJpegPara JPEG图像参数
+     * @param sPicFileName 保存JPEG图的文件路径（包括文件名）
+     * @return TRUE表示成功，FALSE表示失败。接口返回失败请调用NET_DVR_GetLastError获取错误码，通过错误码判断出错原因。
+     */
+    boolean NET_DVR_CaptureJPEGPicture(int lUserID, int lChannel, NET_DVR_JPEGPARA lpJpegPara, byte[] sPicFileName);
+
+    /**
+     * 单帧数据捕获并保存成JPEG存放在指定的内存空间中。
+     * lUserID
+     * [in] NET_DVR_Login_V40等登录接口的返回值
+     * lChannel
+     * [in] 通道号
+     * lpJpegPara
+     * [in] JPEG图像参数
+     * sJpegPicBuffer
+     * [in] 保存JPEG数据的缓冲区
+     * dwPicSize
+     * [in] 输入缓冲区大小
+     * lpSizeReturned
+     * [out] 返回图片数据的大小
+     * @param lUserID NET_DVR_Login_V40等登录接口的返回值
+     * @param lChannel 通道号
+     * @param lpJpegPara JPEG图像参数
+     * @param sJpegPicBuffer 保存JPEG数据的缓冲区
+     * @param dwPicSize 输入缓冲区大小
+     * @param lpSizeReturned 返回图片数据的大小
+     * @return TRUE表示成功，FALSE表示失败。接口返回失败请调用NET_DVR_GetLastError获取错误码，通过错误码判断出错原因。
+     */
+    boolean  NET_DVR_CaptureJPEGPicture_NEW(int lUserID, int lChannel, NET_DVR_JPEGPARA lpJpegPara, byte[] sJpegPicBuffer, int dwPicSize, IntByReference lpSizeReturned);
+
+    /**
+     * bmp预览时，单帧数据捕获并保存成图片。
+     * lRealHandle
+     * [in] NET_DVR_RealPlay或NET_DVR_RealPlay_V30的返回值
+     * sPicFileName
+     * [in] 保存图象的文件路径（包括文件名）。路径长度和操作系统有关，sdk不做限制，windows默认路径长度小于等于256字节（包括文件名在内）。
+     * @param lRealHandle NET_DVR_RealPlay或NET_DVR_RealPlay_V30的返回值
+     * @param sPicFileName 保存图象的文件路径（包括文件名）。路径长度和操作系统有关，sdk不做限制，windows默认路径长度小于等于256字节（包括文件名在内）。
+     * @return TRUE表示成功，FALSE表示失败。接口返回失败请调用NET_DVR_GetLastError获取错误码，通过错误码判断出错原因。
+     */
+    boolean  NET_DVR_CapturePicture(int lRealHandle,String sPicFileName);
+
 }

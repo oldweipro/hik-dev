@@ -195,7 +195,7 @@ public class HikAccessControlServiceImpl implements IHikAccessControlService {
     @Override
     public HikDevResponse modifyUser(AccessPeople accessPeople) {
         String urlInBuffer = "PUT /ISAPI/AccessControl/UserInfo/Modify?format=json";
-        JSONObject result = this.aboutUserInfo(accessPeople.getIp(), accessPeople, urlInBuffer);
+        JSONObject result = this.aboutUserInfo(accessPeople.getIpv4Address(), accessPeople, urlInBuffer);
         return new HikDevResponse().ok(result.getString("msg"));
     }
 
