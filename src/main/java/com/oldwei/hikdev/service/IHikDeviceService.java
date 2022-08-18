@@ -33,7 +33,9 @@ public interface IHikDeviceService {
      * @param deviceSearchInfoVo
      * @return
      */
+    @Deprecated
     List<DeviceSearchInfoVO> getDeviceList(DeviceSearchInfoVO deviceSearchInfoVo);
+    List<DeviceSearchInfo> getDeviceSearchInfoList(DeviceSearchInfo deviceSearchInfo);
 
     /**
      * 获取登陆状态

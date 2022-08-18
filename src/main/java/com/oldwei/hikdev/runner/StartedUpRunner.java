@@ -100,6 +100,7 @@ public class StartedUpRunner implements ApplicationRunner {
                         Map<String, Object> stringObjectMap = XmlUtil.xmlToMap(decodeData);
                         // 过滤无效数据
                         if (stringObjectMap.containsKey("IPv4Address")) {
+                            log.info("过滤数据: {}", stringObjectMap);
                             DeviceSearchInfoDTO deviceSearchInfoDTO = BeanUtil.toBean(stringObjectMap, DeviceSearchInfoDTO.class);
                             ConfigJsonUtil.saveOrUpdateDeviceSearch(deviceSearchInfoDTO);
                         }

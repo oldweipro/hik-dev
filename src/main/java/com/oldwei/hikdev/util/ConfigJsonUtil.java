@@ -151,12 +151,12 @@ public class ConfigJsonUtil {
         // 这会有一个并行问题，如果同时打开文件，第一个人修改之后保存为A，第二个人修改之后保存为B，这个内容最终会覆盖A，显示为B内容，目前的业务一般不会出现
         // 判断当前json文件中是否记录改序列号ip
         // 根据设备的ip判断设备是否存在，如果设备已存在，更新此设备；设备不存在，新增设备
+        JSONObject configJson = readConfigJson();
         List<DeviceSearchInfo> deviceSearchList = getDeviceSearchInfoList();
-        if (deviceSearchList.size() > 0 && ObjectUtil.isNotNull(getDeviceSearchInfoByIp(xmlToMap.getIPv4Address()))) {
+        if (deviceSearchList.size() > 0 && ObjectUtil.isNotNull(getDeviceSearchInfoByIp(xmlToMap.getIPv4Address()).getIpv4Address())) {
             // 说明已存在，需要进行更新
             deviceSearchList.forEach(d -> {
                 if (StrUtil.equals(d.getIpv4Address(), xmlToMap.getIPv4Address())) {
-                    // BeanUtil.copyProperties(xmlToMap, d);
                     d.setDeviceSearchInfoDTO(xmlToMap);
                 }
             });
@@ -165,7 +165,6 @@ public class ConfigJsonUtil {
             deviceSearchInfo.setDeviceSearchInfoDTO(xmlToMap);
             deviceSearchList.add(deviceSearchInfo);
         }
-        JSONObject configJson = readConfigJson();
         configJson.put(deviceSearchInfo, deviceSearchList);
         return ConfigJsonUtil.writeConfigJson(configJson.toJSONString());
     }

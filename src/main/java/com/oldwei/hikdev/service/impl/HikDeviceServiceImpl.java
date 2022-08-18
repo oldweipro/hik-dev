@@ -93,6 +93,11 @@ public class HikDeviceServiceImpl implements IHikDeviceService {
     }
 
     @Override
+    public List<DeviceSearchInfo> getDeviceSearchInfoList(DeviceSearchInfo deviceSearchInfo) {
+        return ConfigJsonUtil.getDeviceSearchInfoList();
+    }
+
+    @Override
     public DeviceSearchInfo loginStatus(String ip) {
         return ConfigJsonUtil.getDeviceSearchInfoByIp(ip);
     }

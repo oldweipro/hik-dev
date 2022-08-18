@@ -79,12 +79,12 @@ public class DeviceController {
     /**
      * 获取设备分页
      *
-     * @param deviceSearchInfoVo
+     * @param deviceSearchInfo
      * @return
      */
-    @GetMapping("getDeviceList")
-    public HikDevResponse getDeviceList(DeviceSearchInfoVO deviceSearchInfoVo) {
-        return new HikDevResponse().ok().data(this.hikDeviceService.getDeviceList(deviceSearchInfoVo));
+    @GetMapping("getDeviceSearchInfoList")
+    public HikDevResponse getDeviceSearchInfoList(DeviceSearchInfo deviceSearchInfo) {
+        return new HikDevResponse().ok().data(this.hikDeviceService.getDeviceSearchInfoList(deviceSearchInfo));
     }
 
     /**
