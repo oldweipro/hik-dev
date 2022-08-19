@@ -32,3 +32,5 @@ build/
 *.log
 pic/
 output/
+
+/sdk/
