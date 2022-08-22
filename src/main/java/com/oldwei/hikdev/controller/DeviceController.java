@@ -2,6 +2,7 @@ package com.oldwei.hikdev.controller;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.fastjson2.JSONObject;
 import com.oldwei.hikdev.annotation.CheckDeviceLogin;
 import com.oldwei.hikdev.component.FileStream;
 import com.oldwei.hikdev.entity.config.DeviceLoginDTO;
@@ -37,6 +38,14 @@ public class DeviceController {
     private final IHikAlarmDataService hikAlarmDataService;
     private final IHikDevService hikDevService;
     private final FileStream fileStream;
+    @PostMapping("user/login")
+    public JSONObject login() {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("access_token", "bBcaC20F-886d-8BcE-D0Cc-5A8D6C52aE3E");
+        jsonObject.put("display_name", "Jason Robinson");
+        jsonObject.put("channels", new String[]{"NBA", "GAME", "FOX", "SPORT", "NEWS"});
+        return jsonObject;
+    }
 
     /**
      * 设备注册登录
