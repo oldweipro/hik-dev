@@ -1,0 +1,26 @@
+spring:
+  servlet:
+    multipart:
+      # 单个上传的数据大小限制200Mb
+      max-file-size: 209715200
+      # 总上传的数据大小限制500Mb
+      max-request-size: 524288000
+mqtt:
+  # 是否开启mqtt
+  enable: false
+  # mqtt相关配置
+  settings:
+    # 订阅
+    sub-topic: topic/cloud
+    # 发布订阅
+    pub-topic: topic/hik
+    # 参考 https://zhuanlan.zhihu.com/p/80203905
+    qos: 2
+    broker: tcp://broker.emqx.io:1883
+    client-id: hik_mqtt_server
+    username: hik_mqtt_server
+hik-dev:
+  #下载文件 输出文件夹
+  output-dir: output
+  #设备报警事件信息推送地址
+  event-push-url: https://推送地址
