@@ -1,6 +1,7 @@
 package com.oldwei.hikdev.structure;
 
 import com.oldwei.hikdev.constant.HikConstant;
+import com.oldwei.hikdev.service.FLoginResultCallBack;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 

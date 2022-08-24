@@ -4,6 +4,8 @@ import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author oldwei
@@ -21,8 +23,12 @@ public class DeviceLoginDTO implements Serializable {
     @NotBlank(message = "[commandPort]端口不能为空")
     private String commandPort;
     private String title;
-    private Boolean useAsync = false;
+    private String screenPicture;
+    private Boolean useAsync = true;
     private Integer charEncodeType;
+    private List<Integer> analogChannelIds = new ArrayList<>();
+    private List<Integer> digitalChannelIds = new ArrayList<>();
+    private List<Integer> allChannelIds = new ArrayList<>();
     /**
      * 登陆状态，海康设备返回的登陆id
      */

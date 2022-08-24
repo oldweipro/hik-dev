@@ -1,10 +1,15 @@
 package com.oldwei.hikdev.controller;
 
 import cn.hutool.core.codec.Base64;
+import cn.hutool.core.collection.ListUtil;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.alibaba.fastjson2.JSONObject;
+import cn.hutool.core.util.PageUtil;
+import cn.hutool.core.util.RandomUtil;
 import com.oldwei.hikdev.annotation.CheckDeviceLogin;
 import com.oldwei.hikdev.component.FileStream;
+import com.oldwei.hikdev.entity.QueryRequest;
 import com.oldwei.hikdev.entity.config.DeviceLoginDTO;
 import com.oldwei.hikdev.entity.HikDevResponse;
 import com.oldwei.hikdev.entity.config.DeviceSearchInfo;
@@ -17,10 +22,14 @@ import com.oldwei.hikdev.util.ConfigJsonUtil;
 import com.sun.jna.ptr.IntByReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author oldwei
@@ -38,14 +47,9 @@ public class DeviceController {
     private final IHikAlarmDataService hikAlarmDataService;
     private final IHikDevService hikDevService;
     private final FileStream fileStream;
-    @PostMapping("user/login")
-    public JSONObject login() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("access_token", "bBcaC20F-886d-8BcE-D0Cc-5A8D6C52aE3E");
-        jsonObject.put("display_name", "Jason Robinson");
-        jsonObject.put("channels", new String[]{"NBA", "GAME", "FOX", "SPORT", "NEWS"});
-        return jsonObject;
-    }
+
+    @Value("${hik-dev.output-dir}")
+    private String outputDir;
 
     /**
      * 设备注册登录
@@ -55,7 +59,7 @@ public class DeviceController {
      */
     @PostMapping("login")
     public HikDevResponse login(@Valid @RequestBody DeviceLoginDTO deviceLogin) {
-        return this.hikDeviceService.login(deviceLogin) ? new HikDevResponse().ok() : new HikDevResponse().err();
+        return this.hikDeviceService.login(deviceLogin) ? new HikDevResponse().ok().msg("注册成功") : new HikDevResponse().err().msg("注册失败");
     }
 
     /**
@@ -69,7 +73,7 @@ public class DeviceController {
     @GetMapping("getDeviceInfoByIp/{ipv4Address}")
     public HikDevResponse getDeviceInfoByIp(@PathVariable String ipv4Address) {
         DeviceSearchInfo deviceLogin = this.hikDeviceService.loginStatus(ipv4Address);
-        return new HikDevResponse().ok().data(deviceLogin);
+        return new HikDevResponse().ok().data(deviceLogin).msg("查询成功");
     }
 
     /**
@@ -81,7 +85,7 @@ public class DeviceController {
     @CheckDeviceLogin
     @PostMapping("clean/{ipv4Address}")
     public HikDevResponse clean(@PathVariable String ipv4Address) {
-        return this.hikDeviceService.clean(ipv4Address) ? new HikDevResponse().ok() : new HikDevResponse().err();
+        return this.hikDeviceService.clean(ipv4Address) ? new HikDevResponse().ok().msg("注销成功") : new HikDevResponse().err().msg("注销失败");
     }
 
     /**
@@ -91,8 +95,20 @@ public class DeviceController {
      * @return
      */
     @GetMapping("getDeviceSearchInfoList")
-    public HikDevResponse getDeviceSearchInfoList(DeviceSearchInfo deviceSearchInfo) {
-        return new HikDevResponse().ok().data(this.hikDeviceService.getDeviceSearchInfoList(deviceSearchInfo));
+    public HikDevResponse getDeviceSearchInfoList(QueryRequest queryRequest, DeviceSearchInfo deviceSearchInfo) {
+        int pageNum = queryRequest.getPageNum();
+        int pageSize = queryRequest.getPageSize();
+
+        List<DeviceSearchInfo> deviceSearchInfoList = this.hikDeviceService.getDeviceSearchInfoList(deviceSearchInfo);
+        int counts = deviceSearchInfoList.size();
+        List<DeviceSearchInfo> page = ListUtil.page(pageNum - 1, pageSize, deviceSearchInfoList);
+        Map<String, Object> map = MapUtil.newConcurrentHashMap();
+        map.put("counts", counts);
+        map.put("pagesize", pageSize);
+        map.put("pages", PageUtil.totalPage(counts, pageSize));
+        map.put("page", pageNum);
+        map.put("items", page);
+        return new HikDevResponse().ok().data(map).msg("查询成功");
     }
 
     /**
@@ -101,7 +117,7 @@ public class DeviceController {
     @GetMapping("searchHikDevice")
     public HikDevResponse searchHikDevice() {
         ConfigJsonUtil.searchHikDevice();
-        return new HikDevResponse().ok();
+        return new HikDevResponse().ok().msg("扫描中");
     }
 
     /**
@@ -136,7 +152,7 @@ public class DeviceController {
      */
     @CheckDeviceLogin
     @GetMapping("captureJpegPictureToMemory/{ipv4Address}")
-    public HikDevResponse captureJpegPictureToMemory(@PathVariable String ipv4Address, Short picQuality, Short picSize) {
+    public HikDevResponse captureJpegPictureToMemory(@PathVariable String ipv4Address, Integer channelId, Short picQuality, Short picSize) {
         DeviceSearchInfo deviceSearchInfoByIp = ConfigJsonUtil.getDeviceSearchInfoByIp(ipv4Address);
         // 这里两个参数经过测试,可能设备比较老wPicSize:只支持0=CIF，wPicQuality：0-最好：图片质量大小220K，1-较好：大小70K，2-一般：大小40K
         NET_DVR_JPEGPARA netDvrJpegpara = new NET_DVR_JPEGPARA();
@@ -149,20 +165,24 @@ public class DeviceController {
             netDvrJpegpara.wPicSize = picSize;
         }
         // 如果设置小了，会报错误43：缓冲区太小。接收设备数据的缓冲区或存放图片缓冲区不足。
-        // 我大概看了一下门禁抓拍的照片普遍在40-120K左右，可能是由于画面颜色单一照片质量较小，这里设置了400KB，开发者可根据实际情况修改缓冲区大小
-        byte[] sJpegPicBuffer = new byte[409600];
+        // 我大概看了一下门禁抓拍的照片普遍在40-120K左右，可能是由于画面颜色单一照片质量较小，这里设置了1024KB，开发者可根据实际情况修改缓冲区大小
+        byte[] sJpegPicBuffer = new byte[1024000];
         IntByReference lpSizeReturned = new IntByReference(sJpegPicBuffer.length);
-        boolean b = this.hikDevService.NET_DVR_CaptureJPEGPicture_NEW(deviceSearchInfoByIp.getLoginId(), deviceSearchInfoByIp.getAnalogChannelNum(), netDvrJpegpara, sJpegPicBuffer, sJpegPicBuffer.length, lpSizeReturned);
+        log.info("=====================查看通道号 {}====================", channelId);
+        if (channelId == null) {
+            channelId = 1;
+        }
+        boolean b = this.hikDevService.NET_DVR_CaptureJPEGPicture_NEW(deviceSearchInfoByIp.getLoginId(), channelId, netDvrJpegpara, sJpegPicBuffer, sJpegPicBuffer.length, lpSizeReturned);
         // 抓完图后可以直接使用sJpegPicBuffer，由于大小为204800所以存储的照片大小为200k，所以如果使用NET_DVR_CaptureJPEGPicture_NEW存储照片的话，得转一下
         byte[] savePic = new byte[lpSizeReturned.getValue()];
         System.arraycopy(sJpegPicBuffer, 0, savePic, 0, savePic.length);
         String encode = Base64.encode(savePic);
         int error = this.hikDevService.NET_DVR_GetLastError();
         if (error == 0) {
-            return new HikDevResponse().ok().data(encode);
+            return new HikDevResponse().ok("截图成功").data(encode);
         } else {
             log.info("errorCode: {}", error);
-            return new HikDevResponse().err().data(error);
+            return new HikDevResponse().err("截图失败: " + error).data(error);
         }
     }
 
@@ -173,7 +193,7 @@ public class DeviceController {
      */
     @CheckDeviceLogin
     @GetMapping("captureJpegPictureToLocal/{ipv4Address}")
-    public HikDevResponse captureJpegPictureToLocal(@PathVariable String ipv4Address, Short picQuality, Short picSize) {
+    public HikDevResponse captureJpegPictureToLocal(@PathVariable String ipv4Address, Integer channelId, Short picQuality, Short picSize) {
         // 这里两个参数经过测试,可能设备比较老wPicSize:只支持0=CIF，wPicQuality：0-最好：图片质量大小220K，1-较好：大小70K，2-一般：大小40K
         NET_DVR_JPEGPARA netDvrJpegpara = new NET_DVR_JPEGPARA();
         if (ObjectUtil.isNotNull(picQuality)) {
@@ -185,18 +205,28 @@ public class DeviceController {
             netDvrJpegpara.wPicSize = picSize;
         }
         String touchJpg = this.fileStream.touchJpg();
+        DeviceSearchInfo deviceSearchInfoByIp = ConfigJsonUtil.getDeviceSearchInfoByIp(ipv4Address);
+        log.info("=====================查看通道号 {}====================", channelId);
+        if (channelId == null) {
+            channelId = 1;
+        }
         // 如果要存储照片到本地，建议使用NET_DVR_CaptureJPEGPicture
         this.hikDevService.NET_DVR_CaptureJPEGPicture(
-                ConfigJsonUtil.getDeviceSearchInfoByIp(ipv4Address).getLoginId(),
-                ConfigJsonUtil.getDeviceSearchInfoByIp(ipv4Address).getAnalogChannelNum(),
+                deviceSearchInfoByIp.getLoginId(),
+                channelId,
                 netDvrJpegpara,
                 touchJpg.getBytes());
         int error = this.hikDevService.NET_DVR_GetLastError();
+        DeviceLoginDTO deviceLoginDTO = deviceSearchInfoByIp.findDeviceLoginDTO();
+        String urlPath = touchJpg.split(outputDir)[1];
+        log.info("分割之后的地址: {}", urlPath);
+        deviceLoginDTO.setScreenPicture(urlPath);
+        ConfigJsonUtil.saveOrUpdateDeviceLogin(deviceLoginDTO);
         if (error == 0) {
-            return new HikDevResponse().ok().data(touchJpg);
+            return new HikDevResponse().ok("截图成功").data(urlPath);
         } else {
             log.info("errorCode: {}", error);
-            return new HikDevResponse().err().data(error);
+            return new HikDevResponse().err("截图失败: " + error).data(error);
         }
     }
 
@@ -210,8 +240,10 @@ public class DeviceController {
     public HikDevResponse openPreview(@PathVariable String ipv4Address) {
         Integer loginId = ConfigJsonUtil.getDeviceSearchInfoByIp(ipv4Address).getLoginId();
         this.hikCameraService.openPreview(loginId, ipv4Address);
-        return new HikDevResponse().ok();
+        return new HikDevResponse().ok("门已打开");
     }
+
+    // TODO 关闭预览
 
     /**
      * [需要开启预览]使用sdk存储视频录像到本地，每一个小时自动创建新文件

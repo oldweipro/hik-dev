@@ -1,6 +1,7 @@
 package com.oldwei.hikdev.component;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.RandomUtil;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,8 +55,8 @@ public class FileStream {
      * @return 文件绝对路径
      */
     public String touchSuffixFile(String suffix) {
-        String filename = RandomUtil.randomString(32) + suffix;
-        String path = System.getProperty("user.dir") + "/" + outputDir + "/" + DateUtil.thisYear() + "/" + DateUtil.thisMonth() + "/" + DateUtil.thisDayOfMonth() + "/" + filename;
+        String filename = System.currentTimeMillis() + suffix;
+        String path = System.getProperty("user.dir") + "/" + outputDir + "/" + DateUtil.thisYear() + "/" + (DateUtil.thisMonth() + 1) + "/" + DateUtil.thisDayOfMonth() + "/" + filename;
         FileUtil.touch(path);
         return path;
     }
