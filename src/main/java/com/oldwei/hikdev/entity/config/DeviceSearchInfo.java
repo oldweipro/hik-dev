@@ -62,6 +62,11 @@ public class DeviceSearchInfo implements Serializable {
     private String title;
     private Boolean useAsync = false;
     /**
+     * 设备型号
+     */
+    private String dVRType;
+
+    /**
      * 布防状态
      */
     private Integer alarmHandleId = -1;
@@ -121,6 +126,7 @@ public class DeviceSearchInfo implements Serializable {
         this.allChannelIds = deviceLoginDTO.getAllChannelIds();
         this.screenPicture = deviceLoginDTO.getScreenPicture();
         this.deviceChannels = deviceLoginDTO.getDeviceChannels();
+        this.dVRType = deviceLoginDTO.getDVRType();
     }
 
     /**
@@ -142,6 +148,7 @@ public class DeviceSearchInfo implements Serializable {
         deviceLoginDTO.setAllChannelIds(this.allChannelIds);
         deviceLoginDTO.setScreenPicture(this.screenPicture);
         deviceLoginDTO.setDeviceChannels(this.deviceChannels);
+        deviceLoginDTO.setDVRType(this.dVRType);
         return deviceLoginDTO;
     }
 }

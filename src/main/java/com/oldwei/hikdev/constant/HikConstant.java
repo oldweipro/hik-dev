@@ -224,4 +224,21 @@ public interface HikConstant {
     int MAX_SHELTERNUM = 4;   //8000设备最大遮挡区域数
     int STREAM_PASSWD_LEN = 12;      //码流加密密钥最大长度
     int STREAM_ID_LEN = 32;
+
+
+    /**
+     * 获取设备的配置信息
+     */
+    int NET_DVR_GET_DEVICECFG_V40 = 1100; //获取扩展设备参数
+    int NET_DVR_GET_DEVICECFG = 100; //获取扩展设备参数
+    int DEV_TYPE_NAME_LEN = 24;      //设备类型名称长度
+
+    /**
+     * 设备型号 NET_DVR_DEVICECFG.byDVRType
+     */
+    String DVR = "DVR";    //尚未定义的DVR类型
+    String DS90XX_HF_S = "DS90XX_HF_S";    // DS90XX_HF_S
+    String DS_96XXXN_IX = "DS_96XXXN_IX";    // DS-96xxxN-I系列NVR（DS-96128N-I16、DS-96128N-I24、DS-96256N-I16、DS-96256N-I24）
+    String IDS_96XX_NX_FA = "IDS_96XX_NX_FA";    // 人脸超脑智能NVR
+
 }

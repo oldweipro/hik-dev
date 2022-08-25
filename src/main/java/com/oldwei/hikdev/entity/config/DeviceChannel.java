@@ -21,4 +21,9 @@ public class DeviceChannel implements Serializable {
      * 该通道是否启用，IP通道在线状态，是一个只读的属性；0表示HDVR或者NVR设备的数字通道连接对应的IP设备失败，该通道不在线；1表示连接成功，该通道在线
      */
     private Integer byEnable;
+
+    /**
+     * 通道的流地址
+     */
+    private String rtspStream;
 }
