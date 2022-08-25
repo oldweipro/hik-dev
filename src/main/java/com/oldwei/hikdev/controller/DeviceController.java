@@ -2,13 +2,12 @@ package com.oldwei.hikdev.controller;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.ListUtil;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.PageUtil;
-import cn.hutool.core.util.RandomUtil;
 import com.oldwei.hikdev.annotation.CheckDeviceLogin;
 import com.oldwei.hikdev.component.FileStream;
+import com.oldwei.hikdev.constant.HikConstant;
 import com.oldwei.hikdev.entity.QueryRequest;
 import com.oldwei.hikdev.entity.config.DeviceLoginDTO;
 import com.oldwei.hikdev.entity.HikDevResponse;
@@ -17,8 +16,9 @@ import com.oldwei.hikdev.service.IHikAlarmDataService;
 import com.oldwei.hikdev.service.IHikCameraService;
 import com.oldwei.hikdev.service.IHikDevService;
 import com.oldwei.hikdev.service.IHikDeviceService;
-import com.oldwei.hikdev.structure.NET_DVR_JPEGPARA;
+import com.oldwei.hikdev.structure.*;
 import com.oldwei.hikdev.util.ConfigJsonUtil;
+import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 

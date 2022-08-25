@@ -73,6 +73,7 @@ public class DeviceSearchInfo implements Serializable {
     private List<Integer> analogChannelIds = new ArrayList<>();
     private List<Integer> digitalChannelIds = new ArrayList<>();
     private List<Integer> allChannelIds = new ArrayList<>();
+    private List<DeviceChannel> deviceChannels = new ArrayList<>();
 
     public void setDeviceSearchInfoDTO(DeviceSearchInfoDTO deviceSearchInfoDTO) {
         this.types = deviceSearchInfoDTO.getTypes();
@@ -119,6 +120,7 @@ public class DeviceSearchInfo implements Serializable {
         this.digitalChannelIds = deviceLoginDTO.getDigitalChannelIds();
         this.allChannelIds = deviceLoginDTO.getAllChannelIds();
         this.screenPicture = deviceLoginDTO.getScreenPicture();
+        this.deviceChannels = deviceLoginDTO.getDeviceChannels();
     }
 
     /**
@@ -139,6 +141,7 @@ public class DeviceSearchInfo implements Serializable {
         deviceLoginDTO.setDigitalChannelIds(this.digitalChannelIds);
         deviceLoginDTO.setAllChannelIds(this.allChannelIds);
         deviceLoginDTO.setScreenPicture(this.screenPicture);
+        deviceLoginDTO.setDeviceChannels(this.deviceChannels);
         return deviceLoginDTO;
     }
 }

@@ -29,6 +29,7 @@ public class DeviceLoginDTO implements Serializable {
     private List<Integer> analogChannelIds = new ArrayList<>();
     private List<Integer> digitalChannelIds = new ArrayList<>();
     private List<Integer> allChannelIds = new ArrayList<>();
+    private List<DeviceChannel> deviceChannels = new ArrayList<>();
     /**
      * 登陆状态，海康设备返回的登陆id
      */

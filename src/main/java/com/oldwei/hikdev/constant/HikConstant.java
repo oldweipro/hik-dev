@@ -40,6 +40,8 @@ public interface HikConstant {
      * 用户名长度
      */
     int NAME_LEN = 32;
+    int PASSWD_LEN = 16;    //密码长度
+    int MAX_DOMAIN_NAME = 64;    /* 最大域名长度 */
 
     int NET_SDK_CONFIG_STATUS_SUCCESS = 1000;
     int NET_SDK_CONFIG_STATUS_NEEDWAIT = 1001;
@@ -155,6 +157,7 @@ public interface HikConstant {
      * 最大32个模拟通道
      */
     int MAX_ANALOG_CHANNUM = 32;
+    int MAX_IP_DEVICE = 32;    //允许接入的最大IP设备数
     /**
      * 允许加入的最多IP通道数
      */
@@ -163,6 +166,7 @@ public interface HikConstant {
      * 64
      */
     int MAX_CHANNUM_V30 = (MAX_ANALOG_CHANNUM + MAX_IP_CHANNEL);
+    int MAX_IP_DEVICE_V40 = 64;
     /**
      * 9000设备最大硬盘数/* 最多33个硬盘(包括16个内置SATA硬盘、1个eSATA硬盘和16个NFS盘)
      */
@@ -211,4 +215,13 @@ public interface HikConstant {
     int NET_DVR_SET_CARD_RIGHT_PLAN_TEMPLATE_V50 = 2323;//设置卡权限计划模板参数V50
     int MAX_TIMESEGMENT_V30 = 8;    //9000设备最大时间段数
     int MAX_DAYS = 7;      //每周天数
+
+    //获取通道的工作状态
+    int NET_DVR_GET_LINK_STATUS = 1256;
+    int NET_DVR_GET_DEVSERVER_CFG = 3257;
+    int NET_DVR_GET_IPPARACFG_V40 = 1062;
+    int NET_DVR_GET_PICCFG_V40 = 6179;   //获取图象参数
+    int MAX_SHELTERNUM = 4;   //8000设备最大遮挡区域数
+    int STREAM_PASSWD_LEN = 12;      //码流加密密钥最大长度
+    int STREAM_ID_LEN = 32;
 }

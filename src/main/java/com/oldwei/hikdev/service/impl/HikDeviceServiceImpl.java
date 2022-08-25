@@ -3,6 +3,8 @@ package com.oldwei.hikdev.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.oldwei.hikdev.constant.HikConstant;
+import com.oldwei.hikdev.entity.config.DeviceChannel;
 import com.oldwei.hikdev.entity.config.DeviceLoginDTO;
 import com.oldwei.hikdev.entity.config.DeviceSearchInfo;
 import com.oldwei.hikdev.entity.config.DeviceSearchInfoVO;
@@ -10,11 +12,10 @@ import com.oldwei.hikdev.service.FLoginResultCallBack;
 import com.oldwei.hikdev.service.IHikAlarmDataService;
 import com.oldwei.hikdev.service.IHikDevService;
 import com.oldwei.hikdev.service.IHikDeviceService;
-import com.oldwei.hikdev.structure.NET_DVR_DEVICEINFO_V30;
-import com.oldwei.hikdev.structure.NET_DVR_DEVICEINFO_V40;
-import com.oldwei.hikdev.structure.NET_DVR_USER_LOGIN_INFO;
+import com.oldwei.hikdev.structure.*;
 import com.oldwei.hikdev.util.ConfigJsonUtil;
 import com.sun.jna.Pointer;
+import com.sun.jna.ptr.IntByReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -83,24 +84,37 @@ public class HikDeviceServiceImpl implements IHikDeviceService {
             deviceLogin.setLoginId(lUserID);
             int ipChan = lpDeviceinfo.byIPChanNum + lpDeviceinfo.byHighDChanNum * 256;
             List<Integer> allIds = new ArrayList<>();
+            List<DeviceChannel> allDeviceChannels = new ArrayList<>();
             if (lpDeviceinfo.byChanNum > 0) {
+                // 模拟通道
                 List<Integer> analogIds = new ArrayList<>();
+                List<DeviceChannel> deviceChannels = new ArrayList<>();
                 for (int i = 0; i < lpDeviceinfo.byStartChan; i++) {
-                    analogIds.add(lpDeviceinfo.byStartChan + i);
+                    // 遍历通道号
+                    Integer channelId = lpDeviceinfo.byStartChan + i;
+                    analogIds.add(channelId);
+                    DeviceChannel deviceChannel = new DeviceChannel();
+                    deviceChannel.setChannelId(channelId);
+                    deviceChannel.setByEnable(1);
+                    deviceChannels.add(deviceChannel);
                 }
                 allIds.addAll(analogIds);
+                allDeviceChannels.addAll(deviceChannels);
                 deviceLogin.setAnalogChannelIds(analogIds);
             }
-
             if (ipChan > 0) {
+                // 数字IP通道
                 List<Integer> digitalIds = new ArrayList<>();
                 for (int i = 0; i < ipChan; i++) {
-                    digitalIds.add(lpDeviceinfo.byStartDChan + i);
+                    // 遍历通道号
+                    Integer channelId = lpDeviceinfo.byStartDChan + i;
+                    digitalIds.add(channelId);
                 }
                 allIds.addAll(digitalIds);
                 deviceLogin.setDigitalChannelIds(digitalIds);
             }
             deviceLogin.setAllChannelIds(allIds);
+            deviceLogin.setDeviceChannels(allDeviceChannels);
             callback.set(false);
             return 1;
         };
@@ -121,6 +135,41 @@ public class HikDeviceServiceImpl implements IHikDeviceService {
             int iCharEncodeType = netDvrDeviceInfoV40.byCharEncodeType;
             deviceLogin.setCharEncodeType(iCharEncodeType);
             while (callback.get()) {
+            }
+            NET_DVR_IPPARACFG_V40 netDvrIpparacfgV40 = new NET_DVR_IPPARACFG_V40();
+            Pointer pointer = netDvrIpparacfgV40.getPointer();
+            IntByReference lpSizeReturned = new IntByReference();
+            netDvrIpparacfgV40.write();
+            boolean b = this.hikDevService.NET_DVR_GetDVRConfig(longUserId,
+                    HikConstant.NET_DVR_GET_IPPARACFG_V40,
+                    0,
+                    pointer,
+                    netDvrIpparacfgV40.size(),
+                    lpSizeReturned);
+            netDvrIpparacfgV40.read();
+            int in = this.hikDevService.NET_DVR_GetLastError();
+            if (in == 0) {
+                List<DeviceChannel> deviceChannels = new ArrayList<>();
+                for (int iChannum = 0; iChannum < netDvrIpparacfgV40.dwDChanNum; iChannum++) {
+                    int channum = iChannum + netDvrIpparacfgV40.dwStartDChan;
+                    netDvrIpparacfgV40.struStreamMode[iChannum].read();
+                    if (netDvrIpparacfgV40.struStreamMode[iChannum].byGetStreamType == 0) {
+                        netDvrIpparacfgV40.struStreamMode[iChannum].uGetStream.setType(NET_DVR_IPCHANINFO.class);
+                        netDvrIpparacfgV40.struStreamMode[iChannum].uGetStream.struChanInfo.read();
+                        DeviceChannel deviceChannel = new DeviceChannel();
+                        deviceChannel.setByEnable((int) netDvrIpparacfgV40.struStreamMode[iChannum].uGetStream.struChanInfo.byEnable);
+                        deviceChannel.setChannelId(channum);
+                        deviceChannels.add(deviceChannel);
+                        if (netDvrIpparacfgV40.struStreamMode[iChannum].uGetStream.struChanInfo.byEnable == 1) {
+                            System.out.println("IP通道" + channum + "在线");
+                        } else {
+                            System.out.println("IP通道" + channum + "不在线");
+                        }
+                    }
+                }
+                deviceLogin.setDeviceChannels(deviceChannels);
+            } else {
+                log.info("错误码: {}", in);
             }
             return ConfigJsonUtil.saveOrUpdateDeviceLogin(deviceLogin);
         }
