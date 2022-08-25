@@ -26,6 +26,7 @@ public class DeviceLoginDTO implements Serializable {
     private String screenPicture;
     private Boolean useAsync = true;
     private Integer charEncodeType;
+    private String dVRType;
     private List<Integer> analogChannelIds = new ArrayList<>();
     private List<Integer> digitalChannelIds = new ArrayList<>();
     private List<Integer> allChannelIds = new ArrayList<>();
