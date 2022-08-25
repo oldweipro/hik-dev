@@ -84,6 +84,11 @@
             <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
             <version>1.2.5</version>
         </dependency>
+        <!--websocket-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
         <!--判断字符串编码格式-->
         <dependency>
             <groupId>com.googlecode.juniversalchardet</groupId>
