@@ -71,7 +71,7 @@ public class StartedUpRunner implements ApplicationRunner {
         });
         ThreadUtil.execAsync(() -> {
             // 启动rtsp_server服务
-            RuntimeUtil.exec("cmd /k cd " + System.getProperty("user.dir") + "/rtsp_server/rtsp_server_windows/ && rtsp_server");
+            RuntimeUtil.exec("cmd /c cd " + System.getProperty("user.dir") + "/rtsp_server/rtsp_server_windows/ && rtsp_server");
         });
         ThreadUtil.execAsync(() -> {
             try (MulticastSocket multicastSocket = new MulticastSocket(37020)) {
