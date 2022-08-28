@@ -2,6 +2,7 @@ package com.oldwei.hikdev.runner;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.XmlUtil;
 import com.alibaba.fastjson2.JSONObject;
@@ -69,6 +70,10 @@ public class StartedUpRunner implements ApplicationRunner {
             });
         });
         ThreadUtil.execAsync(() -> {
+            // 启动rtsp_server服务
+            RuntimeUtil.exec("cmd /k cd " + System.getProperty("user.dir") + "/rtsp_server/rtsp_server_windows/ && rtsp_server");
+        });
+        ThreadUtil.execAsync(() -> {
             try (MulticastSocket multicastSocket = new MulticastSocket(37020)) {
                 InetAddress inetAddress = InetAddress.getByName("239.255.255.250");
                 DatagramPacket datagramPacket = new DatagramPacket(new byte[4096], 4096);
@@ -111,7 +116,6 @@ public class StartedUpRunner implements ApplicationRunner {
                 e.printStackTrace();
             }
         });
-
         log.info("=========================项目启动完成=========================");
     }
 }

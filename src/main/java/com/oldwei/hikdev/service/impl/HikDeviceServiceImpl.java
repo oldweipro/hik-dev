@@ -165,16 +165,21 @@ public class HikDeviceServiceImpl implements IHikDeviceService {
                         deviceChannel.setChannelId(channum);
                         deviceChannels.add(deviceChannel);
                         deviceChannel.setRtspStream("rtsp://" + deviceLogin.getUsername() + ":" + deviceLogin.getPassword() + "@" + deviceLogin.getIpv4Address() + ":554/h264/ch" + channum + "/main/av_stream");
-                        if (netDvrIpparacfgV40.struStreamMode[iChannum].uGetStream.struChanInfo.byEnable == 1) {
-                            System.out.println("IP通道" + channum + "在线");
-                        } else {
-                            System.out.println("IP通道" + channum + "不在线");
-                        }
+//                        if (netDvrIpparacfgV40.struStreamMode[iChannum].uGetStream.struChanInfo.byEnable == 1) {
+//                            System.out.println("IP通道" + channum + "在线");
+//                        } else {
+//                            System.out.println("IP通道" + channum + "不在线");
+//                        }
                     }
                 }
                 deviceLogin.setDeviceChannels(deviceChannels);
             } else {
-                log.info("错误码: {}", in);
+                if (in == 23) {
+                    log.info("{} 不支持IP通道", deviceLogin.getIpv4Address());
+                } else {
+                    log.info("错误码: {}", in);
+                }
+
             }
 
 
@@ -187,7 +192,7 @@ public class HikDeviceServiceImpl implements IHikDeviceService {
             netDvrDevicecfg.read();
             int incfg = this.hikDevService.NET_DVR_GetLastError();
             if (incfg == 0) {
-                System.out.println("byDVRType: " + netDvrDevicecfg.byDVRType);
+//                System.out.println("byDVRType: " + netDvrDevicecfg.byDVRType);
                 switch (netDvrDevicecfg.byDVRType) {//目前仅维护可测试设备,补充设备类型查询文档NET_DVR_DEVICECFG的byDVRType属性
                     case 90: // DS90XX_HF_S
                         deviceLogin.setDVRType(HikConstant.DS90XX_HF_S);
@@ -209,9 +214,9 @@ public class HikDeviceServiceImpl implements IHikDeviceService {
                 netDvrDevicecfgV40.read();
                 int inV40 = this.hikDevService.NET_DVR_GetLastError();
                 if (inV40 == 0) {
-                    System.out.println("byDVRType: " + netDvrDevicecfgV40.byDVRType);
-                    System.out.println("wDevType: " + netDvrDevicecfgV40.wDevType);
-                    System.out.println("byDevTypeName: " + Arrays.toString(netDvrDevicecfgV40.byDevTypeName));
+//                    System.out.println("byDVRType: " + netDvrDevicecfgV40.byDVRType);
+//                    System.out.println("wDevType: " + netDvrDevicecfgV40.wDevType);
+//                    System.out.println("byDevTypeName: " + Arrays.toString(netDvrDevicecfgV40.byDevTypeName));
                     switch (netDvrDevicecfgV40.wDevType) {//目前仅维护可测试设备,补充设备类型查询文档NET_DVR_DEVICECFG_V40的wDevType属性
                         case 2237:
                             deviceLogin.setDVRType(HikConstant.DS_96XXXN_IX);

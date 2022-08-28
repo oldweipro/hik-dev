@@ -16,26 +16,26 @@ public class SdkUtil {
         OsInfo osInfo = SystemUtil.getOsInfo();
         String sdkRootPath = System.getProperty("user.dir") + "/sdk";
         String sdkDownloadPath = sdkRootPath + "/download";
-        String sdkDownloadWindowsPath = sdkDownloadPath + "/windows.zip";
-        String sdkDownloadLinuxPath = sdkDownloadPath + "/linux.zip";
-        String urlWindowsPath = "https://oldwei.oss-cn-hangzhou.aliyuncs.com/hik_dev/sdk/windows.zip";
-        String urlLinuxPath = "https://oldwei.oss-cn-hangzhou.aliyuncs.com/hik_dev/sdk/linux.zip";
+        String sdkDownloadWindowsPath = sdkDownloadPath + "/hik_sdk_windows.zip";
+        String sdkDownloadLinuxPath = sdkDownloadPath + "/hik_sdk_linux.zip";
+        String urlWindowsPath = "https://oldwei.oss-cn-hangzhou.aliyuncs.com/hik_dev/sdk/hik_sdk_windows.zip";
+        String urlLinuxPath = "https://oldwei.oss-cn-hangzhou.aliyuncs.com/hik_dev/sdk/hik_sdk_linux.zip";
         if (osInfo.isWindows()) {
-            boolean exist = FileUtil.exist(System.getProperty("user.dir") + "/sdk/windows/HCNetSDK.dll");
+            boolean exist = FileUtil.exist(System.getProperty("user.dir") + "/sdk/hik_sdk_windows/HCNetSDK.dll");
             if (!exist) {
                 downloadSdk(sdkRootPath, sdkDownloadWindowsPath, urlWindowsPath);
             }
         } else if (osInfo.isLinux()) {
-            boolean exist = FileUtil.exist(System.getProperty("user.dir") + "/sdk/linux/libhcnetsdk.so");
+            boolean exist = FileUtil.exist(System.getProperty("user.dir") + "/sdk/hik_sdk_linux/libhcnetsdk.so");
             if (!exist) {
                 downloadSdk(sdkRootPath, sdkDownloadLinuxPath, urlLinuxPath);
             }
         }
     }
-    private static void downloadSdk(String sdkRootPath, String sdkDownloadWindowsPath, String urlWindowsPath) {
+    private static void downloadSdk(String sdkRootPath, String sdkDownloadWindowsPath, String urlPath) {
         try {
             // 从远端拉取sdk解压到本地
-            HttpUtil.downloadFile(urlWindowsPath, FileUtil.file(sdkDownloadWindowsPath));
+            HttpUtil.downloadFile(urlPath, FileUtil.file(sdkDownloadWindowsPath));
         } catch (Exception e) {
             System.out.println("网络异常，下载SDK文件失败。");
             System.exit(0);
