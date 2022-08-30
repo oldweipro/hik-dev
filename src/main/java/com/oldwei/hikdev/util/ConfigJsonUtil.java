@@ -8,6 +8,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONWriter;
 import com.oldwei.hikdev.entity.config.DeviceHandleDTO;
 import com.oldwei.hikdev.entity.config.DeviceLoginDTO;
 import com.oldwei.hikdev.entity.config.DeviceSearchInfo;
@@ -72,7 +73,7 @@ public class ConfigJsonUtil {
         }
         JSONObject configJson = readConfigJson();
         configJson.put(ConfigJsonUtil.deviceSearchInfo, deviceLoginList);
-        ConfigJsonUtil.writeConfigJson(configJson.toJSONString());
+        ConfigJsonUtil.writeConfigJson(configJson.toJSONString(JSONWriter.Feature.PrettyFormat, JSONWriter.Feature.WriteMapNullValue));
         return true;
     }
 
@@ -97,7 +98,7 @@ public class ConfigJsonUtil {
         // 封装数据写入json文件
         JSONObject configJson = readConfigJson();
         configJson.put(ConfigJsonUtil.deviceSearchInfo, deviceAlarmHandleList);
-        ConfigJsonUtil.writeConfigJson(configJson.toJSONString());
+        ConfigJsonUtil.writeConfigJson(configJson.toJSONString(JSONWriter.Feature.PrettyFormat, JSONWriter.Feature.WriteMapNullValue));
         return true;
     }
 
@@ -120,7 +121,7 @@ public class ConfigJsonUtil {
         }
         JSONObject configJson = readConfigJson();
         configJson.put(ConfigJsonUtil.deviceSearchInfo, deviceLoginLoginList);
-        ConfigJsonUtil.writeConfigJson(configJson.toJSONString());
+        ConfigJsonUtil.writeConfigJson(configJson.toJSONString(JSONWriter.Feature.PrettyFormat, JSONWriter.Feature.WriteMapNullValue));
         return true;
     }
 
@@ -166,7 +167,7 @@ public class ConfigJsonUtil {
             deviceSearchList.add(deviceSearchInfo);
         }
         configJson.put(deviceSearchInfo, deviceSearchList);
-        return ConfigJsonUtil.writeConfigJson(configJson.toJSONString());
+        return ConfigJsonUtil.writeConfigJson(configJson.toJSONString(JSONWriter.Feature.PrettyFormat, JSONWriter.Feature.WriteMapNullValue));
     }
 
     public static void searchHikDevice() {

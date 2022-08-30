@@ -6,6 +6,7 @@ import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.XmlUtil;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONWriter;
 import com.oldwei.hikdev.entity.config.DeviceSearchInfo;
 import com.oldwei.hikdev.entity.config.DeviceSearchInfoDTO;
 import com.oldwei.hikdev.mqtt.MqttConnectClient;
@@ -59,7 +60,7 @@ public class StartedUpRunner implements ApplicationRunner {
             });
             JSONObject configJson = ConfigJsonUtil.readConfigJson();
             configJson.put(ConfigJsonUtil.deviceSearchInfo, deviceSearchInfoList);
-            ConfigJsonUtil.writeConfigJson(configJson.toJSONString());
+            ConfigJsonUtil.writeConfigJson(configJson.toJSONString(JSONWriter.Feature.PrettyFormat, JSONWriter.Feature.WriteMapNullValue));
             deviceSearchInfoList.forEach(d -> {
                 if (StrUtil.isNotBlank(d.getUsername()) && StrUtil.isNotBlank(d.getPassword())) {
                     boolean login = this.hikDeviceService.login(d.findDeviceLoginDTO());
