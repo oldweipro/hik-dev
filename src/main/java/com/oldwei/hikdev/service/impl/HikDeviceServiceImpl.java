@@ -1,16 +1,13 @@
 package com.oldwei.hikdev.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.oldwei.hikdev.constant.HikConstant;
 import com.oldwei.hikdev.entity.config.DeviceChannel;
-import com.oldwei.hikdev.constant.HikConstant;
 import com.oldwei.hikdev.entity.config.DeviceLoginDTO;
 import com.oldwei.hikdev.entity.config.DeviceSearchInfo;
 import com.oldwei.hikdev.entity.config.DeviceSearchInfoVO;
-import com.oldwei.hikdev.service.FLoginResultCallBack;
 import com.oldwei.hikdev.service.IHikAlarmDataService;
 import com.oldwei.hikdev.service.IHikDevService;
 import com.oldwei.hikdev.service.IHikDeviceService;
@@ -23,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -163,8 +159,8 @@ public class HikDeviceServiceImpl implements IHikDeviceService {
                         DeviceChannel deviceChannel = new DeviceChannel();
                         deviceChannel.setByEnable((int) netDvrIpparacfgV40.struStreamMode[iChannum].uGetStream.struChanInfo.byEnable);
                         deviceChannel.setChannelId(channum);
-                        deviceChannels.add(deviceChannel);
                         deviceChannel.setRtspStream("rtsp://" + deviceLogin.getUsername() + ":" + deviceLogin.getPassword() + "@" + deviceLogin.getIpv4Address() + ":554/h264/ch" + channum + "/main/av_stream");
+                        deviceChannels.add(deviceChannel);
 //                        if (netDvrIpparacfgV40.struStreamMode[iChannum].uGetStream.struChanInfo.byEnable == 1) {
 //                            System.out.println("IP通道" + channum + "在线");
 //                        } else {

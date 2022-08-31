@@ -52,8 +52,4 @@ public class RtspServerUtil {
             System.exit(0);
         }
     }
-
-    public static void main(String[] args) {
-        System.out.println(RuntimeUtil.execForStr(System.getProperty("user.dir") + "/rtsp_server/rtsp_server_windows/rtsp_server.exe"));
-    }
 }
