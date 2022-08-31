@@ -22,19 +22,23 @@ public class RtspServerServiceImpl implements IRtspServerService {
         for (DeviceSearchInfo d :
                 deviceSearchInfoList) {
             List<DeviceChannel> deviceChannels = d.getDeviceChannels();
-            RtspStreams rtspStreams = new RtspStreams();
-            Map<String, Object> channels = MapUtil.newHashMap();
-            for (int i = 0; i < deviceChannels.size(); i++) {
-                DeviceChannel dc = deviceChannels.get(i);
-                Map<String, Object> rtsp = MapUtil.newHashMap();
-                rtsp.put("url", dc.getRtspStream());
-                channels.put(String.valueOf(i), rtsp);
+            if (deviceChannels.size() > 0) {
+                RtspStreams rtspStreams = new RtspStreams();
+                Map<String, Object> channels = MapUtil.newHashMap();
+                for (int i = 0; i < deviceChannels.size(); i++) {
+                    DeviceChannel dc = deviceChannels.get(i);
+                    if (dc.getByEnable() > 0) {
+                        Map<String, Object> rtsp = MapUtil.newHashMap();
+                        rtsp.put("url", dc.getRtspStream());
+                        channels.put(String.valueOf(i), rtsp);
+                    }
+                }
+                rtspStreams.setChannels(channels);
+                rtspStreams.setName(StrUtil.isBlankIfStr(d.getTitle()) ? d.getIpv4Address() : d.getTitle());
+                // 添加流信息
+                String edit = RtspServerHttpUtil.post("stream/" + d.getDeviceSn() + "/edit", JSON.toJSONString(rtspStreams));
+                String add = RtspServerHttpUtil.post("stream/" + d.getDeviceSn() + "/add", JSON.toJSONString(rtspStreams));
             }
-            rtspStreams.setChannels(channels);
-            rtspStreams.setName(StrUtil.isBlankIfStr(d.getTitle()) ? d.getIpv4Address() : d.getTitle());
-            // 添加流信息
-            String edit = RtspServerHttpUtil.post("stream/" + d.getDeviceSn() + "/edit", JSON.toJSONString(rtspStreams));
-            String add = RtspServerHttpUtil.post("stream/" + d.getDeviceSn() + "/add", JSON.toJSONString(rtspStreams));
         }
     }
 }

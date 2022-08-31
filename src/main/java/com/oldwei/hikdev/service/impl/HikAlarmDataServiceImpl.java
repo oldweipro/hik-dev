@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.oldwei.hikdev.constant.HikConstant;
 import com.oldwei.hikdev.entity.HikDevResponse;
 import com.oldwei.hikdev.entity.config.DeviceHandleDTO;
+import com.oldwei.hikdev.mqtt.MqttConnectClient;
 import com.oldwei.hikdev.service.FMSGCallBack_V31;
 import com.oldwei.hikdev.service.IHikAlarmDataService;
 import com.oldwei.hikdev.service.IHikCardService;
@@ -36,6 +37,8 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
     private final FileStream fileStream;
 
     private final IHikCardService hikCardService;
+
+    private final MqttConnectClient mqttConnectClient;
 
     @Override
     public boolean invoke(int lCommand, NET_DVR_ALARMER pAlarmer, Pointer pAlarmInfo, int dwBufLen, Pointer pUser) {
@@ -137,7 +140,8 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
             newRow[1] = deviceIp;
             //报警信息
             StringBuilder sAlarmType = new StringBuilder("lCommand=0x" + Integer.toHexString(lCommand));
-            System.out.println("lcomman:" + lCommand);
+            JSONObject alarmData = new JSONObject();
+            alarmData.put("code", lCommand);
             //lCommand是传的报警类型
             switch (lCommand) {
                 case HikConstant.COMM_ALARM_V40:
@@ -327,21 +331,39 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     Pointer pPDCInfo = strPDCResult.getPointer();
                     pPDCInfo.write(0, pAlarmInfo.getByteArray(0, strPDCResult.size()), 0, strPDCResult.size());
                     strPDCResult.read();
-
+                    // byMode 0-单帧统计结果，1-最小时间段统计结果
                     if (strPDCResult.byMode == 0) {
                         strPDCResult.uStatModeParam.setType(NET_DVR_STATFRAME.class);
-                        sAlarmType.append("：客流量统计，进入人数:").append(strPDCResult.dwEnterNum).append("，离开人数：").append(strPDCResult.dwLeaveNum).append(", byMode:").append(strPDCResult.byMode).append(", dwRelativeTime:").append(strPDCResult.uStatModeParam.struStatFrame.dwRelativeTime).append(", dwAbsTime:").append(strPDCResult.uStatModeParam.struStatFrame.dwAbsTime);
+                        sAlarmType.append("：客流量统计，进入人数:").append(strPDCResult.dwEnterNum)
+                                .append("，离开人数：").append(strPDCResult.dwLeaveNum)
+                                .append(", byMode:").append(strPDCResult.byMode)
+                                .append(", dwRelativeTime:").append(strPDCResult.uStatModeParam.struStatFrame.dwRelativeTime)
+                                .append(", dwAbsTime:").append(strPDCResult.uStatModeParam.struStatFrame.dwAbsTime);
+                        alarmData.put("countMode", strPDCResult.byMode);
+                        alarmData.put("enterNum", strPDCResult.dwEnterNum);
+                        alarmData.put("leaveNum", strPDCResult.dwLeaveNum);
+                        alarmData.put("relativeTime", strPDCResult.uStatModeParam.struStatFrame.dwRelativeTime);
+                        alarmData.put("absTime", strPDCResult.uStatModeParam.struStatFrame.dwAbsTime);
                     } else if (strPDCResult.byMode == 1) {
                         strPDCResult.uStatModeParam.setType(NET_DVR_STATTIME.class);
-                        String strtmStart = strPDCResult.uStatModeParam.struStatTime.tmStart.toStringTimeDateFormat();
-                        String strtmEnd = strPDCResult.uStatModeParam.struStatTime.tmEnd.toStringTimeDateFormat();
-                        sAlarmType.append(":客流量统计，进入人数:").append(strPDCResult.dwEnterNum).append(", 离开人数:").append(strPDCResult.dwLeaveNum).append(", byMode:").append(strPDCResult.byMode).append(", 开始时间:").append(strtmStart).append(", 结束时间 :").append(strtmEnd);
+                        String startTime = strPDCResult.uStatModeParam.struStatTime.tmStart.toStringTimeDateFormat();
+                        String endTime = strPDCResult.uStatModeParam.struStatTime.tmEnd.toStringTimeDateFormat();
+                        sAlarmType.append(":客流量统计，进入人数:").append(strPDCResult.dwEnterNum)
+                                .append(", 离开人数:").append(strPDCResult.dwLeaveNum)
+                                .append(", byMode:").append(strPDCResult.byMode)
+                                .append(", 开始时间:").append(startTime)
+                                .append(", 结束时间 :").append(endTime);
+                        alarmData.put("countMode", strPDCResult.byMode);
+                        alarmData.put("enterNum", strPDCResult.dwEnterNum);
+                        alarmData.put("leaveNum", strPDCResult.dwLeaveNum);
+                        alarmData.put("startTime", startTime);
+                        alarmData.put("endTime", endTime);
                     }
                     //报警类型
                     newRow[2] = sAlarmType.toString();
-                    log.info("客流量统计报警上传：{}", sAlarmType.toString());
+                    log.info("客流量统计报警上传：{}", sAlarmType);
+                    this.mqttConnectClient.publish(alarmData.toJSONString());
                     break;
-
                 case HikConstant.COMM_ITS_PARK_VEHICLE:
                     NET_ITS_PARK_VEHICLE strItsParkVehicle = new NET_ITS_PARK_VEHICLE();
                     strItsParkVehicle.write();
@@ -405,16 +427,25 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     Pointer pFaceSnapInfo = strFaceSnapInfo.getPointer();
                     pFaceSnapInfo.write(0, pAlarmInfo.getByteArray(0, strFaceSnapInfo.size()), 0, strFaceSnapInfo.size());
                     strFaceSnapInfo.read();
-                    sAlarmType.append("：人脸抓拍上传，人脸评分：").append(strFaceSnapInfo.dwFaceScore).append("，年龄段：").append(strFaceSnapInfo.struFeature.byAgeGroup).append("，性别：").append(strFaceSnapInfo.struFeature.bySex);
+                    sAlarmType.append("：人脸抓拍上传，人脸评分：").append(strFaceSnapInfo.dwFaceScore)
+                            .append("，年龄段：").append(strFaceSnapInfo.struFeature.byAgeGroup)
+                            .append("，性别：").append(strFaceSnapInfo.struFeature.bySex);
+                    alarmData.put("faceScore", strFaceSnapInfo.dwFaceScore);
+                    alarmData.put("ageGroup", strFaceSnapInfo.struFeature.byAgeGroup);
+                    alarmData.put("sex", strFaceSnapInfo.struFeature.bySex);
                     //报警类型
                     newRow[2] = sAlarmType.toString();
                     if (strFaceSnapInfo.dwFacePicLen > 0) {
                         //人脸图片写文件 小图 人脸图
-                        this.fileStream.downloadToLocal(this.fileStream.touchJpg(), strFaceSnapInfo.pBuffer1.getByteArray(0, strFaceSnapInfo.dwFacePicLen));
+                        String touchJpg = this.fileStream.touchJpg();
+                        this.fileStream.downloadToLocal(touchJpg, strFaceSnapInfo.pBuffer1.getByteArray(0, strFaceSnapInfo.dwFacePicLen));
+                        alarmData.put("smallFacePic", touchJpg);
                     }
                     if (strFaceSnapInfo.dwBackgroundPicLen > 0) {
                         //人脸图片写文件 大图 背景图
-                        this.fileStream.downloadToLocal(this.fileStream.touchJpg(), strFaceSnapInfo.pBuffer2.getByteArray(0, strFaceSnapInfo.dwBackgroundPicLen));
+                        String touchJpg = this.fileStream.touchJpg();
+                        this.fileStream.downloadToLocal(touchJpg, strFaceSnapInfo.pBuffer2.getByteArray(0, strFaceSnapInfo.dwBackgroundPicLen));
+                        alarmData.put("bigFacePic", touchJpg);
                     }
                     log.info("人脸识别结果：{}", sAlarmType.toString());
                     break;
@@ -429,18 +460,28 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     if ((strFaceSnapMatch.dwSnapPicLen > 0) && (strFaceSnapMatch.byPicTransType == 0)) {
                         String filename = this.fileStream.touchJpg();
                         this.fileStream.downloadToLocal(filename, strFaceSnapMatch.pSnapPicBuffer.getByteArray(0, strFaceSnapMatch.dwSnapPicLen));
+                        alarmData.put("bigFacePic", filename);
                     }
                     if ((strFaceSnapMatch.struSnapInfo.dwSnapFacePicLen > 0) && (strFaceSnapMatch.byPicTransType == 0)) {
                         String filename = this.fileStream.touchJpg();
                         //将字节写入文件
                         this.fileStream.downloadToLocal(filename, strFaceSnapMatch.struSnapInfo.pBuffer1.getByteArray(0, strFaceSnapMatch.struSnapInfo.dwSnapFacePicLen));
+                        alarmData.put("smallFacePic", filename);
                     }
+                    // 禁止名单人脸子图
                     if ((strFaceSnapMatch.struBlockListInfo.dwBlockListPicLen > 0) && (strFaceSnapMatch.byPicTransType == 0)) {
                         String filename = this.fileStream.touchJpg();
                         this.fileStream.downloadToLocal(filename, strFaceSnapMatch.struBlockListInfo.pBuffer1.getByteArray(0, strFaceSnapMatch.struBlockListInfo.dwBlockListPicLen));
+                        alarmData.put("blackSmallFacePic", filename);
                     }
-
-                    sAlarmType.append("：人脸名单比对报警，相识度：").append(strFaceSnapMatch.fSimilarity).append("，名单姓名：").append(new String(strFaceSnapMatch.struBlockListInfo.struBlockListInfo.struAttribute.byName, "GBK").trim()).append("，\n名单证件信息：").append(new String(strFaceSnapMatch.struBlockListInfo.struBlockListInfo.struAttribute.byCertificateNumber).trim());
+                    String name = new String(strFaceSnapMatch.struBlockListInfo.struBlockListInfo.struAttribute.byName, "GBK").trim();
+                    String certificateNumber = new String(strFaceSnapMatch.struBlockListInfo.struBlockListInfo.struAttribute.byCertificateNumber).trim();
+                    sAlarmType.append("：人脸名单比对报警，相识度：").append(strFaceSnapMatch.fSimilarity)
+                            .append("，名单姓名：").append(name)
+                            .append("，\n名单证件信息：").append(certificateNumber);
+                    alarmData.put("faceScore", strFaceSnapMatch.fSimilarity);
+                    alarmData.put("name", name);
+                    alarmData.put("certificateNumber", certificateNumber);
 
                     //获取人脸库ID
                     byte[] FDIDbytes;
@@ -450,6 +491,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                         FDIDbuffers.rewind();
                         FDIDbuffers.get(FDIDbytes);
                         sAlarmType.append("，人脸库ID:").append(new String(FDIDbytes).trim());
+                        alarmData.put("faceDataId", new String(FDIDbytes).trim());
                     }
                     //获取人脸图片ID
                     byte[] PIDbytes;
@@ -459,6 +501,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                         PIDbuffers.rewind();
                         PIDbuffers.get(PIDbytes);
                         sAlarmType.append("，人脸图片ID:").append(new String(PIDbytes).trim());
+                        alarmData.put("facePicId", new String(PIDbytes).trim());
                     }
                     //报警类型
                     newRow[2] = sAlarmType.toString();
@@ -473,18 +516,16 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     strACSInfo.read();
                     String eventDatetime = strACSInfo.struTime.toStringTimeDateFormat();
                     if (strACSInfo.dwPicDataLen > 0) {
+                        // 抓取到照片
                         JSONObject data = this.personInfo(strACSInfo, pAlarmer);
                         // minorAlarmType报警次类型dwMinor 参考宏定义{1024:防区短路报警,21:门锁打开,22:门锁关闭}
                         String pathname = this.fileStream.touchJpg();
                         byte[] picDataByteArray = strACSInfo.pPicData.getByteArray(0, strACSInfo.dwPicDataLen);
                         this.fileStream.downloadToLocal(pathname, picDataByteArray);
                         log.info("新设备抓取实时照片事件:{} 发生时间：{}", pathname, eventDatetime);
-                        String upload = cn.hutool.core.codec.Base64.encode(picDataByteArray);
-                        data.put("pic", upload);
-                        JSONObject mqttMsg = new JSONObject();
-                        mqttMsg.put("code", 4);
-                        mqttMsg.put("data", data);
-//                        mqtt push
+//                        String upload = cn.hutool.core.codec.Base64.encode(picDataByteArray);
+                        data.put("pic", pathname);
+                        alarmData.putAll(data);
                         //TODO 上报布防事件
 //                        ThreadUtil.execAsync(() -> HttpUtil.post("http://localhost:4068/hik/api/accessControlEvent", JSONObject.toJSONString(mqttMsg)));
 
@@ -498,18 +539,15 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             String personName = this.hikCardService.selectPersonByCardNo(cardNo, deviceIp);
                             if (StrUtil.isNotBlank(personName) && StrUtil.isNotBlank(pathname)) {
                                 log.info("the employeeNo:{}", personName);
-                                log.info("the employeeNo:{}", personName.length());
                                 data.put("employeeNo", personName);
-                                String upload = cn.hutool.core.codec.Base64.encode(new File(pathname));
-                                data.put("pic", upload);
-                                JSONObject mqttMsg = new JSONObject();
-                                mqttMsg.put("code", 4);
-                                mqttMsg.put("data", data);
-//                                mqtt push
-                                //TODO 上报布防事件
-//                                ThreadUtil.execAsync(() -> HttpUtil.post("http://localhost:4068/hik/api/accessControlEvent", JSONObject.toJSONString(mqttMsg)));
-                            }
+//                                String upload = cn.hutool.core.codec.Base64.encode(new File(pathname));
+                                data.put("pic", pathname);
+                               }
                         }
+                        alarmData.putAll(data);
+                        //TODO 上报布防事件
+                        //ThreadUtil.execAsync(() -> HttpUtil.post("http://localhost:4068/hik/api/accessControlEvent", JSONObject.toJSONString(mqttMsg)));
+
                     }
                     break;
                 case HikConstant.COMM_ID_INFO_ALARM: //身份证信息
@@ -519,7 +557,9 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     pIDCardInfo.write(0, pAlarmInfo.getByteArray(0, strIDCardInfo.size()), 0, strIDCardInfo.size());
                     strIDCardInfo.read();
 
-                    sAlarmType.append("：门禁身份证刷卡信息，身份证号码：").append(new String(strIDCardInfo.struIDCardCfg.byIDNum).trim()).append("，姓名：").append(new String(strIDCardInfo.struIDCardCfg.byName).trim()).append("，报警主类型：").append(strIDCardInfo.dwMajor).append("，报警次类型：").append(strIDCardInfo.dwMinor);
+                    sAlarmType.append("：门禁身份证刷卡信息，身份证号码：").append(new String(strIDCardInfo.struIDCardCfg.byIDNum).trim())
+                            .append("，姓名：").append(new String(strIDCardInfo.struIDCardCfg.byName).trim())
+                            .append("，报警主类型：").append(strIDCardInfo.dwMajor).append("，报警次类型：").append(strIDCardInfo.dwMinor);
                     //报警类型
                     newRow[2] = sAlarmType.toString();
                     //身份证图片
@@ -581,7 +621,8 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     pEventISAPI.write(0, pAlarmInfo.getByteArray(0, struEventISAPI.size()), 0, struEventISAPI.size());
                     struEventISAPI.read();
 
-                    sAlarmType.append("：ISAPI协议报警信息, 数据格式:").append(struEventISAPI.byDataType).append(", 图片个数:").append(struEventISAPI.byPicturesNumber);
+                    sAlarmType.append("：ISAPI协议报警信息, 数据格式:").append(struEventISAPI.byDataType)
+                            .append(", 图片个数:").append(struEventISAPI.byPicturesNumber);
                     //报警类型
                     newRow[2] = sAlarmType.toString();
                     if (struEventISAPI.dwAlarmDataLen > 0) {
@@ -593,7 +634,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                         NET_DVR_ALARM_ISAPI_PICDATA struPicData = new NET_DVR_ALARM_ISAPI_PICDATA();
                         struPicData.write();
                         Pointer pPicData = struPicData.getPointer();
-                        pPicData.write(0, struEventISAPI.pPicPackData.getByteArray(i * struPicData.size(), struPicData.size()), 0, struPicData.size());
+                        pPicData.write(0, struEventISAPI.pPicPackData.getByteArray((long) i * struPicData.size(), struPicData.size()), 0, struPicData.size());
                         struPicData.read();
 
                         if (struPicData.dwPicLen > 0) {
@@ -602,6 +643,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                         }
                     }
                     log.info("ISAPI协议报警信息：{}", sAlarmType);
+                    alarmData.put("msg", sAlarmType);
                     break;
                 default:
                     //报警类型
@@ -609,6 +651,8 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     log.info("其他信息：{},lCommand是传的报警类型:{}", sAlarmType, lCommand);
                     break;
             }
+            alarmData.put("msg", sAlarmType);
+            this.mqttConnectClient.publish(alarmData.toJSONString());
         } catch (UnsupportedEncodingException ex) {
             ex.printStackTrace();
         }
@@ -631,7 +675,6 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
         data.put("majorAlarmType", strACSInfo.dwMajor);
         data.put("minorAlarmType", strACSInfo.dwMinor);
         data.put("cardType", strACSInfo.struAcsEventInfo.byCardType);
-//        this.aliyunComponent.sendDataToCloudApi(data);
         log.info("门禁主机报警信息=====>{}", data);
         return data;
     }
