@@ -43,6 +43,7 @@ public class MqttConnectClient {
 
     public void mqttConnect() {
         try {
+            Thread.sleep(5 * 1000L);
             log.info("Mqtt开始连接");
             // MQTT 连接选项
             MqttConnectOptions connOpts = new MqttConnectOptions();
@@ -55,8 +56,10 @@ public class MqttConnectClient {
             this.subscribe(subTopic);
             log.info("Mqtt 订阅成功：{}", subTopic);
         } catch (MqttException me) {
-            me.printStackTrace();
+            log.error("连接mqtt异常,重新连接。");
             this.mqttConnect();
+        } catch (InterruptedException e) {
+            log.error("连接mqtt,睡眠异常");
         }
 
     }
