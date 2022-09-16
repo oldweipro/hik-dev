@@ -1,6 +1,5 @@
 package com.oldwei.hikdev.service.impl;
 
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.oldwei.hikdev.entity.config.DeviceChannel;
@@ -9,35 +8,48 @@ import com.oldwei.hikdev.entity.rtsp.RtspStreams;
 import com.oldwei.hikdev.service.IRtspServerService;
 import com.oldwei.hikdev.util.ConfigJsonUtil;
 import com.oldwei.hikdev.util.RtspServerHttpUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 @Service
 public class RtspServerServiceImpl implements IRtspServerService {
     @Override
     public void syncRtspStream() {
         List<DeviceSearchInfo> deviceSearchInfoList = ConfigJsonUtil.getDeviceSearchInfoList();
-        for (DeviceSearchInfo d :
-                deviceSearchInfoList) {
+        for (int i = 0; i < deviceSearchInfoList.size(); i++) {
+            DeviceSearchInfo d = deviceSearchInfoList.get(i);
             List<DeviceChannel> deviceChannels = d.getDeviceChannels();
             if (deviceChannels.size() > 0) {
                 RtspStreams rtspStreams = new RtspStreams();
-                Map<String, Object> channels = MapUtil.newHashMap();
-                for (int i = 0; i < deviceChannels.size(); i++) {
-                    DeviceChannel dc = deviceChannels.get(i);
+                Map<String, Object> channels = new ConcurrentHashMap<>();
+                int index = 0;
+                for (int j = 0; j < deviceChannels.size(); j++) {
+                    DeviceChannel dc = deviceChannels.get(j);
                     if (dc.getByEnable() > 0) {
-                        Map<String, Object> rtsp = MapUtil.newHashMap();
+                        Map<String, Object> rtsp = new ConcurrentHashMap<>();
                         rtsp.put("url", dc.getRtspStream());
-                        channels.put(String.valueOf(i), rtsp);
+                        rtsp.put("debug", false);
+                        rtsp.put("on_demand", false);
+                        channels.put(String.valueOf(index), rtsp);
+                        index++;
                     }
                 }
                 rtspStreams.setChannels(channels);
                 rtspStreams.setName(StrUtil.isBlankIfStr(d.getTitle()) ? d.getIpv4Address() : d.getTitle());
+                // 提高兼容性,uuid长度大于32位会接口卡死，去掉“/”否则会访问不到接口
+                String uuid = d.getDeviceSn().replaceAll("/", "").replaceAll("-", "");
+                if (uuid.length() > 32) {
+                    uuid = uuid.substring(uuid.length() - 32);
+                }
+                rtspStreams.setUuid(uuid);
                 // 添加流信息
-                String edit = RtspServerHttpUtil.post("stream/" + d.getDeviceSn() + "/edit", JSON.toJSONString(rtspStreams));
-                String add = RtspServerHttpUtil.post("stream/" + d.getDeviceSn() + "/add", JSON.toJSONString(rtspStreams));
+                String edit = RtspServerHttpUtil.post("stream/" + uuid + "/edit", JSON.toJSONString(rtspStreams));
+                String add = RtspServerHttpUtil.post("stream/" + uuid + "/add", JSON.toJSONString(rtspStreams));
             }
         }
     }

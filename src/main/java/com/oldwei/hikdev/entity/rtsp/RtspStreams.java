@@ -9,6 +9,7 @@ import java.util.Map;
 public class RtspStreams implements Serializable {
     private static final long serialVersionUID = 2601333357344782941L;
 
-    private Map<String, Object> channels;
+    private String uuid;
     private String name;
+    private Map<String, Object> channels;
 }
