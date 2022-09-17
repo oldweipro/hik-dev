@@ -60,6 +60,7 @@ public class DeviceSearchInfo implements Serializable {
     private String username;
     private String password;
     private String title;
+    private String deviceId;
     private Boolean useAsync = false;
     /**
      * 设备型号
@@ -117,6 +118,7 @@ public class DeviceSearchInfo implements Serializable {
         this.username = deviceLoginDTO.getUsername();
         this.charEncodeType = deviceLoginDTO.getCharEncodeType();
         this.title = deviceLoginDTO.getTitle();
+        this.deviceId = deviceLoginDTO.getDeviceId();
         this.password = deviceLoginDTO.getPassword();
         this.loginId = deviceLoginDTO.getLoginId();
         this.ipv4Address = deviceLoginDTO.getIpv4Address();
@@ -139,6 +141,7 @@ public class DeviceSearchInfo implements Serializable {
         deviceLoginDTO.setUsername(this.username);
         deviceLoginDTO.setCharEncodeType(this.charEncodeType);
         deviceLoginDTO.setTitle(this.title);
+        deviceLoginDTO.setDeviceId(this.deviceId);
         deviceLoginDTO.setPassword(this.password);
         deviceLoginDTO.setLoginId(this.loginId);
         deviceLoginDTO.setIpv4Address(this.ipv4Address);

@@ -23,6 +23,7 @@ public class DeviceLoginDTO implements Serializable {
     @NotBlank(message = "[commandPort]端口不能为空")
     private String commandPort;
     private String title;
+    private String deviceId;
     private String screenPicture;
     private Boolean useAsync = true;
     private Integer charEncodeType;

@@ -27,7 +27,6 @@ public class RtspServerServiceImpl implements IRtspServerService {
             if (deviceChannels.size() > 0) {
                 RtspStreams rtspStreams = new RtspStreams();
                 Map<String, Object> channels = new ConcurrentHashMap<>();
-                int index = 0;
                 for (int j = 0; j < deviceChannels.size(); j++) {
                     DeviceChannel dc = deviceChannels.get(j);
                     if (dc.getByEnable() > 0) {
@@ -35,17 +34,13 @@ public class RtspServerServiceImpl implements IRtspServerService {
                         rtsp.put("url", dc.getRtspStream());
                         rtsp.put("debug", false);
                         rtsp.put("on_demand", false);
-                        channels.put(String.valueOf(index), rtsp);
-                        index++;
+                        channels.put(String.valueOf(dc.getChannelId()), rtsp);
                     }
                 }
                 rtspStreams.setChannels(channels);
                 rtspStreams.setName(StrUtil.isBlankIfStr(d.getTitle()) ? d.getIpv4Address() : d.getTitle());
-                // 提高兼容性,uuid长度大于32位会接口卡死，去掉“/”否则会访问不到接口
-                String uuid = d.getDeviceSn().replaceAll("/", "").replaceAll("-", "");
-                if (uuid.length() > 32) {
-                    uuid = uuid.substring(uuid.length() - 32);
-                }
+                // 提高兼容性,uuid长度大于32位会接口卡死，使用deviceId(由deviceSn的16位MD5值)
+                String uuid = d.getDeviceId();
                 rtspStreams.setUuid(uuid);
                 // 添加流信息
                 String edit = RtspServerHttpUtil.post("stream/" + uuid + "/edit", JSON.toJSONString(rtspStreams));

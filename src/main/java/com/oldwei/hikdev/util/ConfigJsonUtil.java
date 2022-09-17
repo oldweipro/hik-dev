@@ -6,6 +6,7 @@ import cn.hutool.core.io.file.FileWriter;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.digest.MD5;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
@@ -159,11 +160,13 @@ public class ConfigJsonUtil {
             deviceSearchList.forEach(d -> {
                 if (StrUtil.equals(d.getIpv4Address(), xmlToMap.getIPv4Address())) {
                     d.setDeviceSearchInfoDTO(xmlToMap);
+                    d.setDeviceId(MD5.create().digestHex16(xmlToMap.getDeviceSN()));
                 }
             });
         } else {
             DeviceSearchInfo deviceSearchInfo = new DeviceSearchInfo();
             deviceSearchInfo.setDeviceSearchInfoDTO(xmlToMap);
+            deviceSearchInfo.setDeviceId(MD5.create().digestHex16(xmlToMap.getDeviceSN()));
             deviceSearchList.add(deviceSearchInfo);
         }
         configJson.put(deviceSearchInfo, deviceSearchList);
