@@ -7,6 +7,7 @@ import cn.hutool.core.util.*;
 import com.oldwei.hikdev.annotation.CheckDeviceLogin;
 import com.oldwei.hikdev.component.FileStream;
 import com.oldwei.hikdev.entity.QueryRequest;
+import com.oldwei.hikdev.entity.config.DeviceInfoDTO;
 import com.oldwei.hikdev.entity.config.DeviceLoginDTO;
 import com.oldwei.hikdev.entity.HikDevResponse;
 import com.oldwei.hikdev.entity.config.DeviceSearchInfo;
@@ -55,6 +56,17 @@ public class DeviceController {
     @PostMapping("login")
     public HikDevResponse login(@Valid @RequestBody DeviceLoginDTO deviceLogin) {
         return this.hikDeviceService.login(deviceLogin) ? new HikDevResponse().ok().msg("注册成功") : new HikDevResponse().err().msg("注册失败");
+    }
+
+    /**
+     * 修改设备基本信息
+     *
+     * @param deviceInfoDTO 设备基本信息
+     * @return
+     */
+    @PostMapping("modifyDeviceInfo")
+    public HikDevResponse modifyDeviceInfo(@Valid @RequestBody DeviceInfoDTO deviceInfoDTO) {
+        return this.hikDeviceService.modifyDeviceInfo(deviceInfoDTO) ? new HikDevResponse().ok().msg("修改成功") : new HikDevResponse().err().msg("修改失败");
     }
 
     /**

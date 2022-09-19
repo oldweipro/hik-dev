@@ -4,10 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.oldwei.hikdev.constant.HikConstant;
-import com.oldwei.hikdev.entity.config.DeviceChannel;
-import com.oldwei.hikdev.entity.config.DeviceLoginDTO;
-import com.oldwei.hikdev.entity.config.DeviceSearchInfo;
-import com.oldwei.hikdev.entity.config.DeviceSearchInfoVO;
+import com.oldwei.hikdev.entity.config.*;
 import com.oldwei.hikdev.service.IHikAlarmDataService;
 import com.oldwei.hikdev.service.IHikDevService;
 import com.oldwei.hikdev.service.IHikDeviceService;
@@ -232,6 +229,11 @@ public class HikDeviceServiceImpl implements IHikDeviceService {
 
             return ConfigJsonUtil.saveOrUpdateDeviceLogin(deviceLogin);
         }
+    }
+
+    @Override
+    public boolean modifyDeviceInfo(DeviceInfoDTO deviceInfoDTO) {
+        return ConfigJsonUtil.saveOrUpdateDeviceInfo(deviceInfoDTO);
     }
 
     @Override

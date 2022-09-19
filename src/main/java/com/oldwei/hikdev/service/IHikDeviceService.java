@@ -1,5 +1,6 @@
 package com.oldwei.hikdev.service;
 
+import com.oldwei.hikdev.entity.config.DeviceInfoDTO;
 import com.oldwei.hikdev.entity.config.DeviceLoginDTO;
 import com.oldwei.hikdev.entity.config.DeviceSearchInfo;
 import com.oldwei.hikdev.entity.config.DeviceSearchInfoVO;
@@ -18,6 +19,8 @@ public interface IHikDeviceService {
      * @return
      */
     boolean login(DeviceLoginDTO deviceLogin);
+
+    boolean modifyDeviceInfo(DeviceInfoDTO deviceInfoDTO);
 
     /**
      * 清除设备注册

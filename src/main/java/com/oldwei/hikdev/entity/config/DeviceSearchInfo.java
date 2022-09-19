@@ -1,6 +1,5 @@
 package com.oldwei.hikdev.entity.config;
 
-import com.oldwei.hikdev.entity.QueryRequest;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -129,6 +128,13 @@ public class DeviceSearchInfo implements Serializable {
         this.screenPicture = deviceLoginDTO.getScreenPicture();
         this.deviceChannels = deviceLoginDTO.getDeviceChannels();
         this.dVRType = deviceLoginDTO.getDVRType();
+    }
+    public void setDeviceInfoDTO(DeviceInfoDTO deviceInfoDTO) {
+        this.username = deviceInfoDTO.getUsername();
+        this.title = deviceInfoDTO.getTitle();
+        this.password = deviceInfoDTO.getPassword();
+        this.ipv4Address = deviceInfoDTO.getIpv4Address();
+        this.commandPort = deviceInfoDTO.getCommandPort();
     }
 
     /**

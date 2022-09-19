@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * 设备登录信息
  * @author oldwei
  * @date 2021-7-7 14:42
  */

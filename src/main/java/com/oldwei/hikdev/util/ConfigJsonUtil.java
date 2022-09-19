@@ -10,10 +10,7 @@ import cn.hutool.crypto.digest.MD5;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
-import com.oldwei.hikdev.entity.config.DeviceHandleDTO;
-import com.oldwei.hikdev.entity.config.DeviceLoginDTO;
-import com.oldwei.hikdev.entity.config.DeviceSearchInfo;
-import com.oldwei.hikdev.entity.config.DeviceSearchInfoDTO;
+import com.oldwei.hikdev.entity.config.*;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -70,6 +67,26 @@ public class ConfigJsonUtil {
         } else {
             DeviceSearchInfo deviceSearchInfo = new DeviceSearchInfo();
             deviceSearchInfo.setDeviceLoginDTO(deviceLogin);
+            deviceLoginList.add(deviceSearchInfo);
+        }
+        JSONObject configJson = readConfigJson();
+        configJson.put(ConfigJsonUtil.deviceSearchInfo, deviceLoginList);
+        ConfigJsonUtil.writeConfigJson(configJson.toJSONString(JSONWriter.Feature.PrettyFormat, JSONWriter.Feature.WriteMapNullValue));
+        return true;
+    }
+
+    public static boolean saveOrUpdateDeviceInfo(DeviceInfoDTO deviceInfoDTO) {
+        // 判断json文件中是否有deviceLogin数据 && 判断这个数据是否存在
+        List<DeviceSearchInfo> deviceLoginList = getDeviceSearchInfoList();
+        if (deviceLoginList.size() > 0 && ObjectUtil.isNotNull(getDeviceSearchInfoByIp(deviceInfoDTO.getIpv4Address()))) {
+            deviceLoginList.forEach(d -> {
+                if (StrUtil.equals(d.getIpv4Address(), deviceInfoDTO.getIpv4Address())) {
+                    d.setDeviceInfoDTO(deviceInfoDTO);
+                }
+            });
+        } else {
+            DeviceSearchInfo deviceSearchInfo = new DeviceSearchInfo();
+            deviceSearchInfo.setDeviceInfoDTO(deviceInfoDTO);
             deviceLoginList.add(deviceSearchInfo);
         }
         JSONObject configJson = readConfigJson();
