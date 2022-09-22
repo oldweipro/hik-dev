@@ -26,6 +26,8 @@ public class MqttConnectClient {
     private Integer qos;
     @Value("${mqtt.settings.username}")
     private String username;
+    @Value("${mqtt.settings.password}")
+    private String password;
     @Value("${mqtt.settings.broker}")
     private String broker;
 
@@ -48,6 +50,7 @@ public class MqttConnectClient {
             // MQTT 连接选项
             MqttConnectOptions connOpts = new MqttConnectOptions();
             connOpts.setUserName(username);
+            connOpts.setPassword(password.toCharArray());
             // 保留会话
             connOpts.setCleanSession(true);
             // 建立连接

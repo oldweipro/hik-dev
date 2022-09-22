@@ -7,7 +7,7 @@ spring:
       max-request-size: 524288000
 mqtt:
   # 是否开启mqtt
-  enable: false
+  enable: true
   # mqtt相关配置
   settings:
     # 订阅
@@ -16,9 +16,10 @@ mqtt:
     pub-topic: topic/hik
     # 参考 https://zhuanlan.zhihu.com/p/80203905
     qos: 2
-    broker: tcp://broker.emqx.io:1883
+    broker: tcp://mqtt.oldwei.com:1883
     client-id: hik_mqtt_server
-    username: hik_mqtt_server
+    username: hik
+    password: dev
 hik-dev:
   #下载文件 输出文件夹
   output-dir: output
