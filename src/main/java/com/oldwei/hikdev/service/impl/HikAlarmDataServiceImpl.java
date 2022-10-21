@@ -17,6 +17,7 @@ import com.sun.jna.Pointer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import cn.hutool.core.codec.Base64;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -439,13 +440,15 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                         //人脸图片写文件 小图 人脸图
                         String touchJpg = this.fileStream.touchJpg();
                         this.fileStream.downloadToLocal(touchJpg, strFaceSnapInfo.pBuffer1.getByteArray(0, strFaceSnapInfo.dwFacePicLen));
-                        alarmData.put("smallFacePic", touchJpg);
+                        String encode = Base64.encode(new File(touchJpg));
+                        alarmData.put("smallFacePic", encode);
                     }
                     if (strFaceSnapInfo.dwBackgroundPicLen > 0) {
                         //人脸图片写文件 大图 背景图
                         String touchJpg = this.fileStream.touchJpg();
                         this.fileStream.downloadToLocal(touchJpg, strFaceSnapInfo.pBuffer2.getByteArray(0, strFaceSnapInfo.dwBackgroundPicLen));
-                        alarmData.put("bigFacePic", touchJpg);
+                        String encode = Base64.encode(new File(touchJpg));
+                        alarmData.put("bigFacePic", encode);
                     }
                     log.info("人脸识别结果：{}", sAlarmType.toString());
                     break;
@@ -460,19 +463,23 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     if ((strFaceSnapMatch.dwSnapPicLen > 0) && (strFaceSnapMatch.byPicTransType == 0)) {
                         String filename = this.fileStream.touchJpg();
                         this.fileStream.downloadToLocal(filename, strFaceSnapMatch.pSnapPicBuffer.getByteArray(0, strFaceSnapMatch.dwSnapPicLen));
-                        alarmData.put("bigFacePic", filename);
+                        // TODO 以后测试一下能不能直接使用strFaceSnapMatch.pSnapPicBuffer.getByteArray(0, strFaceSnapMatch.dwSnapPicLen)
+                        String encode = Base64.encode(new File(filename));
+                        alarmData.put("bigFacePic", encode);
                     }
                     if ((strFaceSnapMatch.struSnapInfo.dwSnapFacePicLen > 0) && (strFaceSnapMatch.byPicTransType == 0)) {
                         String filename = this.fileStream.touchJpg();
                         //将字节写入文件
                         this.fileStream.downloadToLocal(filename, strFaceSnapMatch.struSnapInfo.pBuffer1.getByteArray(0, strFaceSnapMatch.struSnapInfo.dwSnapFacePicLen));
-                        alarmData.put("smallFacePic", filename);
+                        String encode = Base64.encode(new File(filename));
+                        alarmData.put("smallFacePic", encode);
                     }
                     // 禁止名单人脸子图
                     if ((strFaceSnapMatch.struBlockListInfo.dwBlockListPicLen > 0) && (strFaceSnapMatch.byPicTransType == 0)) {
                         String filename = this.fileStream.touchJpg();
                         this.fileStream.downloadToLocal(filename, strFaceSnapMatch.struBlockListInfo.pBuffer1.getByteArray(0, strFaceSnapMatch.struBlockListInfo.dwBlockListPicLen));
-                        alarmData.put("blackSmallFacePic", filename);
+                        String encode = Base64.encode(new File(filename));
+                        alarmData.put("blackSmallFacePic", encode);
                     }
                     String name = new String(strFaceSnapMatch.struBlockListInfo.struBlockListInfo.struAttribute.byName, "GBK").trim();
                     String certificateNumber = new String(strFaceSnapMatch.struBlockListInfo.struBlockListInfo.struAttribute.byCertificateNumber).trim();
@@ -523,8 +530,8 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                         byte[] picDataByteArray = strACSInfo.pPicData.getByteArray(0, strACSInfo.dwPicDataLen);
                         this.fileStream.downloadToLocal(pathname, picDataByteArray);
                         log.info("新设备抓取实时照片事件:{} 发生时间：{}", pathname, eventDatetime);
-//                        String upload = cn.hutool.core.codec.Base64.encode(picDataByteArray);
-                        data.put("pic", pathname);
+                        String upload = Base64.encode(picDataByteArray);
+                        data.put("pic", upload);
                         alarmData.putAll(data);
                         //TODO 上报布防事件
 //                        ThreadUtil.execAsync(() -> HttpUtil.post("http://localhost:4068/hik/api/accessControlEvent", JSONObject.toJSONString(mqttMsg)));
@@ -540,8 +547,8 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             if (StrUtil.isNotBlank(personName) && StrUtil.isNotBlank(pathname)) {
                                 log.info("the employeeNo:{}", personName);
                                 data.put("employeeNo", personName);
-//                                String upload = cn.hutool.core.codec.Base64.encode(new File(pathname));
-                                data.put("pic", pathname);
+                                String upload = cn.hutool.core.codec.Base64.encode(new File(pathname));
+                                data.put("pic", upload);
                                }
                         }
                         alarmData.putAll(data);
