@@ -25,8 +25,3 @@ hik-dev:
   output-dir: output
   #设备报警事件信息推送地址
   event-push-url: https://推送地址
-# 反向代理rtsp_server服务
-proxy:
-  rtsp_server:
-    url: /*
-    target_url: http://localhost:41319

@@ -547,7 +547,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             if (StrUtil.isNotBlank(personName) && StrUtil.isNotBlank(pathname)) {
                                 log.info("the employeeNo:{}", personName);
                                 data.put("employeeNo", personName);
-                                String upload = cn.hutool.core.codec.Base64.encode(new File(pathname));
+                                String upload = Base64.encode(new File(pathname));
                                 data.put("pic", upload);
                                }
                         }
