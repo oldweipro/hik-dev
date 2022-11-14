@@ -1,5 +1,6 @@
 package com.oldwei.hikdev.util;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.io.file.FileWriter;
@@ -11,6 +12,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
 import com.oldwei.hikdev.entity.config.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
  * @author oldwei
  * @date 2022/8/12 23:44
  */
+@Slf4j
 public class ConfigJsonUtil {
     public static final String configPath = System.getProperty("user.dir") + "/sdk/config/config.json";
     public static final String deviceSearchInfo = "deviceSearchInfo";
@@ -197,6 +200,7 @@ public class ConfigJsonUtil {
             InetAddress address = InetAddress.getByName("239.255.255.250");
             DatagramPacket packet = new DatagramPacket(data, data.length, address, 37020);
             multicastSocket.send(packet);
+            log.info("searchHikDevice查找设备...{}", DateUtil.now());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

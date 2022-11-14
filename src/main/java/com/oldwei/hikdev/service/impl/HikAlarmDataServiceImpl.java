@@ -182,7 +182,6 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
 
                                 sAlarmType.append("+ch[").append(iChanneNo).append("]");
                             }
-
                             break;
                         case 4:
                             sAlarmType.append("：硬盘未格式化");
@@ -239,7 +238,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             map.put("alarmMsg", "移动侦测");
                             result.put("code", 3);
                             result.put("data", map);
-//                            mqtt push
+                            alarmData.putAll(result);
                             //==================写自己的业务代码===========================
                             break;
                         case 4:
@@ -431,6 +430,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     sAlarmType.append("：人脸抓拍上传，人脸评分：").append(strFaceSnapInfo.dwFaceScore)
                             .append("，年龄段：").append(strFaceSnapInfo.struFeature.byAgeGroup)
                             .append("，性别：").append(strFaceSnapInfo.struFeature.bySex);
+                    alarmData.put("deviceIp", deviceIp);
                     alarmData.put("faceScore", strFaceSnapInfo.dwFaceScore);
                     alarmData.put("ageGroup", strFaceSnapInfo.struFeature.byAgeGroup);
                     alarmData.put("sex", strFaceSnapInfo.struFeature.bySex);
