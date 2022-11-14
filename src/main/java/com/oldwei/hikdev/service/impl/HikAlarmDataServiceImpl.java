@@ -16,6 +16,7 @@ import com.oldwei.hikdev.util.ConfigJsonUtil;
 import com.sun.jna.Pointer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import cn.hutool.core.codec.Base64;
 
@@ -33,6 +34,9 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBack_V31 {
+    @Value("${hik-dev.project-id}")
+    String projectId;
+
     private final IHikDevService hikDevService;
 
     private final FileStream fileStream;
@@ -56,7 +60,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
         struGeneralCfg.write();
 
         if (!this.hikDevService.NET_DVR_SetSDKLocalCfg(17, struGeneralCfg.getPointer())) {
-            log.info("NET_DVR_SetSDKLocalCfg失败");
+            // log.info("NET_DVR_SetSDKLocalCfg失败");
             return result.err("NET_DVR_StopRemoteConfig接口调用失败，错误码：" + this.hikDevService.NET_DVR_GetLastError());
         }
         Integer longAlarmHandle = ConfigJsonUtil.getDeviceSearchInfoByIp(ip).getAlarmHandleId();
@@ -82,10 +86,10 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
             }
             longAlarmHandle = this.hikDevService.NET_DVR_SetupAlarmChan_V41(longUserId, mStrAlarmInfo);
             if (longAlarmHandle == -1) {
-                log.info("布防失败，错误号:{}", this.hikDevService.NET_DVR_GetLastError());
+                // log.info("布防失败，错误号:{}", this.hikDevService.NET_DVR_GetLastError());
                 result.err("布防失败，错误号:" + this.hikDevService.NET_DVR_GetLastError());
             } else {
-                log.info("布防成功");
+                // log.info("布防成功");
                 DeviceHandleDTO deviceHandleDTO = new DeviceHandleDTO();
                 deviceHandleDTO.setAlarmHandleId(longAlarmHandle);
                 deviceHandleDTO.setIpv4Address(ip);
@@ -143,6 +147,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
             StringBuilder sAlarmType = new StringBuilder("lCommand=0x" + Integer.toHexString(lCommand));
             JSONObject alarmData = new JSONObject();
             alarmData.put("code", lCommand);
+            alarmData.put("projectId", this.projectId);
             //lCommand是传的报警类型
             switch (lCommand) {
                 case HikConstant.COMM_ALARM_V40:
@@ -201,7 +206,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     }
                     //报警类型
                     newRow[2] = sAlarmType.toString();
-                    log.info("报警信息主动上传V40：{}", sAlarmType.toString());
+                    // log.info("报警信息主动上传V40：{}", sAlarmType.toString());
                     break;
                 case HikConstant.COMM_ALARM_V30:
                     NET_DVR_ALARMINFO_V30 strAlarmInfoV30 = new NET_DVR_ALARMINFO_V30();
@@ -259,7 +264,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     }
                     //报警类型
                     newRow[2] = sAlarmType.toString();
-                    log.info("报警信息主动上传V30：{}", sAlarmType);
+                    // log.info("报警信息主动上传V30：{}", sAlarmType);
                     break;
                 case HikConstant.COMM_ALARM_RULE:
                     NET_VCA_RULE_ALARM strVcaAlarm = new NET_VCA_RULE_ALARM();
@@ -289,7 +294,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                         String filename = this.fileStream.touchJpg();
                         this.fileStream.downloadToLocal(filename, strVcaAlarm.pImage.getByteArray(0, strVcaAlarm.dwPicDataLen));
                     }
-                    log.info("行为分析信息上传：{}", sAlarmType.toString());
+                    // log.info("行为分析信息上传：{}", sAlarmType.toString());
                     break;
                 case HikConstant.COMM_UPLOAD_PLATE_RESULT:
                     NET_DVR_PLATE_RESULT strPlateResult = new NET_DVR_PLATE_RESULT();
@@ -306,7 +311,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                         String filename = this.fileStream.touchJpg();
                         this.fileStream.downloadToLocal(filename, strPlateResult.pBuffer1.getByteArray(0, strPlateResult.dwPicLen));
                     }
-                    log.info("交通抓拍结果上传：{}", sAlarmType.toString());
+                    // log.info("交通抓拍结果上传：{}", sAlarmType.toString());
                     break;
                 case HikConstant.COMM_ITS_PLATE_RESULT:
                     NET_ITS_PLATE_RESULT strItsPlateResult = new NET_ITS_PLATE_RESULT();
@@ -323,7 +328,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             this.fileStream.downloadToLocal(filename, strItsPlateResult.struPicInfo[i].pBuffer.getByteArray(0, strItsPlateResult.struPicInfo[i].dwDataLen));
                         }
                     }
-                    log.info("交通抓拍的终端图片上传：{}", sAlarmType.toString());
+                    // log.info("交通抓拍的终端图片上传：{}", sAlarmType.toString());
                     break;
                 case HikConstant.COMM_ALARM_PDC:
                     NET_DVR_PDC_ALRAM_INFO strPDCResult = new NET_DVR_PDC_ALRAM_INFO();
@@ -361,7 +366,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     }
                     //报警类型
                     newRow[2] = sAlarmType.toString();
-                    log.info("客流量统计报警上传：{}", sAlarmType);
+                    // log.info("客流量统计报警上传：{}", sAlarmType);
                     this.mqttConnectClient.publish(alarmData.toJSONString());
                     break;
                 case HikConstant.COMM_ITS_PARK_VEHICLE:
@@ -381,7 +386,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             this.fileStream.downloadToLocal(filename, strItsParkVehicle.struPicInfo[i].pBuffer.getByteArray(0, strItsParkVehicle.struPicInfo[i].dwDataLen));
                         }
                     }
-                    log.info("停车场数据：{}", sAlarmType.toString());
+                    // log.info("停车场数据：{}", sAlarmType.toString());
                     break;
                 case HikConstant.COMM_ALARM_TFS:
                     NET_DVR_TFS_ALARM strTFSAlarmInfo = new NET_DVR_TFS_ALARM();
@@ -395,7 +400,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     newRow[2] = sAlarmType.toString();
                     //报警设备IP地址
 //                    String sIP = new String(strTFSAlarmInfo.struDevInfo.struDevIP.sIpV4).split("\0", 2);
-                    log.info("交通取证报警信息：{}", sAlarmType.toString());
+                    // log.info("交通取证报警信息：{}", sAlarmType.toString());
                     break;
                 case HikConstant.COMM_ALARM_AID_V41:
                     NET_DVR_AID_ALARM_V41 struAIDAlarmInfo = new NET_DVR_AID_ALARM_V41();
@@ -406,7 +411,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     sAlarmType.append("：交通事件报警信息，交通事件类型：").append(struAIDAlarmInfo.struAIDInfo.dwAIDType).append("，规则ID：").append(struAIDAlarmInfo.struAIDInfo.byRuleID).append("，车辆出入状态：").append(struAIDAlarmInfo.struAIDInfo.byVehicleEnterState);
                     //报警类型
                     newRow[2] = sAlarmType.toString();
-                    log.info("交通事件报警信息扩展：{}", sAlarmType.toString());
+                    // log.info("交通事件报警信息扩展：{}", sAlarmType.toString());
                     break;
                 case HikConstant.COMM_ALARM_TPS_V41:
                     NET_DVR_TPS_ALARM_V41 struTPSAlarmInfo = new NET_DVR_TPS_ALARM_V41();
@@ -418,7 +423,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     sAlarmType.append("：交通统计报警信息，绝对时标：").append(struTPSAlarmInfo.dwAbsTime).append("，能见度:").append(struTPSAlarmInfo.struDevInfo.byIvmsChannel).append("，车道1交通状态:").append(struTPSAlarmInfo.struTPSInfo.struLaneParam[0].byTrafficState).append("，监测点编号：").append(new String(struTPSAlarmInfo.byMonitoringSiteID).trim()).append("，设备编号：").append(new String(struTPSAlarmInfo.byDeviceID).trim()).append("，开始统计时间：").append(struTPSAlarmInfo.dwStartTime).append("，结束统计时间：").append(struTPSAlarmInfo.dwStopTime);
                     //报警类型
                     newRow[2] = sAlarmType.toString();
-                    log.info("交通事件报警信息扩展：{}", sAlarmType.toString());
+                    // log.info("交通事件报警信息扩展：{}", sAlarmType.toString());
                     break;
                 case HikConstant.COMM_UPLOAD_FACESNAP_RESULT:
                     //实时人脸抓拍上传
@@ -450,7 +455,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                         String encode = Base64.encode(new File(touchJpg));
                         alarmData.put("bigFacePic", encode);
                     }
-                    log.info("人脸识别结果：{}", sAlarmType.toString());
+                    // log.info("人脸识别结果：{}", sAlarmType.toString());
                     break;
                 case HikConstant.COMM_SNAP_MATCH_ALARM:
                     //人脸名单比对报警
@@ -512,7 +517,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     }
                     //报警类型
                     newRow[2] = sAlarmType.toString();
-                    log.info("人脸比对结果上传：{}", sAlarmType.toString());
+                    // log.info("人脸比对结果上传：{}", sAlarmType.toString());
                     break;
                 case HikConstant.COMM_ALARM_ACS:
                     //门禁主机报警信息
@@ -529,7 +534,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                         String pathname = this.fileStream.touchJpg();
                         byte[] picDataByteArray = strACSInfo.pPicData.getByteArray(0, strACSInfo.dwPicDataLen);
                         this.fileStream.downloadToLocal(pathname, picDataByteArray);
-                        log.info("新设备抓取实时照片事件:{} 发生时间：{}", pathname, eventDatetime);
+                        // log.info("新设备抓取实时照片事件:{} 发生时间：{}", pathname, eventDatetime);
                         String upload = Base64.encode(picDataByteArray);
                         data.put("pic", upload);
                         alarmData.putAll(data);
@@ -542,10 +547,10 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                         String cardNo = new String(strACSInfo.struAcsEventInfo.byCardNo).trim();
                         if (StrUtil.isNotBlank(cardNo)) {
                             String pathname = this.hikCardService.selectFaceByCardNo(cardNo, deviceIp);
-                            log.info("旧设备读取人脸照片:{},发生时间:{}", pathname, eventDatetime);
+                            // log.info("旧设备读取人脸照片:{},发生时间:{}", pathname, eventDatetime);
                             String personName = this.hikCardService.selectPersonByCardNo(cardNo, deviceIp);
                             if (StrUtil.isNotBlank(personName) && StrUtil.isNotBlank(pathname)) {
-                                log.info("the employeeNo:{}", personName);
+                                // log.info("the employeeNo:{}", personName);
                                 data.put("employeeNo", personName);
                                 String upload = Base64.encode(new File(pathname));
                                 data.put("pic", upload);
@@ -580,7 +585,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                         String filename = this.fileStream.touchJpg();
                         this.fileStream.downloadToLocal(filename, strIDCardInfo.pCapturePicData.getByteArray(0, strIDCardInfo.dwCapturePicDataLen));
                     }
-                    log.info("门禁身份证刷卡信息：{}", sAlarmType.toString());
+                    // log.info("门禁身份证刷卡信息：{}", sAlarmType.toString());
                     break;
                 case HikConstant.COMM_UPLOAD_AIOP_VIDEO: //设备支持AI开放平台接入，上传视频检测数据
                     NET_AIOP_VIDEO_HEAD struAIOPVideo = new NET_AIOP_VIDEO_HEAD();
@@ -601,7 +606,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                         String filename = this.fileStream.touchJpg();
                         this.fileStream.downloadToLocal(filename, struAIOPVideo.pBufferPicture.getByteArray(0, struAIOPVideo.dwPictureSize));
                     }
-                    log.info("设备支持AI开放平台接入，上传视频检测数据：{}", sAlarmType.toString());
+                    // log.info("设备支持AI开放平台接入，上传视频检测数据：{}", sAlarmType.toString());
                     break;
                 case HikConstant.COMM_UPLOAD_AIOP_PICTURE: //设备支持AI开放平台接入，上传视频检测数据
                     NET_AIOP_PICTURE_HEAD struAIOPPic = new NET_AIOP_PICTURE_HEAD();
@@ -619,7 +624,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                         String filename = this.fileStream.touchJpg();
                         this.fileStream.downloadToLocal(filename, struAIOPPic.pBufferAIOPData.getByteArray(0, struAIOPPic.dwAIOPDataSize));
                     }
-                    log.info("设备支持AI开放平台接入，上传图片检测数据：{}", sAlarmType.toString());
+                    // log.info("设备支持AI开放平台接入，上传图片检测数据：{}", sAlarmType.toString());
                     break;
                 case HikConstant.COMM_ISAPI_ALARM: //ISAPI协议报警信息
                     NET_DVR_ALARM_ISAPI_INFO struEventISAPI = new NET_DVR_ALARM_ISAPI_INFO();
@@ -649,13 +654,13 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                             this.fileStream.downloadToLocal(filename, struPicData.pPicData.getByteArray(0, struPicData.dwPicLen));
                         }
                     }
-                    log.info("ISAPI协议报警信息：{}", sAlarmType);
+                    // log.info("ISAPI协议报警信息：{}", sAlarmType);
                     alarmData.put("msg", sAlarmType);
                     break;
                 default:
                     //报警类型
                     newRow[2] = sAlarmType.toString();
-                    log.info("其他信息：{},lCommand是传的报警类型:{}", sAlarmType, lCommand);
+                    // log.info("其他信息：{},lCommand是传的报警类型:{}", sAlarmType, lCommand);
                     break;
             }
             alarmData.put("msg", sAlarmType);
@@ -682,7 +687,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
         data.put("majorAlarmType", strACSInfo.dwMajor);
         data.put("minorAlarmType", strACSInfo.dwMinor);
         data.put("cardType", strACSInfo.struAcsEventInfo.byCardType);
-        log.info("门禁主机报警信息=====>{}", data);
+        // log.info("门禁主机报警信息=====>{}", data);
         return data;
     }
 }

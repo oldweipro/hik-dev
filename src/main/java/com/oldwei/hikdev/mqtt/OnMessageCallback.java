@@ -31,7 +31,7 @@ public class OnMessageCallback implements MqttCallback {
             String payload = new String(message.getPayload());
             //防止消息内容不是json字符串，json转换异常导致程序崩溃
             JSONObject obj = JSONObject.parseObject(payload);
-            log.info("收到mqtt订阅消息: {}", obj);
+//            log.info("收到mqtt订阅消息: {}", obj);
             // TODO 在这里继续写业务
         } catch (Exception ignored) {
         }
@@ -39,6 +39,6 @@ public class OnMessageCallback implements MqttCallback {
 
     @Override
     public void deliveryComplete(IMqttDeliveryToken token) {
-        log.info("deliveryComplete---------{}", token.isComplete());
+//        log.info("deliveryComplete---------{}", token.isComplete());
     }
 }

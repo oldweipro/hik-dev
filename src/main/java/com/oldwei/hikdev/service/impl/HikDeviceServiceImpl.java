@@ -168,7 +168,7 @@ public class HikDeviceServiceImpl implements IHikDeviceService {
                 deviceLogin.setDeviceChannels(deviceChannels);
             } else {
                 if (in == 23) {
-                    log.info("{} 不支持IP通道", deviceLogin.getIpv4Address());
+//                    log.info("{} 不支持IP通道", deviceLogin.getIpv4Address());
                 } else {
                     log.info("错误码: {}", in);
                 }

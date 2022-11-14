@@ -25,3 +25,5 @@ hik-dev:
   output-dir: output
   #设备报警事件信息推送地址
   event-push-url: https://推送地址
+  #项目ID
+  project-id: "123456"

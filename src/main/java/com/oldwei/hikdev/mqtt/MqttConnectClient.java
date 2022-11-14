@@ -84,7 +84,7 @@ public class MqttConnectClient {
             MqttMessage message = new MqttMessage(content.getBytes());
             message.setQos(qos);
             this.mqttClient.publish(pubTopic, message);
-            log.info("Message published");
+//            log.info("Message published");
         } catch (MqttException me) {
             me.printStackTrace();
         }
@@ -93,9 +93,9 @@ public class MqttConnectClient {
     public void close() {
         try {
             this.mqttClient.disconnect();
-            log.info("Mqtt Disconnected");
+//            log.info("Mqtt Disconnected");
             this.mqttClient.close();
-            log.info("Mqtt Closed");
+//            log.info("Mqtt Closed");
         } catch (MqttException me) {
             me.printStackTrace();
         }

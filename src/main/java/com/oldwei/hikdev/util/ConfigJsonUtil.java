@@ -200,7 +200,6 @@ public class ConfigJsonUtil {
             InetAddress address = InetAddress.getByName("239.255.255.250");
             DatagramPacket packet = new DatagramPacket(data, data.length, address, 37020);
             multicastSocket.send(packet);
-            log.info("searchHikDevice查找设备...{}", DateUtil.now());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
