@@ -1,6 +1,8 @@
 package com.oldwei.hikdev.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.oldwei.hikdev.constant.HikConstant;
 import com.oldwei.hikdev.entity.HikDevResponse;
@@ -149,6 +151,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
             alarmData.put("code", lCommand);
             alarmData.put("projectId", this.projectId);
             //lCommand是传的报警类型
+//             log.info("报警信息主动上传V40：{}", lCommand);
             switch (lCommand) {
                 case HikConstant.COMM_ALARM_V40:
                     NET_DVR_ALARMINFO_V40 struAlarmInfoV40 = new NET_DVR_ALARMINFO_V40();
@@ -455,7 +458,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                         String encode = Base64.encode(new File(touchJpg));
                         alarmData.put("bigFacePic", encode);
                     }
-                    // log.info("人脸识别结果：{}", sAlarmType.toString());
+                     log.info("人脸识别结果：{}", sAlarmType.toString());
                     break;
                 case HikConstant.COMM_SNAP_MATCH_ALARM:
                     //人脸名单比对报警
@@ -598,13 +601,23 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     sAlarmType.append("：AI开放平台接入，上传视频检测数据，通道号:").append(struAIOPVideo.dwChannel).append(", 时间:").append(eventTime);
                     //报警类型
                     newRow[2] = sAlarmType.toString();
+                    // 解析json数据
                     if (struAIOPVideo.dwAIOPDataSize > 0) {
-                        String filename = this.fileStream.touchJpg();
-                        this.fileStream.downloadToLocal(filename, struAIOPVideo.pBufferAIOPData.getByteArray(0, struAIOPVideo.dwAIOPDataSize));
+                        JSONObject jsonObject = JSON.parseObject(struAIOPVideo.pBufferAIOPData.getByteArray(0, struAIOPVideo.dwAIOPDataSize));
+                        JSONArray jsonArray = jsonObject.getJSONObject("events").getJSONArray("alertInfo");
+                        List<Integer> ruleIdList = new ArrayList<>();
+                        for (int i=0;i < jsonArray.size(); i++) {
+                            Integer ruleId = jsonArray.getJSONObject(i).getJSONObject("ruleInfo").getInteger("ruleID");
+                            // TODO 这些ruleId是从摄像头那端自行设置的规则id，1：玩手机；2：睡岗；3：离岗
+                            ruleIdList.add(ruleId);
+                        }
+                        alarmData.put("ruleIdList", ruleIdList);
                     }
                     if (struAIOPVideo.dwPictureSize > 0) {
                         String filename = this.fileStream.touchJpg();
                         this.fileStream.downloadToLocal(filename, struAIOPVideo.pBufferPicture.getByteArray(0, struAIOPVideo.dwPictureSize));
+                        String encode = Base64.encode(new File(filename));
+                        alarmData.put("facePic", encode);
                     }
                     // log.info("设备支持AI开放平台接入，上传视频检测数据：{}", sAlarmType.toString());
                     break;
