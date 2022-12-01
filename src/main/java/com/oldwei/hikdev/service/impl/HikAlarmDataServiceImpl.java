@@ -438,7 +438,6 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     sAlarmType.append("：人脸抓拍上传，人脸评分：").append(strFaceSnapInfo.dwFaceScore)
                             .append("，年龄段：").append(strFaceSnapInfo.struFeature.byAgeGroup)
                             .append("，性别：").append(strFaceSnapInfo.struFeature.bySex);
-                    alarmData.put("deviceIp", deviceIp);
                     alarmData.put("faceScore", strFaceSnapInfo.dwFaceScore);
                     alarmData.put("ageGroup", strFaceSnapInfo.struFeature.byAgeGroup);
                     alarmData.put("sex", strFaceSnapInfo.struFeature.bySex);
@@ -676,6 +675,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
                     // log.info("其他信息：{},lCommand是传的报警类型:{}", sAlarmType, lCommand);
                     break;
             }
+            alarmData.put("deviceIp", deviceIp);
             alarmData.put("msg", sAlarmType);
             this.mqttConnectClient.publish(alarmData.toJSONString());
         } catch (UnsupportedEncodingException ex) {
