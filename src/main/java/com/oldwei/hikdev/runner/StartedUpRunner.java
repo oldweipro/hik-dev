@@ -5,6 +5,8 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.XmlUtil;
+import cn.hutool.system.OsInfo;
+import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
 import com.oldwei.hikdev.entity.config.DeviceSearchInfo;
@@ -45,6 +47,7 @@ public class StartedUpRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        OsInfo osInfo = SystemUtil.getOsInfo();
         if (mqttEnable) {
             //实例化bean之后 初始化连接
             this.mqttConnectClient.initMqttClient();
@@ -72,7 +75,25 @@ public class StartedUpRunner implements ApplicationRunner {
         });
         ThreadUtil.execAsync(() -> {
             // 启动rtsp_server服务
-            RuntimeUtil.exec("cmd /c cd " + System.getProperty("user.dir") + "/rtsp_server/rtsp_server_windows/ && rtsp_server");
+            if (osInfo.isWindows()) {
+                RuntimeUtil.exec("cmd /c cd " + System.getProperty("user.dir") + "/rtsp_server/rtsp_server_windows/ && rtsp_server");
+            } else if (osInfo.isLinux()) {
+                //start rtsp server
+//                RuntimeUtil.exec("cd rtsp_server/rtsp_server_linux");
+//                RuntimeUtil.exec("cd /home/oem/IdeaProjects/hik-dev/rtsp_server/rtsp_server_linux && ./rtsp_server");
+                String command = "cd /home/oem/IdeaProjects/hik-dev/rtsp_server/rtsp_server_linux && ./rtsp_server";
+                try {
+                    Process process = Runtime.getRuntime().exec(command);
+                    int waitFor = process.waitFor();
+                    if (waitFor>= 0) {
+                        log.info("调用成功");
+                    } else {
+                        log.info("调用失败");
+                    }
+                } catch (IOException | InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         });
         ThreadUtil.execAsync(() -> {
             try (MulticastSocket multicastSocket = new MulticastSocket(37020)) {

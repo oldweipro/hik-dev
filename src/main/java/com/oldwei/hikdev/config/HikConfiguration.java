@@ -27,7 +27,7 @@ public class HikConfiguration {
         if (osInfo.isWindows()) {
             hikDevService = (IHikDevService) Native.loadLibrary(System.getProperty("user.dir") + "\\sdk\\hik_sdk_windows\\HCNetSDK.dll", IHikDevService.class);
         } else if (osInfo.isLinux()) {
-            hikDevService = (IHikDevService) Native.loadLibrary(System.getProperty("user.dir") + "\\sdk\\hik_sdk_linux\\libhcnetsdk.so", IHikDevService.class);
+            hikDevService = (IHikDevService) Native.loadLibrary(System.getProperty("user.dir") + "/sdk/hik_sdk_linux/libhcnetsdk.so", IHikDevService.class);
         }
         assert hikDevService != null;
         hikDevService.NET_DVR_Init();
@@ -46,7 +46,7 @@ public class HikConfiguration {
         if (osInfo.isWindows()) {
             hikPlayCtrlService = (IHikPlayCtrlService) Native.loadLibrary(System.getProperty("user.dir") + "\\sdk\\hik_sdk_windows\\PlayCtrl.dll", IHikPlayCtrlService.class);
         } else if (osInfo.isLinux()) {
-            hikPlayCtrlService = (IHikPlayCtrlService) Native.loadLibrary(System.getProperty("user.dir") + "\\sdk\\hik_sdk_windows\\libPlayCtrl.so", IHikPlayCtrlService.class);
+            hikPlayCtrlService = (IHikPlayCtrlService) Native.loadLibrary(System.getProperty("user.dir") + "/sdk/hik_sdk_linux/libAudioRender.so", IHikPlayCtrlService.class);
         }
         return hikPlayCtrlService;
     }

@@ -1,15 +1,15 @@
 package com.oldwei.hikdev.service;
 
 import com.oldwei.hikdev.structure.*;
+import com.sun.jna.Library;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
-import com.sun.jna.win32.StdCallLibrary;
 
 /**
  * @author oldwei
  * @date 2021-5-12 15:48
  */
-public interface IHikDevService extends StdCallLibrary {
+public interface IHikDevService extends Library {
 
     boolean NET_DVR_Init();
 

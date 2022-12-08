@@ -25,14 +25,17 @@ public class RtspServerUtil {
                 downloadRtspServer(rtspServerRootPath, rtspServerDownloadWindowsPath, urlWindowsPath);
             }
             // TODO 启动项目，测试服务是否启动，检测端口号占用，如果占用，找一个没占用的，修改一下配置文件再次运行。
-            // 杀死服务
+            // 杀死rtsp服务
             RuntimeUtil.exec("cmd /c taskkill /f /im rtsp_server.exe");
         } else if (osInfo.isLinux()) {
-            if (!FileUtil.exist(rtspServerRootPath + "/rtsp_server_windows/config.json") || !FileUtil.exist(rtspServerRootPath + "/rtsp_server_windows/rtsp_server")) {
+            if (!FileUtil.exist(rtspServerRootPath + "/rtsp_server_linux/config.json") || !FileUtil.exist(rtspServerRootPath + "/rtsp_server_linux/rtsp_server")) {
                 downloadRtspServer(rtspServerRootPath, rtspServerDownloadLinuxPath, urlLinuxPath);
             }
             // TODO 启动项目，测试服务是否启动，检测端口号占用，如果占用，找一个没占用的，修改一下配置文件再次运行。
-            RuntimeUtil.exec(rtspServerRootPath + "/rtsp_server_windows/rtsp_server");
+            RuntimeUtil.exec("chmod 755 " + rtspServerRootPath + "/rtsp_server_linux/rtsp_server");
+            // 杀死rtsp服务
+            System.out.println("TODO 杀死rtsp服务");
+//            RuntimeUtil.exec(rtspServerRootPath + "/rtsp_server_linux/rtsp_server");
         }
     }
 

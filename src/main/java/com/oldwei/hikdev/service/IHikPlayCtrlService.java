@@ -1,16 +1,16 @@
 package com.oldwei.hikdev.service;
 
+import com.sun.jna.Library;
 import com.sun.jna.NativeLong;
 import com.sun.jna.examples.win32.W32API;
 import com.sun.jna.ptr.ByteByReference;
 import com.sun.jna.ptr.NativeLongByReference;
-import com.sun.jna.win32.StdCallLibrary;
 
 /**
  * @author oldwei
  * @date 2021-5-19 18:27
  */
-public interface IHikPlayCtrlService extends StdCallLibrary {
+public interface IHikPlayCtrlService extends Library {
 
     boolean PlayM4_GetPort(NativeLongByReference nPort);
 
