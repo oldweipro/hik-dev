@@ -7,6 +7,11 @@ import com.oldwei.hikdev.entity.HikDevResponse;
  * @date 2021-5-18 12:01
  */
 public interface IHikAlarmDataService {
+    /**
+     * 设置项目ID
+     * @param projectId
+     */
+    void setProjectId(String projectId);
 
     /**
      * 设置报警 设备布防

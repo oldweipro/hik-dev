@@ -3,17 +3,20 @@ server:
   tomcat:
     uri-encoding: utf-8
     max-connections: 30000
-
 spring:
-  profiles:
-    active: dev
-
   thymeleaf:
     cache: false
-
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
-
   aop:
     proxy-target-class: true
+  servlet:
+    multipart:
+      # 单个上传的数据大小限制200Mb
+      max-file-size: 209715200
+      # 总上传的数据大小限制500Mb
+      max-request-size: 524288000
+hik-dev:
+  #下载文件 输出文件夹
+  output-dir: output

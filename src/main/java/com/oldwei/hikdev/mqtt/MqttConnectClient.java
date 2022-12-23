@@ -1,6 +1,9 @@
 package com.oldwei.hikdev.mqtt;
 
 import cn.hutool.core.util.RandomUtil;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
@@ -16,19 +19,14 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
+@Data
 public class MqttConnectClient {
 
-    @Value("${mqtt.settings.sub-topic}")
-    private String subTopic;
-    @Value("${mqtt.settings.pub-topic}")
-    private String pubTopic;
-    @Value("${mqtt.settings.qos}")
-    private Integer qos;
-    @Value("${mqtt.settings.username}")
-    private String username;
-    @Value("${mqtt.settings.password}")
-    private String password;
-    @Value("${mqtt.settings.broker}")
+    private String subTopic = "topic/cloud";
+    private String pubTopic = "topic/hik";
+    private Integer qos = 2;
+    private String username = "hik";
+    private String password = "dev";
     private String broker;
 
     private MqttClient mqttClient;
@@ -81,6 +79,7 @@ public class MqttConnectClient {
      */
     public void publish(String content) {
         try {
+            JSONObject jsonObject = JSON.parseObject(content);
             MqttMessage message = new MqttMessage(content.getBytes());
             message.setQos(qos);
             this.mqttClient.publish(pubTopic, message);

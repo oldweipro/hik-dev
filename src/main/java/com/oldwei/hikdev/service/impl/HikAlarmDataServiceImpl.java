@@ -36,8 +36,12 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBack_V31 {
-    @Value("${hik-dev.project-id}")
-    String projectId;
+    @Override
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
+    }
+
+    private String projectId = "000000";
 
     private final IHikDevService hikDevService;
 
