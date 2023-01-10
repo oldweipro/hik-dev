@@ -3,14 +3,13 @@ package com.oldwei.hikdev.mqtt;
 import cn.hutool.core.util.RandomUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import lombok.Data;
+import com.oldwei.hikdev.util.ConfigJsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,21 +18,13 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-@Data
 public class MqttConnectClient {
-
-    private String subTopic = "topic/cloud";
-    private String pubTopic = "topic/hik";
-    private Integer qos = 2;
-    private String username = "hik";
-    private String password = "dev";
-    private String broker;
 
     private MqttClient mqttClient;
 
     public void initMqttClient() {
         try {
-            this.mqttClient = new MqttClient(broker, RandomUtil.randomString(16), new MemoryPersistence());
+            this.mqttClient = new MqttClient(ConfigJsonUtil.getMqttConfig().getBroker(), RandomUtil.randomString(16), new MemoryPersistence());
             //设置回调
             this.mqttClient.setCallback(new OnMessageCallback(this));
         } catch (MqttException e) {
@@ -47,15 +38,15 @@ public class MqttConnectClient {
             log.info("Mqtt开始连接");
             // MQTT 连接选项
             MqttConnectOptions connOpts = new MqttConnectOptions();
-            connOpts.setUserName(username);
-            connOpts.setPassword(password.toCharArray());
+            connOpts.setUserName(ConfigJsonUtil.getMqttConfig().getUsername());
+            connOpts.setPassword(ConfigJsonUtil.getMqttConfig().getPassword().toCharArray());
             // 保留会话
             connOpts.setCleanSession(true);
             // 建立连接
             this.mqttClient.connect(connOpts);
             log.info("Mqtt 连接成功");
-            this.subscribe(subTopic);
-            log.info("Mqtt 订阅成功：{}", subTopic);
+            this.subscribe(ConfigJsonUtil.getMqttConfig().getSubTopic());
+            log.info("Mqtt 订阅成功：{}", ConfigJsonUtil.getMqttConfig().getSubTopic());
         } catch (MqttException me) {
             log.error("连接mqtt异常,重新连接。");
             this.mqttConnect();
@@ -81,8 +72,8 @@ public class MqttConnectClient {
         try {
             JSONObject jsonObject = JSON.parseObject(content);
             MqttMessage message = new MqttMessage(content.getBytes());
-            message.setQos(qos);
-            this.mqttClient.publish(pubTopic, message);
+            message.setQos(ConfigJsonUtil.getMqttConfig().getQos());
+            this.mqttClient.publish(ConfigJsonUtil.getMqttConfig().getPubTopic(), message);
 //            log.info("Message published");
         } catch (MqttException me) {
             me.printStackTrace();

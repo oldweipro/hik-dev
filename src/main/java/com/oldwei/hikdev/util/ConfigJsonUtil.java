@@ -11,6 +11,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
 import com.oldwei.hikdev.entity.config.*;
+import com.oldwei.hikdev.mqtt.MqttConfig;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -29,6 +30,8 @@ import java.util.stream.Collectors;
 public class ConfigJsonUtil {
     public static final String configPath = System.getProperty("user.dir") + "/sdk/config/config.json";
     public static final String deviceSearchInfo = "deviceSearchInfo";
+    public static final String projectId = "projectId";
+    public static final String mqttConfig = "mqttConfig";
 
     public static JSONObject readConfigJson() {
         boolean exist = FileUtil.exist(configPath);
@@ -202,5 +205,27 @@ public class ConfigJsonUtil {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static void setProjectId(String id) {
+        JSONObject configJson = readConfigJson();
+        configJson.put(projectId, id);
+        writeConfigJson(configJson.toJSONString());
+    }
+
+    public static String getProjectId() {
+        JSONObject configJson = readConfigJson();
+        return configJson.getString(projectId);
+    }
+
+    public static void setMqttConfig(MqttConfig mqtt) {
+        JSONObject configJson = readConfigJson();
+        configJson.put(mqttConfig, mqtt);
+        writeConfigJson(configJson.toJSONString());
+    }
+
+    public static MqttConfig getMqttConfig() {
+        JSONObject configJson = readConfigJson();
+        return configJson.getObject(mqttConfig, MqttConfig.class);
     }
 }

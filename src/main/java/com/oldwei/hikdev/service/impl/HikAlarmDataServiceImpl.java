@@ -18,7 +18,6 @@ import com.oldwei.hikdev.util.ConfigJsonUtil;
 import com.sun.jna.Pointer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import cn.hutool.core.codec.Base64;
 
@@ -36,12 +35,6 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBack_V31 {
-    @Override
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
-    }
-
-    private String projectId = "000000";
 
     private final IHikDevService hikDevService;
 
@@ -153,7 +146,7 @@ public class HikAlarmDataServiceImpl implements IHikAlarmDataService, FMSGCallBa
             StringBuilder sAlarmType = new StringBuilder("lCommand=0x" + Integer.toHexString(lCommand));
             JSONObject alarmData = new JSONObject();
             alarmData.put("code", lCommand);
-            alarmData.put("projectId", this.projectId);
+            alarmData.put("projectId", ConfigJsonUtil.getProjectId());
             //lCommand是传的报警类型
 //             log.info("报警信息主动上传V40：{}", lCommand);
             switch (lCommand) {
