@@ -14,7 +14,9 @@
 
 设备网络SDK是基于设备私有网络通信协议开发的，为海康威视各类硬件产品服务的配套模块，用于远程访问和控制设备的软件二次开发，内含SDK动态库、开发文档 及Demo示例（C++、C#、Java）。
 
-### 运行
+### docker运行
+
+📦需要先进行maven打包
 
 ```dockerfile
 docker build -t hik-dev:latest . && docker run -p 8923:8923 -v /Users/oldwei/IdeaProjects/hik-dev/:/opt/hik-dev --name hik-dev hik-dev:latest
