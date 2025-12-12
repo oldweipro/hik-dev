@@ -58,46 +58,72 @@ public class StartedUpRunner implements ApplicationRunner {
             });
         });
         ThreadUtil.execAsync(() -> {
-            try (MulticastSocket multicastSocket = new MulticastSocket(37020)) {
-                InetAddress inetAddress = InetAddress.getByName("239.255.255.250");
-                DatagramPacket datagramPacket = new DatagramPacket(new byte[4096], 4096);
+            MulticastSocket multicastSocket = null;
+            try {
+                // 监听指定多播端口
+                multicastSocket = new MulticastSocket(37020);
+                InetAddress multicastGroup = InetAddress.getByName("239.255.255.250");
 
-                // 遍历查找IPv4的网卡
-                NetworkInterface.networkInterfaces().forEach(networkInterface -> {
-                    int port = 20220;
-                    Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
-                    while (inetAddresses.hasMoreElements()) {
-                        InetAddress inetAddressElement = inetAddresses.nextElement();
-                        try {
-                            if (inetAddressElement instanceof Inet4Address && !networkInterface.isLoopback()) {
-                                // 加入多播组
-                                InetSocketAddress inetSocketAddress = new InetSocketAddress(inetAddress, port);
-                                multicastSocket.joinGroup(inetSocketAddress, networkInterface);
-                                port++;
-                            }
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
+                // 获取所有网络接口（Java 1.8 兼容）
+                Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+                while (networkInterfaces.hasMoreElements()) {
+                    NetworkInterface ni = networkInterfaces.nextElement();
+                    if (ni.isLoopback() || !ni.isUp()) {
+                        continue; // 跳过回环和未启用的接口
                     }
-                });
-                while (true) {
-                    // 接收数据，在ScheduledTask类中会有一个定时任务searchHikDevice，每一分钟发送一次请求，所以这里每隔一分钟会收到一份响应
-                    multicastSocket.receive(datagramPacket);
-                    byte[] receiveByte = Arrays.copyOfRange(datagramPacket.getData(), 0, datagramPacket.getLength());
-                    String decodeData = new String(receiveByte, StandardCharsets.UTF_8).trim();
-                    try {
-                        Map<String, Object> stringObjectMap = XmlUtil.xmlToMap(decodeData);
-                        // 过滤无效数据
-                        if (stringObjectMap.containsKey("IPv4Address")) {
-                            DeviceSearchInfoDTO deviceSearchInfoDTO = BeanUtil.toBean(stringObjectMap, DeviceSearchInfoDTO.class);
-                            ConfigJsonUtil.saveOrUpdateDeviceSearch(deviceSearchInfoDTO);
+
+                    Enumeration<InetAddress> addresses = ni.getInetAddresses();
+                    while (addresses.hasMoreElements()) {
+                        InetAddress addr = addresses.nextElement();
+                        if (addr instanceof Inet4Address) {
+                            try {
+                                // 加入多播组：端口必须与 MulticastSocket 的端口一致（37020）
+                                // 注意：InetSocketAddress 的端口在这里其实会被忽略（JDK 实现中只用 IP）
+                                // 但为语义清晰，建议使用 multicastSocket.getLocalPort()
+                                InetSocketAddress group = new InetSocketAddress(multicastGroup, multicastSocket.getLocalPort());
+                                multicastSocket.joinGroup(group, ni);
+                                // 可选：记录已加入的接口
+                                // log.debug("Joined multicast group on interface: {}", ni.getName());
+                            } catch (IOException e) {
+                                // 部分接口可能不支持多播（如某些虚拟网卡），记录但不中断
+                                // log.warn("Failed to join multicast on interface: {}", ni.getName(), e);
+                            }
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
                 }
+
+                byte[] buffer = new byte[4096];
+                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+
+                // 持续接收数据
+                while (!Thread.currentThread().isInterrupted()) {
+                    try {
+                        multicastSocket.receive(packet);
+                        String xmlData = new String(packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8).trim();
+
+                        Map<String, Object> map = XmlUtil.xmlToMap(xmlData);
+                        if (map != null && map.containsKey("IPv4Address")) {
+                            DeviceSearchInfoDTO dto = BeanUtil.toBean(map, DeviceSearchInfoDTO.class);
+                            ConfigJsonUtil.saveOrUpdateDeviceSearch(dto);
+                        }
+                    } catch (InterruptedIOException e) {
+                        // 超时或中断，可选处理
+                        break;
+                    } catch (Exception e) {
+                        // log.warn("Failed to process multicast packet", e);
+                    } finally {
+                        packet.setLength(buffer.length); // 重置长度，避免下一次接收出错
+                    }
+                }
+
             } catch (IOException e) {
-                e.printStackTrace();
+                // log.error("Multicast receiver error", e);
+            } finally {
+                if (multicastSocket != null) {
+                    try {
+                        multicastSocket.close();
+                    } catch (Exception ignored) {}
+                }
             }
         });
         log.info("=========================项目启动完成=========================");
